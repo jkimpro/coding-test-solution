@@ -1,0 +1,129 @@
+//뱀
+
+#include <stdio.h>
+#include <vector>
+#include <queue>
+
+using namespace std;
+typedef struct snake {
+	int r, c;
+}Snake;
+
+typedef struct dir {
+	int time;
+	char c;
+}Dir;
+
+int rMove[4] = {-1,0,1,0};
+int cMove[4] = {0,1,0,-1};
+
+int n;
+int k;
+int l;
+int arr[101][101];
+int result;
+int nowDir = 1;
+
+vector <Snake> snake;
+queue <Dir> dir;
+
+int main() {
+	result = 0;
+	scanf("%d", &n);
+	scanf("%d", &k);
+	//뱀 오른쪽 크기 1;
+
+	for (int i = 1; i <= n; i++) {
+		for (int j = 1; j <= n; j++) {
+			arr[i][j] = 0;
+		}
+	}
+
+	for (int i = 0; i < k; i++) {
+		int r, c;
+		scanf("%d %d", &r, &c);
+		arr[r][c] = 1;
+	}
+
+	scanf("%d", &l);
+
+	for (int i = 0; i < l; i++) {
+		Dir temp;
+		scanf("%d %c", &temp.time, &temp.c);
+		dir.push(temp);
+	}
+	snake.push_back({ 1,1 });
+
+	for (int time = 0; ;time++) {
+		int flag = 0;
+		Snake temp = snake.front();
+
+//		printf("///////////////////%d %d\n", snake[0].r, snake[0].c);
+	
+		if (temp.r >n || temp.r < 1 || temp.c > n || temp.c<1) {
+			result = time;
+			break;
+		}
+
+
+		//충돌했을 경우
+		int size = snake.size();
+		for (int i = 1; i < size; i++) {
+			//printf("s: %d %d\n", snake[i].r, snake[i].c);
+			//printf("compare: %d %d\n", snake[0].r + rMove[nowDir], snake[0].c + cMove[nowDir]);
+			if (snake[i].r == (snake[0].r+rMove[nowDir]) && snake[i].c == (snake[0].c + cMove[nowDir])) {
+				result = time+1;
+				flag = 1;
+				break;
+			}
+		}
+		if (flag == 1) { break; }
+
+		if (arr[temp.r][temp.c] == 1) {					//apple 인경우
+			Snake tail = snake[snake.size() - 1];
+
+			for (int i = snake.size() - 1; i >= 1; i--)
+			{
+				snake[i].r = snake[i - 1].r;
+				snake[i].c = snake[i - 1].c;
+			}
+			snake[0].r += rMove[nowDir];
+			snake[0].c += cMove[nowDir];
+	
+			snake.push_back(tail);
+			arr[temp.r][temp.c] = 0;
+		}
+		else {											//apple이 아닌 경우
+			for (int i = snake.size() - 1; i >= 1; i--)
+			{
+				snake[i].r = snake[i - 1].r;
+				snake[i].c = snake[i - 1].c;
+			}
+			snake[0].r += rMove[nowDir];
+			snake[0].c += cMove[nowDir];
+		}
+
+		temp = snake.front();
+		//범위 밖인경우
+
+		temp.r += rMove[nowDir];
+		temp.c += cMove[nowDir];
+
+		if (!dir.empty()) {
+			if (dir.front().time == time+1) {
+				if (dir.front().c == 'L') {
+					nowDir -= 1;
+					if (nowDir == -1) { nowDir = 3; }
+				}
+				else if (dir.front().c == 'D') {
+					nowDir = (nowDir + 1) % 4;
+				}
+				dir.pop();
+			}
+		}
+
+	}
+
+	printf("%d", result);
+	return 0;
+}

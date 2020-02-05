@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int arr[10];
+
+vector <int> result;
+
+int main() {
+	int sum =0;
+	result.clear();
+	for (int i = 0; i < 9; i++) {
+		scanf("%d", &arr[i]);
+		sum += arr[i];
+	}
+	for (int i = 0; i < 9; i++) {
+		bool out = false;
+		for (int j = i + 1; j < 9; j++) {
+			int temp = sum;
+			temp -= (arr[i] + arr[j]);
+			if (temp == 100) {
+				for (int k = 0; k < 9; k++) {
+					if (k == i || k == j) {
+						continue;
+					}
+					else{
+						result.push_back(arr[k]);
+					}
+				}
+				out = true;
+				break;
+			}
+		}
+		if (out == true) {
+			break;
+		}
+	}
+
+
+	sort(result.begin(), result.end());
+	for (int i = 0; i < result.size(); i++) {
+		printf("%d\n", result[i]);
+	}
+	return 0;
+}

@@ -1,0 +1,90 @@
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct range {
+	int startInd;
+	int endInd;
+	int state; 
+}Range;
+
+char arr[21];
+int result;
+int n;
+
+vector <int> integer;
+vector <char> ch;
+
+int calculate(int formal, char set, int after) {
+	if (set == '+') {
+		return formal + after;
+	}
+	else if (set == '-') {
+		return formal - after;
+	}
+	else {
+		return formal*after;
+	}
+}
+void dfs(int proResult, int now) {
+	//printf("getin\n");
+
+	if (now >= integer.size()) {
+	//	printf("result! proResult:%d \n", proResult);
+		result = max(proResult, result);
+		return;
+	}
+	else {
+		for (int i = now; i < now+2 && i<integer.size(); i++) {
+			int temp = integer[now];
+	
+			//그냥 그 값까지 계산하는 단계	
+			for (int k = now+1; k <= i; k++) {
+				temp = calculate(temp, ch[k-1], integer[k]);
+			}
+			//printf("proResult:%d chnow-1:%c temp:%d now:%d \n", proResult, ch[now - 1], temp, now);
+
+			temp = calculate(proResult, ch[now-1], temp);
+			
+			dfs(temp, i+1);
+		}
+		return;
+	}
+}
+
+int main() {
+	scanf("%d", &n);
+
+	scanf("%s", arr);
+	
+	for (int i = 0; i < n; i++) {
+		if ('0' <= arr[i] && '9'>=arr[i]) {
+			integer.push_back(arr[i] - '0');
+		}
+		else {
+			ch.push_back(arr[i]);
+		}
+	}
+
+	result = integer[0];
+
+	for (int i = 0; i < n/2; i++) {
+		result = calculate(result, ch[i],integer[i+1]);
+	}
+	for (int i = 0; i < integer.size(); i++) {
+		int proResult = integer[0];
+
+		for (int k = 0; k < i; k++) {
+			proResult = calculate(proResult, ch[k], integer[k + 1]);
+		}
+
+		dfs(proResult,i+1);  
+	}
+
+	printf("%d", result);
+	return 0;
+}

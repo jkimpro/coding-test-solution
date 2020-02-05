@@ -1,0 +1,72 @@
+//암호 만들기
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+char mo[5] = {'a','e','i','o','u'};
+
+vector <char> root;
+vector <char> output;
+
+int l, c;
+char arr[300];
+bool comp(char &a, char &c) {
+	if (a < c) { return true; }
+	else { return false; }
+}
+void dfs(int num, int count) {
+	if (l == output.size()) {
+		int moCount = 0;
+		int otherCount = 0;
+		
+		for (int i = 0; i < output.size(); i++) {
+			bool check = false;
+			for (int j = 0; j < 5; j++) {
+				if (output[i] == mo[j]) { moCount++; check = true; break; }
+			}
+			if (check == false) { otherCount++; }
+		}
+
+		if (moCount >= 1 && otherCount >= 2) {
+			for (int i = 0; i < output.size(); i++) {
+				printf("%c", output[i]);
+			}
+			printf("\n");
+		}
+		return;
+	}
+	else if (num == root.size() - 1 && count != l) {
+		return;
+	}
+	else {
+		for (int i = num + 1; i < root.size(); i++) {
+			output.push_back(root[i]);
+			dfs(i, count + 1);
+			output.pop_back();
+		}
+	}
+	return;
+}
+int main() {
+	scanf("%d %d\n", &l, &c);
+
+	scanf("%[^\n]", arr);
+	
+	for (int i = 0; arr[i] != '\0'; i++) {
+		if (arr[i] >= 'a' && arr[i] <= 'z') {
+			root.push_back(arr[i]);
+		}
+	}
+
+	sort(root.begin(), root.end(), comp);
+	
+	for (int i = 0; i < root.size(); i++) {
+		output.push_back(root[i]);
+		dfs(i, 1);
+		output.pop_back();
+	}
+	return 0;
+}

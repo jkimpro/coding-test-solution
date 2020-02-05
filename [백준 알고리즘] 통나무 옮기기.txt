@@ -1,0 +1,461 @@
+#include <stdio.h>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+typedef struct core {
+	int r, c;
+	int mode;	//mode = 0가로 //mode =1 세로
+	int count;
+}Core;
+int dr[4] = { -1,0,1,0 };
+int dc[4] = { 0,1,0,-1 };
+
+char arr[200][200];
+bool visit0[3][200][200];	//0-2 mode0 (1중심) //3-5 mode1 (4중심)
+bool visit1[3][200][200];
+
+int n;
+int result;
+bool isMatch(Core temp){
+	if (temp.mode == 0) {
+		if (arr[temp.r][temp.c - 1] != 'E') { return false; }
+		if (arr[temp.r][temp.c] != 'E') { return false; }
+		if (arr[temp.r][temp.c+1] != 'E') { return false; }
+	}
+	else{
+		if (arr[temp.r-1][temp.c] != 'E') { return false; }
+		if (arr[temp.r][temp.c] != 'E') { return false; }
+		if (arr[temp.r+1][temp.c] != 'E') { return false; }
+	}
+	return true;
+}
+bool canGo(Core temp, int dir) {
+	if (temp.mode == 0) {
+		for (int i = 0; i < 3; i++) {
+			if (temp.c - 1 + i + dc[dir] < 0 || temp.c - 1 + i + dc[dir] >= n || temp.r + dr[dir] <0 || temp.r + dr[dir] >=n) {
+				return false;
+			}
+			if (arr[temp.r + dr[dir]][temp.c - 1 + i + dc[dir]] == '1' || visit0[i][temp.r + dr[dir]][temp.c - 1 + i + dc[dir]] == true) {
+				return false;
+			}
+		}
+		visit0[0][temp.r + dr[dir]][temp.c - 1 + dc[dir]] = true;
+		visit0[1][temp.r + dr[dir]][temp.c + dc[dir]] = true;
+		visit0[2][temp.r + dr[dir]][temp.c + 1 + dc[dir]] = true;
+	}
+	else {
+		for (int i = 0; i < 3; i++) {
+			if (temp.r - 1 + i + dr[dir] < 0 || temp.r - 1 + i + dr[dir] >= n || temp.c + dc[dir] <0 || temp.c + dc[dir] >=n ) {
+				return false;
+			}
+			if (arr[temp.r - 1 + i + dr[dir]][temp.c + dc[dir]] == '1' || visit1[i][temp.r - 1 + i + dr[dir]][temp.c + dc[dir]] == true) {
+				return false;
+			}
+		}
+		visit1[0][temp.r - 1 + dr[dir]][temp.c + dc[dir]] = true;
+		visit1[1][temp.r+ dr[dir]][temp.c + dc[dir]] = true;
+		visit1[2][temp.r+ 1 + dr[dir]][temp.c + dc[dir]] = true;
+	}
+	return true;
+}
+bool canRotate(Core temp) {
+	for (int i = temp.r - 1; i <= temp.r + 1; i++) {
+		for (int j = temp.c - 1; j <= temp.c + 1; j++) {
+			if (i < 0 || i >= n || j < 0 || j >= n) { return false; }
+			if (arr[i][j] == '1') { return false; }
+		}
+	}
+
+	if (temp.mode == 0) { //가로 모드
+		for (int i = 0; i < 3; i++) {
+			if (visit1[i][temp.r - 1+i][temp.c] == true) { return false; }
+		}
+		visit1[0][temp.r - 1][temp.c] = true;
+		visit1[1][temp.r][temp.c] = true;
+		visit1[2][temp.r + 1][temp.c] = true;
+		return true;
+	}
+	else {	//세로 모드
+		for (int i = 0; i < 3; i++) {
+			if (visit0[i][temp.r][temp.c - 1 + i] == true) { return false; }
+		}
+		visit0[0][temp.r][temp.c-1] = true;
+		visit0[1][temp.r][temp.c] = true;
+		visit0[2][temp.r][temp.c+1] = true;
+		return true;
+	}
+}
+int main() {
+	result = 0;
+
+	Core B;
+
+	scanf("%d", &n);
+
+	for (int i = 0; i < n; i++) {
+		scanf("%s", arr[i]);
+	}
+
+	for (int i = 0; i < n; i++) {
+		int flag = 0;
+		for (int j = 0; j < n; j++) {
+			if (arr[i][j] == 'B') {
+				B.r = i;
+				B.c = j;
+				B.count = 0;
+				flag = 1;
+				break;
+			}
+		}
+		if (flag == 1) { break; }
+	}
+
+	if (B.c + 1 <n && arr[B.r][B.c + 1] == 'B') {
+		B.mode = 0; B.c += 1; 
+		visit0[0][B.r][B.c-1] = true;
+		visit0[1][B.r][B.c] = true;
+		visit0[2][B.r][B.c+1] = true;
+	//	printf("%d %d %d\n", B.c - 1, B.c, B.c + 1);
+
+	}
+	else { B.mode = 1; B.r += 1; 
+		visit1[0][B.r-1][B.c] = true;
+		visit1[1][B.r][B.c] = true;
+		visit1[2][B.r+1][B.c] = true;
+	//	printf("%d %d %d\n", B.r - 1, B.r, B.r + 1);
+	}
+	
+	queue <Core> loc;
+	loc.push(B);
+
+	while (!loc.empty()) {
+		Core temp = loc.front();
+		loc.pop();
+
+	//	printf("temp.r: %d temp.c:%d mode: %d count:%d \n", temp.r, temp.c, temp.mode, temp.count);
+		
+	//	printf("\n\n");
+		if (isMatch(temp)) {
+			result = temp.count;
+			break;
+		}
+		for (int dir = 0; dir < 4; dir++) {
+			if (canGo(temp, dir)) {
+				loc.push({ temp.r + dr[dir], temp.c + dc[dir], temp.mode, temp.count+1});
+			}
+		}
+		if (canRotate(temp)) {
+			loc.push({ temp.r, temp.c, (temp.mode+1)%2, temp.count + 1 });
+		}
+	}
+
+	printf("%d", result);
+	return 0;
+}
+
+
+//메모리 초과본
+#include <stdio.h>
+#include <string.h>
+#include <queue>
+#include <vector>
+
+//걍 중앙만 잡고 위아래 움직이는 형식 취하기
+using namespace std;
+
+typedef struct tree {
+	int r, c;
+	int count;
+	int mode;		//mode 0일 경우 가로 방향 //mode 1일 경우 세로 방향
+	bool rotate;
+}Tree;
+
+int dr[4] = {-1,0,1,0};
+int dc[4] = {0,1,0,-1};
+
+int n;
+int result;
+
+int arr[100][100];
+char map[100][100];
+bool visit[2][100][100];
+queue <Tree> root;
+vector <Tree> dest;
+
+bool canGo(Tree tree, int dir) {			//세개중 중앙점 넣고, 돌림
+	Tree set[3];
+	if (tree.mode == 0) {					//가로모드
+		set[0] = { tree.r,tree.c-1 };
+		set[1] = { tree.r,tree.c };
+		set[2] = { tree.r,tree.c+1 };
+	}
+	else {									//세로 모드
+		set[0] = { tree.r-1,tree.c };
+		set[1] = { tree.r,tree.c };
+		set[2] = { tree.r+1,tree.c };
+	}
+
+	if (dir>=0 && dir<=3) {
+		int realR, realC;
+		for (int i = 0; i < 3; i++) {
+			realR = set[i].r + dr[dir];
+			realC = set[i].c + dc[dir];
+			if (realR < 0 || realR >=n || realC < 0 || realC >=n) {return false;}
+			if (arr[realR][realC] == 1) { return false; }
+		}
+		if (visit[tree.mode][set[1].r + dr[dir]][set[1].c + dc[dir]] == true) { return false; }
+	
+		return true;
+	}
+	else {		//회전의 경우
+		if (tree.mode == 0) {	//같은 행에 있다는 뜻
+			for (int i = 0; i < 3; i++) {
+				if (set[i].r - 1 < 0 || set[i].r + 1 >= n) { return false; }
+				if (arr[set[i].r - 1][set[i].c] == 1) { return false; }
+				if (arr[set[i].r + 1][set[i].c] == 1) { return false; }
+			}
+			return true;
+		}
+		else {		//같은 열에 있다는 뜻
+			for (int i = 0; i < 3; i++) {
+				if (set[i].c - 1 < 0 || set[i].c + 1 >= n) { return false; }
+				if (arr[set[i].r][set[i].c - 1] == 1) { return false; }
+				if (arr[set[i].r][set[i].c + 1] == 1) { return false; }
+			}
+			return true;
+		}
+	}
+}
+int main() {
+
+	result = 0;
+	scanf("%d", &n);
+	vector <Tree> set;
+	for (int i = 0; i < n; i++) {
+		scanf("%s", map[i]);
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			arr[i][j] = 0;
+			if (map[i][j] == '1') { arr[i][j] = 1; }
+			else if (map[i][j] == 'B') { set.push_back({ i,j,0,0,false });}
+			else if (map[i][j] == 'E') { dest.push_back({ i,j,0,0, false });}
+			visit[0][i][j] = false;
+			visit[1][i][j] = false;
+		}
+	}
+	//0 = 가로모드 1 = 세로모드
+	
+	if (set[0].r == set[1].r) { set[1].mode = 0; visit[0][set[1].r][set[1].c] = true; }
+	else {set[1].mode = 1; visit[1][set[1].r][set[1].c] = true;}
+	root.push(set[1]);
+
+	while (!root.empty()) {
+		int flag = 0;
+	
+		Tree temp = root.front();
+		root.pop();
+		visit[temp.mode][temp.r][temp.c] = true;
+		
+		//printf("count: %d mode:%d temp.r: %d temp.c: %d\n", temp.count, temp.mode, temp.r, temp.c);
+		if (temp.mode ==1) {			//세로 모드
+			if (dest[0].r == temp.r - 1 && dest[0].c == temp.c) { flag += 1; }
+			if (dest[1].r == temp.r && dest[1].c == temp.c) { flag += 1; }
+			if (dest[2].r == temp.r + 1 && dest[2].c == temp.c) { flag += 1; }
+		}
+		else {							//가로모드
+			if (dest[0].c == temp.c - 1 && dest[0].r == temp.r) { flag += 1; }
+			if (dest[1].c == temp.c && dest[1].r == temp.r) { flag += 1; }
+			if (dest[2].c == temp.c + 1 && dest[2].r == temp.r) { flag += 1; }
+		}
+
+		if (flag == 3) {
+			result = temp.count; 
+			break;
+		}
+
+		for (int i = 0; i < 5; i++) {
+			if (canGo(temp, i)) {				
+				if (i >= 0 && i <= 3) {
+					Tree tmp = { temp.r + dr[i],temp.c + dc[i],temp.count + 1,temp.mode, false };
+					root.push(tmp);
+				}
+				else if (i == 4 && temp.rotate == false) {
+					if (temp.mode ==0) {
+						Tree tmp = {temp.r,temp.c,temp.count + 1,1, true};
+						root.push(tmp);
+					}
+					else {
+						Tree tmp = { temp.r,temp.c,temp.count + 1,0, true };
+						root.push(tmp);
+					}
+				}
+			}
+		}
+	}
+	printf("%d", result);
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////막무 가내 version -> 메모리 초과본
+#include <stdio.h>
+#include <string.h>
+#include <queue>
+#include <vector>
+
+//걍 중앙만 잡고 위아래 움직이는 형식 취하기
+using namespace std;
+
+typedef struct tree {
+	int r, c;
+	int count;
+	int mode;		//mode 1일 경우 가로 방향 //mode 2일 경우 세로 방향
+	bool rotate;
+}Tree;
+
+int dr[4] = {-1,0,1,0};
+int dc[4] = {0,1,0,-1};
+
+int n;
+int result;
+char map[100][100];
+int arr[100][100];
+
+bool canGo(vector<Tree> set, int dir) {//세개중 중앙점 넣고, 돌림
+	if (dir>=0 && dir<=3) {
+		
+		for (int i = 0; i < 3; i++) {
+			int realR = set[i].r + dr[dir];
+			int realC = set[i].c + dc[dir];
+			if (realR < 0 || realR >=n || realC < 0 || realC >=n) {
+				return false;
+			}
+			if (arr[realR][realC] == 1) {
+				return false;
+			}
+		}
+		return true;
+	}
+	else {		//회전의 경우
+		//printf("check rotate\n");
+		if (set[0].r == set[1].r) {	//같은 행에 있다는 뜻
+			for (int i = 0; i < 3; i++) {
+				if (set[i].r - 1 < 0 || set[i].r + 1 >= n) { return false; }
+				if (arr[set[i].r - 1][set[i].c] == 1) { return false; }
+				if (arr[set[i].r + 1][set[i].c] == 1) { return false; }
+			}
+			return true;
+	
+		}
+		else {		//같은 열에 있다는 뜻
+			for (int i = 0; i < 3; i++) {
+				if (set[i].c - 1 < 0 || set[i].c + 1 >= n) { return false; }
+				if (arr[set[i].r][set[i].c - 1] == 1) { return false; }
+				if (arr[set[i].r][set[i].c + 1] == 1) { return false; }
+			}
+			return true;
+		}
+	}
+}
+int main() {
+
+	result = 0;
+	scanf("%d", &n);
+
+	vector <Tree> set;
+	vector <Tree> dest;
+	queue <vector<Tree>> root;
+
+	for (int i = 0; i < n; i++) {
+		scanf("%s", map[i]);
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			arr[i][j] = 0;
+
+			if (map[i][j] == '1') { arr[i][j] = 1; }
+			else if (map[i][j] == 'B') { set.push_back({ i,j,0, false }); arr[i][j] = 0; }
+			else if (map[i][j] == 'E') { dest.push_back({ i,j,0, false }); arr[i][j] = 0; }
+		}
+	}
+
+	root.push(set);
+
+	while (!root.empty()) {
+		int flag = 0;
+		vector <Tree> temp = root.front();
+		root.pop();
+		
+		for (int i = 0; i < 3; i++) {
+			if (temp[i].r == dest[i].r &&temp[i].c == dest[i].c) {
+				flag++;
+			}
+		}
+
+		if (flag == 3) {
+			result = temp[1].count; 
+			break;
+		}
+
+		for (int i = 0; i < 5; i++) {
+			if (canGo(temp, i)) {				
+				vector <Tree> insert;
+				if (i == 4 && temp[1].rotate == false) {	//예외 처리 //이미 한번 돌아간거면 ㅂㅂ
+					if (temp[0].r == temp[1].r) {	//같은 행에 있다는 뜻 -> 세로 방향으로 바꿔줌
+						Tree tmp[3];
+						tmp[0].r = temp[1].r - 1; tmp[0].c = temp[1].c;
+						tmp[1].r = temp[1].r; tmp[1].c = temp[1].c; tmp[1].count = temp[1].count + 1; tmp[1].rotate = true;
+						tmp[2].r = temp[1].r + 1; tmp[2].c = temp[1].c;
+						insert.push_back(tmp[0]);
+						insert.push_back(tmp[1]);
+						insert.push_back(tmp[2]);
+					}
+					else {		//같은 열에 있다는 뜻 -> 가로 방향으로 바꿔줌
+						Tree tmp[3];
+						tmp[0].c = temp[1].c - 1; tmp[0].r = temp[1].r;
+						tmp[1].c = temp[1].c; tmp[1].r = temp[1].r; tmp[1].count = temp[1].count + 1; tmp[1].rotate = true;
+						tmp[2].c = temp[1].c + 1; tmp[2].r = temp[1].r;
+						insert.push_back(tmp[0]);
+						insert.push_back(tmp[1]);
+						insert.push_back(tmp[2]);
+					}
+					root.push(insert);
+				}
+				else if(i>=0 && i<=3){
+					for (int j = 0; j < 3; j++) {
+						Tree tmp;
+						tmp.r = temp[j].r + dr[i];
+						tmp.c = temp[j].c + dc[i];
+						tmp.count = temp[1].count + 1;
+						tmp.rotate = false;
+						insert.push_back(tmp);
+					}
+					root.push(insert);
+				}
+			}
+		}
+	}
+
+	printf("%d", result);
+	return 0;
+}

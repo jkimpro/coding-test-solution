@@ -1,0 +1,77 @@
+//단순도금 비용
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct element
+{
+	int w, h;
+
+}Element;
+int arr[101][101];
+int price[3] = { 2,4,7 };
+int range[3];
+int result;
+int n;
+////단순 도금 처리 비용
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+		result = 0;
+		int size = 0;
+
+		scanf("%d",&n);
+		scanf("%d", &size);
+
+		for (int i = 1; i <= n; i++)
+		{
+			for (int j = 1; j <= n; j++)
+			{
+				arr[i][j] = 0;
+			}
+		}
+
+		for (int i = 0; i < size; i++)
+		{
+			int num1, num2;
+			scanf("%d %d", &num1, &num2);
+			arr[num1][num2] = 1;
+		}
+		
+		//3탐색
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				
+			}
+		}
+
+		printf("#%d ", );
+	}
+
+	return 0;
+}

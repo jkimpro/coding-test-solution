@@ -1,0 +1,187 @@
+/////////////////////내답안
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <queue>
+
+#define DEAD -1
+
+using namespace std;
+
+typedef struct cell
+{
+	int w, h;
+	int time;
+	int count;
+}Cell;
+
+int result;
+
+int space[750][750];
+int n;
+int m;
+int k;
+
+int start;
+int rightEnd;
+int leftEnd;
+
+int main()
+{
+	int real;
+
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+
+		scanf("%d %d %d", &n, &m, &k);
+		result = 0;
+
+		queue <Cell> loc[11];
+
+		for (int i = 310; i < 310 + n; i++) //세로
+		{
+			for (int j = 310; j < 310 + m; j++) //가로
+			{
+				scanf("%d", &space[i][j]);
+
+				if (space[i][j] > 0)
+				{
+
+					Cell temp;
+					temp.time = space[i][j];
+					temp.w = i; temp.h = j;
+					temp.count = 0;
+					loc[space[i][j]].push(temp);
+					space[i][j] = temp.time;
+				}
+			}
+		}
+		start = 309; rightEnd = 310 + m; //세로
+		leftEnd = 310 + n; // 무조건 포함관계로
+
+		for (int t = 0; t <= k; t++)
+		{
+			for (int i = start; i <= rightEnd; i++)
+			{
+				space[start][i] = 0;
+				space[leftEnd][i] = 0;
+				//printf("%d %d  %d %d\n", start,i, leftEnd,i);
+			}
+			for (int i = start; i <= leftEnd; i++)
+			{
+				space[i][start] = 0;
+				space[i][rightEnd] = 0;
+			}
+
+			start -= 1; rightEnd += 1; leftEnd += 1;
+
+			for (int loop = 10; loop >= 1; loop--)
+			{
+				if (loc[loop].empty()) { continue; }
+				int qsize = loc[loop].size();
+
+
+				for (int i = 0; i < qsize; i++)
+				{
+					Cell temp = loc[loop].front();
+					if (t == k)
+					{
+						if (temp.count == temp.time * 2)
+						{
+							space[temp.w][temp.h] = DEAD;         //죽은놈은 DEAD 처리
+							loc[loop].pop();
+						}
+						else
+						{
+							loc[loop].pop();
+							loc[loop].push(temp);
+						}
+						continue;
+					}
+
+					if (temp.count == temp.time)
+					{
+						if ((space[temp.w - 1][temp.h]) == 0) {
+							Cell tool;
+							tool.w = temp.w - 1;
+							tool.h = temp.h;
+							space[tool.w][tool.h] = temp.time;
+							tool.time = temp.time;
+							tool.count = 0;
+							loc[loop].push(tool);
+						}
+						if ((space[temp.w + 1][temp.h]) == 0) {
+							Cell tool;
+							tool.w = temp.w + 1;
+							tool.h = temp.h;
+							space[tool.w][tool.h] = temp.time;
+							tool.time = temp.time;
+							tool.count = 0;
+							loc[loop].push(tool);
+						}
+						if (space[temp.w][temp.h - 1] == 0) {
+							Cell tool;
+							tool.w = temp.w;
+							tool.h = temp.h - 1;
+							space[tool.w][tool.h] = temp.time;
+							tool.time = temp.time;
+							tool.count = 0;
+							loc[loop].push(tool);
+						}
+						if (space[temp.w][temp.h + 1] == 0) {
+							Cell tool;
+							tool.w = temp.w;
+							tool.h = temp.h + 1;
+							space[tool.w][tool.h] = temp.time;
+							tool.time = temp.time;
+							tool.count = 0;
+							loc[loop].push(tool);
+						}
+
+						if (loop == 1)
+						{
+							space[temp.w][temp.h] = DEAD;         //죽은놈은 DEAD 처리
+							loc[loop].pop();
+						}
+						else
+						{
+							temp.count += 1;
+							loc[loop].push(temp);
+							loc[loop].pop();
+						}
+					}
+					else if (temp.count == temp.time * 2)
+					{
+						space[temp.w][temp.h] = DEAD;         //죽은놈은 DEAD 처리
+						loc[loop].pop();
+					}
+					else
+					{
+						temp.count += 1;
+						loc[loop].push(temp);
+						loc[loop].pop();
+					}
+				}
+			}
+		}
+
+		for (int i = 1; i <= 10; i++)
+		{
+			result += loc[i].size();
+		}
+
+		for (int i = start; i <= leftEnd; i++)
+		{
+			for (int j = start; j <= rightEnd; j++)
+			{
+				space[i][j] = 0;
+			}
+		}
+
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}

@@ -1,0 +1,165 @@
+
+
+
+
+
+
+//시간 초과본///////////////////////////////////////
+#include <iostream>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+typedef struct shark {
+	int r;
+	int c;
+	int s;
+	int d;
+	int z;
+}Shark;
+
+int rdir[5] = {0,-1,1,0,0};
+int cdir[5] = {0,0,0,1,-1};
+
+vector <Shark> root;
+vector <Shark> rootInit;
+
+bool visit[101][101];
+Shark check[101][101];
+
+int changeDir(int d) {
+	if (d == 1) return 2;
+	else if (d == 2) return 1;
+	else if (d == 3) return 4;
+	else return 3;
+}
+
+int main() {
+	int result =0;
+	int r, c;
+	int m;
+	
+	scanf("%d %d %d", &r, &c, &m);
+	for (int i = 0; i < m; i++) {
+		Shark temp;
+		scanf("%d %d %d %d %d", &temp.r, &temp.c, &temp.s, &temp.d, &temp.z);
+		root.push_back(temp);
+
+		visit[temp.r][temp.c] = true;
+		check[temp.r][temp.c] = temp;
+	}
+	
+	for (int time = 1; time <= c; time++) {
+		for (int i = 1; i <= r; i++) {			//상어 잡기
+			//printf("%d %d", i, time);
+			if (visit[i][time] == true) {
+
+				result += check[i][time].z;
+				visit[i][time] = false;
+				for (int j = 0; j < root.size(); j++) {
+					if (root[j].r == i  && root[j].c == time) {
+						root.erase(root.begin() + j);
+						break;
+					}
+				}
+				break;
+			}
+		}
+		
+		for (int i = 1; i <= r; i++) {
+			for (int j = 1; j <= c; j++) {
+				visit[i][j] = false;
+			}
+		}
+		
+		//상어 움직이기
+		for (int i = 0; i < root.size(); i++) {	//범위 넘어감
+			
+			if (root[i].r + rdir[root[i].d]*root[i].s > r || root[i].r + rdir[root[i].d]* root[i].s <= 0 ||
+				root[i].c + cdir[root[i].d]* root[i].s > c || root[i].c + cdir[root[i].d]*root[i].s <= 0) {
+				int dis = root[i].s;
+				int temp;
+				int rest;
+
+				if (root[i].d == 1) {			//위
+					dis -= root[i].r; //가야할거리
+					temp = dis / (r-1);
+					rest = dis%(r-1);
+					if (temp % 2 == 0) {	//방향 바꾸기 (아래)
+						root[i].d = changeDir(root[i].d);
+						root[i].r = rest + 1;
+					}
+					else {
+						root[i].r = r-rest;
+					}
+				}
+				else if (root[i].d == 2) {		//아래
+					dis -= (r-root[i].r);
+					temp = dis / (r - 1);
+					rest = dis % (r - 1);
+					if (temp % 2 == 0) {	//방향바꾸기 (위)
+						root[i].d = changeDir(root[i].d);
+						root[i].r = r - rest;
+					}
+					else {
+						root[i].r = rest + 1;
+					}
+				}
+				else if (root[i].d == 3) {		//오른쪽
+					dis -= (c - root[i].c);
+					temp = dis / (c - 1);
+					rest = dis % (c - 1);
+					if (temp % 2 == 0) {
+						root[i].d = changeDir(root[i].d);
+						root[i].c = c - rest;
+					}
+					else {
+						root[i].c = rest + 1;
+					}
+				}
+				else {							//왼쪽
+					dis -= root[i].c; //가야할거리
+					temp = dis / (c - 1);
+					rest = dis % (c - 1);
+					if (temp % 2 == 0) {	//방향 바꾸기 (아래)
+						root[i].d = changeDir(root[i].d);
+						root[i].c = rest + 1;
+					}
+					else { root[i].c = c - rest; }
+				}
+			}
+			else {			//범위내 움직이기 가능
+				root[i].r += rdir[root[i].d]*root[i].s;
+				root[i].c += cdir[root[i].d]* root[i].s;
+			}
+
+			if (visit[root[i].r][root[i].c] == false) {
+				visit[root[i].r][root[i].c] = true;
+				check[root[i].r][root[i].c] = root[i];
+				rootInit.push_back(root[i]);
+			}
+			else {	//이미 어떤놈이 자리 차지 하고 있으면
+				//크기 비교
+				if (check[root[i].r][root[i].c].z > root[i].z) {	//원래 있던 놈이 크면
+					continue;
+				}
+				else {
+					for (int j = 0; j < rootInit.size(); j++) {		//바뀔 놈이 더 크면
+						if (rootInit[j].r == check[root[i].r][root[i].c].r && rootInit[j].c == check[root[i].r][root[i].c].c) {
+							rootInit.erase(rootInit.begin() + j);
+							break;
+						}
+					}
+					check[root[i].r][root[i].c] = root[i];
+					rootInit.push_back(root[i]);
+				}
+			}
+		}
+		root.clear();
+		root = rootInit;
+	}
+	printf("%d\n", result);
+	
+	return 0;
+}

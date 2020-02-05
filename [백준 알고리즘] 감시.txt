@@ -1,0 +1,216 @@
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+typedef struct cctv {
+	int r, c;
+	int num;
+}CCTV;
+
+int rMove[4] = { -1,0,1,0 };
+int cMove[4] = { 0,1,0,-1 };
+
+int n, m;
+int result;
+int plan[9][9];
+
+vector <CCTV> cctv;
+
+bool canGo(int r, int c) {
+	if (r >= n || r<0 || c >= m || c<0) {
+		return false;
+	}
+	else if (plan[r][c] == 6) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+void dfs(int ind,int arr[9][9]) {
+	if (ind == cctv.size()) {
+		int count = 0;
+		for (int i = 0; i<n; i++) {
+			for (int j = 0; j<m; j++) {
+				if (arr[i][j] == 0) {
+					count++;
+				}
+			}
+		}
+		result = min(result, count);
+		return;
+	}
+
+	int r = cctv[ind].r;
+	int c = cctv[ind].c;
+
+	if (cctv[ind].num == 1) {
+		for (int dir = 0; dir < 4; dir++) {
+			int temp[9][9];
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					temp[i][j] = arr[i][j];
+				}
+			}
+			r = cctv[ind].r; c = cctv[ind].c;
+
+			while (canGo(r + rMove[dir], c + cMove[dir]))
+			{
+				temp[r + rMove[dir]][c + cMove[dir]] = -1;
+				r += rMove[dir];
+				c += cMove[dir];
+			}
+			dfs(ind + 1, temp);
+		}
+	}
+	else if (cctv[ind].num == 2) {
+		for (int dir = 0; dir<4; dir++) {
+			int temp[9][9];
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					temp[i][j] = arr[i][j];
+				}
+			}
+			r = cctv[ind].r; c = cctv[ind].c;
+
+			while (1) {
+				if (canGo(r + rMove[dir], c + cMove[dir]))
+				{
+					temp[r + rMove[dir]][c + cMove[dir]] = -1;
+					r += rMove[dir];
+					c += cMove[dir];
+				}
+				else { break; }
+			}
+			r = cctv[ind].r; c = cctv[ind].c;
+			while (1) {
+				if (canGo(r + rMove[(dir+2)%4], c + cMove[(dir + 2) % 4])) { 
+					temp[r + rMove[(dir + 2) % 4]][c + cMove[(dir + 2) % 4]] = -1; 
+					r += rMove[(dir + 2) % 4];
+					c += cMove[(dir + 2) % 4];
+				}
+				else { break; } 
+			}
+			dfs(ind + 1, temp);
+		}
+	}
+	else if (cctv[ind].num == 3) {
+	for (int dir = 0; dir<4; dir++) {
+			int temp[9][9];
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					temp[i][j] = arr[i][j];
+				}
+			}
+			r = cctv[ind].r; c = cctv[ind].c;
+
+			while (1) {
+				if (canGo(r + rMove[dir], c + cMove[dir]))
+				{
+					temp[r + rMove[dir]][c + cMove[dir]] = -1;
+					r += rMove[dir];
+					c += cMove[dir];
+				}
+				else { break; }
+			}
+			r = cctv[ind].r; c = cctv[ind].c;
+			while (1) {
+				if (canGo(r + rMove[(dir + 1) % 4], c + cMove[(dir + 1) % 4])) {
+					temp[r + rMove[(dir + 1) % 4]][c + cMove[(dir + 1) % 4]] = -1;
+					r += rMove[(dir + 1) % 4];
+					c += cMove[(dir + 1) % 4];
+				}
+				else { break; }
+			}
+			dfs(ind + 1, temp);
+		}
+	}
+	else if (cctv[ind].num == 4) {
+		for (int dir = 0; dir<4; dir++) {
+			int temp[9][9];
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					temp[i][j] = arr[i][j];
+				}
+			}
+			r = cctv[ind].r; c = cctv[ind].c;
+			while (1) {
+				if (canGo(r + rMove[dir], c + cMove[dir]))
+				{
+					temp[r + rMove[dir]][c + cMove[dir]] = -1;
+					r += rMove[dir];
+					c += cMove[dir];
+				}
+				else { break; }
+			}
+			r = cctv[ind].r; c = cctv[ind].c;
+			while (1) {
+				if (canGo(r + rMove[(dir + 1) % 4], c + cMove[(dir + 1) % 4])) {
+					temp[r + rMove[(dir + 1) % 4]][c + cMove[(dir + 1) % 4]] = -1;
+					r += rMove[(dir + 1) % 4];
+					c += cMove[(dir + 1) % 4];
+				}
+				else { break; }
+			}
+			r = cctv[ind].r; c = cctv[ind].c;
+			while (1) {
+				if (canGo(r + rMove[(dir + 2) % 4], c + cMove[(dir + 2) % 4])) {
+					temp[r + rMove[(dir + 2) % 4]][c + cMove[(dir + 2) % 4]] = -1;
+					r += rMove[(dir + 2) % 4];
+					c += cMove[(dir + 2) % 4];
+				}
+				else { break; }
+			}
+			dfs(ind + 1, temp);
+		}
+	}
+
+}
+int main() {
+
+	int arr[9][9];
+	result = 999999;
+	scanf("%d %d", &n, &m);
+
+	for (int i = 0; i<n; i++) {
+		for (int j = 0; j<m; j++) {
+			scanf("%d", &arr[i][j]);
+			if (arr[i][j] != 0) {
+				cctv.push_back({ i,j,arr[i][j] });
+			}
+			plan[i][j] = arr[i][j];
+		}
+	}
+
+	//5번 찾고 다 초기화 시키기
+	for (int i = 0; i<cctv.size(); i++) {
+		if (cctv[i].num == 5) {
+			int flag = 0;
+			
+			int r = cctv[i].r;
+			int c = cctv[i].c;
+
+			while (1) { if (canGo(r - 1, c)) { arr[r - 1][c] = -1; r -= 1; } else { break; } }
+			r = cctv[i].r; c = cctv[i].c;
+			while (1) { if (canGo(r + 1, c)) { arr[r + 1][c] = -1; r += 1; } else { break; } }
+			r = cctv[i].r; c = cctv[i].c;
+			while (1) { if (canGo(r, c - 1)) { arr[r][c - 1] = -1; c -= 1; } else { break; } }
+			r = cctv[i].r; c = cctv[i].c;
+			while (1) { if (canGo(r, c + 1)) { arr[r][c + 1] = -1; c += 1; } else { break; } }
+			
+			cctv.erase(cctv.begin() + i);
+			i--;
+		}
+		else if (cctv[i].num == 6) {
+			cctv.erase(cctv.begin() + i);
+			i--;
+		}
+	}
+	dfs(0,arr);
+
+	printf("%d", result);
+	return 0;
+}

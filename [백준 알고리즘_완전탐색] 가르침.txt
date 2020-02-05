@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
+#include <math.h>
+#include <string.h>
+
+using namespace std;
+
+
+char alpha[21] = { 'b','d','e','f','g','h','j','k','l','m','o',
+'p','q','r','s','u','v','w','x','y','z'};
+
+char word[100][100];
+vector <char> col;
+
+int n, k;
+int result = 0;
+
+int check() {
+	//printf("col.size:%d col[0]:%d\n", col.size(),col[0]);
+	int count = 0;
+	for (int i = 0; i < n; i++) {
+	//	printf("%d", i);
+		bool canCount = true;
+		for (int j = 0; word[i][j] != '\0'; j++) {
+			if (word[i][j] == 'a' || word[i][j] == 'n' || word[i][j] == 't' || word[i][j] == 'i' || word[i][j] == 'c') {
+				continue;
+			}
+			else {
+				bool isEx = false;
+				for (int k = 0; k < col.size(); k++) {
+					if(word[i][j] == col[k]){
+						isEx = true;
+						break;
+					}
+				}
+				if (isEx == false) {
+					canCount = false;
+					break;
+				}
+			}
+		}
+		if (canCount == true) { count++; }
+	}
+	//printf("returning?");
+	return count;
+}
+int main() {
+
+	scanf("%d %d", &n, &k);
+	k -= 5;
+
+	for (int i = 0; i < n; i++) {
+		char temp[100];
+		char * p = temp+4;
+		scanf("%s", temp);
+		strcpy(temp, p);
+	
+		for (int j = 0; ; j++) {
+			if (temp[j] == '\0') {
+				temp[j - 4] = '\0';
+				break;
+			}
+		}
+		strcpy(word[i], temp);
+	}
+
+
+	for (int i = 0; i < pow(2.0, 21); i++) {
+		int alCount = 0;
+		for (int j = 0; j < 21; j++) {
+			if (i&(1 << j)) {
+				col.push_back(alpha[j]);
+				alCount++;
+
+				if (alCount > k) {
+					col.clear();
+					break;
+				}
+			}
+			else{
+				continue;
+			}
+		}
+		if (alCount != k) {
+			//printf("alCount:%d \n", alCount);
+		}
+		else {
+		//	printf("%d %c\n", col.size(), col[0]);
+			result = max(result, check());
+		}
+		col.clear();
+		
+	}
+	printf("%d", result);
+	return 0;
+}

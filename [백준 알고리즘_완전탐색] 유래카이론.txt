@@ -1,0 +1,46 @@
+#include <stdio.h>
+
+using namespace std;
+
+int target[1001];
+int result[1001];
+
+bool check(int num) {
+	for (int i = 1; i < 1001; i++) {
+		for (int j = i; j < 1001; j++) {
+			for (int k = j; k < 1001; k++) {
+				if (target[i] + target[j] + target[k] == num) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+int main() {
+	int n;
+
+	for (int i = 0; i < 1001; i++) {
+		target[i] = i*(i + 1) / 2;
+	}
+
+	scanf("%d", &n);
+
+	for (int i = 0; i< n; i++) {
+		int temp;
+		scanf("%d", &temp);
+		if (check(temp)) {
+			result[i] = 1;
+		}
+		else {
+			result[i] = 0;
+		}
+	}
+
+	for (int i = 0; i < n; i++) {
+		printf("%d\n", result[i]);
+	}
+
+
+	return 0;
+}

@@ -1,0 +1,322 @@
+///정답
+#include <cstdio>
+#include <vector>
+#define MIN(a, b) (a) < (b) ? (a) : (b)
+using namespace std;
+ 
+const int dy[4] = { 0, 1, 0, -1};
+const int dx[4] = { 1, 0, -1, 0 };
+ 
+int om[15][12] = { 0, }; // 원본 배열
+int tm[15][12] = { 0, }; // 임시 배열
+ 
+void init() {
+ 
+    for (int i = 0; i < 12; ++i) {
+        for (int j = 0; j < 15; ++j) {
+            om[i][j] = tm[i][j] = 0;
+        }
+    }
+}
+ 
+void tmInit(int h, int w) {
+ 
+    for (int i = 0; i < h; ++i) {
+        for (int j = 0; j < w; ++j) {
+            tm[i][j] = om[i][j];
+        }
+    }
+}
+ 
+/*
+ * return: 제거한 블록의 개수
+ */
+int dfs(int h, int w, int y, int x) {
+ 
+    // 범위 검증
+    if (y < 0 || y >= h || x < 0 || x >= w) {
+        return 0;
+    }
+ 
+    // 현재 지점이 0이면 폭파할 필요 없으므로 종료
+    if (tm[y][x] == 0) {
+        return 0;
+    }
+ 
+    // 폭발력을 저장한 뒤 현재 지점을 폭발시킴
+    int boom = tm[y][x];
+    tm[y][x] = 0;
+ 
+    int cnt = 1;
+ 
+    // 폭발력이 닿는 지점까지 연쇄 폭발
+    for (int i = 1; i < boom; ++i) {
+        for (int d = 0; d < 4; ++d) {
+            cnt += dfs(h, w, y + dy[d] * i, x + dx[d] * i);
+        }
+    }
+ 
+    return cnt;
+}
+ 
+int getY(int x, int h) {
+ 
+    for (int y = 0; y < h; ++y) {
+        if (tm[y][x] != 0) {
+            return y;
+        }
+    }
+ 
+    // 한 열이 전부 0이면 -1을 반환
+    return -1;
+}
+ 
+void down(int h, int w) {
+ 
+    for (int x = 0; x < w; ++x) {
+        for (int y = h - 2; y >= 0; --y) {
+            if (tm[y][x] != 0) {
+                for (int i = y; tm[i + 1][x] == 0 && i < h - 1; ++i) {
+                    tm[i][x] ^= tm[i + 1][x];
+                    tm[i + 1][x] ^= tm[i][x];
+                    tm[i][x] ^= tm[i + 1][x];
+                }
+            }
+        }
+    }
+}
+ 
+int main()
+{
+    int test_case;
+    int T;
+ 
+    scanf("%d", &T);
+ 
+    for (test_case = 1; test_case <= T; ++test_case) {
+         
+        // min : 최소값(정답)
+        // blockCnt : 정답을 구하는 과정에서 반복 회수를 줄이기 위해 사용하는 블록 개수 변수
+        int n, w, h, min = 0x7FFFFFFF, blockCnt = 0;
+        scanf("%d %d %d", &n, &w, &h);
+ 
+        init();
+ 
+        for (int i = 0; i < h; ++i) {
+            for (int j = 0; j < w; ++j) {
+                scanf("%d", &om[i][j]);
+                 
+                if (om[i][j] > 0) {
+                    ++blockCnt;
+                }
+            }
+        }
+ 
+        // 블록이 떨어질 x좌표 순열을 저장할 배열
+        int arr[4] = { 0, };
+ 
+        for (arr[0] = 0; arr[0] < w; arr[0]++) {
+            for (arr[1] = 0; arr[1] < w; arr[1]++) {
+                for (arr[2] = 0; arr[2] < w; arr[2]++) {
+                    for (arr[3] = 0; arr[3] < w; arr[3]++) {
+                         
+                        // 임시 변수 초기화
+                        tmInit(h, w);
+                        int cnt = blockCnt;
+ 
+                        // 순열에 저장된 x좌표에 공을 떨어뜨림
+                        for (int p = 0; p < n; p++) {
+                            int x = arr[p];
+                            int y = getY(x, h);
+ 
+                            // 수행할 필요가 없는 지점은 skip
+                            if (y == -1) {
+                                continue;
+                            }
+                             
+                            // 블록 폭발
+                            cnt -= dfs(h, w, y, x);
+ 
+                            // 블록 폭발 후 떨어지는 블록
+                            down(h, w);
+                        }
+ 
+                        min = MIN(min, cnt);
+ 
+                        // 최소값이 0이면 더 수행할 필요 없음
+                        if (min == 0) {
+                            arr[0] = arr[1] = arr[2] = arr[3] = w;
+                        }
+ 
+                        if (n < 4) break;
+                    }
+                    if (n < 3) break;
+                }
+                if (n < 2) break;
+            }
+        }
+ 
+        printf("#%d %d\n", test_case, min);
+    }
+ 
+    return 0;
+}
+
+
+///////////내답안
+//벽돌깨기
+#include <stdio.h>
+#include <stdlib.h>
+#include <queue>
+
+using namespace std;
+
+int n;
+int w;
+int h;
+int result;
+
+int arr[18][18];
+int backup[6][18][18];
+
+void checkAndBreak(int coreRow, int coreCol, int core, int time){
+	for (int i = 1; i < core; i++){
+
+		//printf("just erase\n");
+		if (coreCol - i >= 0) //좌
+		{
+			//printf("erase 1\n");
+			int temp1 = backup[time][coreRow][coreCol - i];
+			if (temp1 >= 1) { backup[time][coreRow][coreCol - i] = 0; checkAndBreak(coreRow, coreCol - i, temp1, time); }
+		}
+		if (coreCol+i < w)	//우
+		{
+			//printf("erase 2\n");
+			int temp2 = backup[time][coreRow][coreCol + i];
+			if (temp2 >= 1) { backup[time][coreRow][coreCol + i] = 0; checkAndBreak(coreRow, coreCol + i, temp2, time); }
+		}
+		if (coreRow - i >= 0)	//상
+		{
+			//printf("erase 3\n");
+			int temp3 = backup[time][coreRow - i][coreCol];
+			if (temp3 >= 1) { backup[time][coreRow - i][coreCol] = 0; checkAndBreak(coreRow - i, coreCol, temp3, time); }
+		}
+		if (coreRow < h)		//하
+		{
+			//printf("erase 4\n");
+			int temp4 = backup[time][coreRow + i][coreCol];
+			if (temp4 >= 1) { backup[time][coreRow + i][coreCol] = 0; checkAndBreak(coreRow + i, coreCol, temp4, time); }
+		}
+	}
+}
+void simulation(int time, int num)
+{
+	int core= 0;
+	int coreRow=0;
+	int coreCol=0;
+	int tool;
+	int flag = 0;
+	queue <int> temp;
+	//먼저 복사부터
+
+	//printf("simulation: %d %d\n", time, num);
+
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{
+			backup[time][i][j] = backup[time-1][i][j];
+		}
+	}
+	
+	for (int i = 0; i < h; i++)
+	{
+		if (backup[time][i][num] >=1)
+		{
+			core = backup[time][i][num];
+			coreRow = i;
+			coreCol = num;
+			flag = 1;
+			break;
+		}
+	}
+	if (flag == 0)
+	{
+		core = backup[time][h-1][num];
+		coreRow = h - 1;
+		coreCol = num;
+	}
+
+	//printf("coreRow:%d coreCol: %d  num:%d time:%d\n", coreRow, coreCol, num, time);
+
+	tool=backup[time][coreRow][coreCol];
+
+	if (tool >= 1){
+		backup[time][coreRow][coreCol] = 0;
+		checkAndBreak(coreRow, coreCol, core, time);
+	}
+	
+	//각 배열내리기
+	for (int i = 0; i < w; i++)
+	{
+		for (int j = h-1; j >=0; j--)
+		{
+			if (backup[time][j][i] >= 1) { temp.push(backup[time][j][i]); }
+		}
+		for (int j = h - 1; j >= 0; j--)
+		{
+			if (!temp.empty()) { backup[time][j][i] = temp.front(); temp.pop(); }
+			else { backup[time][j][i] = 0; }
+		}
+
+	}
+
+	if (time == n) {
+		int sum = 0;
+		for (int i = 0; i < h; i++)
+		{
+			for (int j = 0; j < w; j++)
+			{
+				if (backup[n][i][j] >= 1) { sum += 1; }
+			}
+		}
+		if (sum < result) { 
+			result = sum; 
+			return;
+		}
+	}
+	else
+	{
+		for (int i = 0; i < w; i++)
+		{
+			simulation(time + 1, i);
+		}
+	}
+}
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+		result = 0;
+		scanf("%d %d %d", &n, &w, &h);
+		
+		for (int i = 0; i < h; i++)
+		{
+			for (int j = 0; j < w; j++)
+			{
+				scanf("%d", &backup[0][i][j]);
+				if (backup[0][i][j] >= 1) { result += 1; }
+			}
+		}
+
+		for (int i = 0; i < w; i++)
+		{
+			simulation(1, i);
+		}
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}

@@ -1,0 +1,546 @@
+///////////////////원자로 시뮬레이션 문제 -> at 말고 배열로 접근 (해결본)
+#include <iostream>
+#include <cstdio>
+#include <vector> 
+#include <cstring>
+
+using namespace std;
+
+int rd[4] = { 1,-1,0,0 };
+int cd[4] = { 0,0,-1,1 };
+int atomSpace[4002][4002];
+int visit[4002][4002];
+
+typedef struct atom {
+	int x, y;
+	int energy;
+	int dir;
+}Atom;
+
+vector <Atom> atomCol;
+
+int result;
+int n;
+int real;
+
+int main()
+{
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+		scanf("%d", &n);
+
+		result = 0;
+		
+		for (int i = 0; i < n; i++)
+		{
+			Atom atom;
+
+			scanf("%d %d %d %d", &atom.x, &atom.y, &atom.dir, &atom.energy);
+
+			atom.x += 1000;
+			atom.y += 1000;
+
+			atom.x *= 2;
+			atom.y *= 2;	//모두 홀수화 시키기 위해 곱함
+
+			atomCol.push_back(atom);
+			atomSpace[atom.y][atom.x] = 1;
+		}   //일단 움직임 
+
+
+		while(1) {
+
+			for (int j = 0; j < atomCol.size(); j++) {
+
+				atomSpace[atomCol[j].y][atomCol[j].x]--;
+
+				int nx = atomCol[j].x + cd[atomCol[j].dir];
+				int ny = atomCol[j].y + rd[atomCol[j].dir];
+				
+				if (nx<0 || nx >= 4000 || ny<0 || ny >= 4000) {
+					atomCol.erase(atomCol.begin() + j);
+					j--;
+					continue;
+				}
+				else {
+					
+					atomCol.at(j).x = nx;
+					atomCol.at(j).y = ny;
+					atomSpace[ny][nx]++;
+					
+					if (atomSpace[ny][nx] >= 2) {
+						visit[ny][nx] = 1;
+					}
+				}
+			}
+
+			for (int j = 0; j<atomCol.size(); j++) {
+
+				int nx = atomCol[j].x;
+				int ny = atomCol[j].y;
+
+				if (visit[ny][nx]) {
+					if (atomSpace[ny][nx] == 1) {
+						visit[ny][nx] = 0;
+					}
+					atomSpace[ny][nx]--;
+					result += atomCol[j].energy;
+					atomCol.erase(atomCol.begin() + j);
+					j--;
+				}
+
+			}
+			if (atomCol.size() == 0) { break; }
+		}
+
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}
+
+///정답
+#include <stdio.h>
+#define max 10000
+typedef struct OneJa {
+    int r, c, dir, num;
+};
+OneJa oneJa[1002];
+int sum_num, n, queue[max+2],front,rear; //부딪힌 장소 담을 큐!
+int map[4001][4001];//원자의 번호만을 담을 맵; 단 들어오는 순으로 10씩 곱해줌
+int dr[] = { 1, -1, 0, 0 };
+int dc[] = { 0, 0, -1, 1 };
+void clear();
+void bfs();
+int main() {
+    int t; scanf("%d", &t);
+    for (int t_case = 1; t_case <= t; t_case++) {
+        scanf("%d", &n); 
+        int r, c;
+        clear();
+        for (int i = 1; i <= n; i++) {
+            scanf("%d %d %d %d",
+                &c, &r,
+                &oneJa[i].dir, &oneJa[i].num);
+            oneJa[i].c = (c*2)+2000;
+            oneJa[i].r = (r*2)+2000;
+        }
+        int time = 4002;
+        while (time--) {
+    //      printf("시간 = %d\n",time);
+            bfs();
+        }
+ 
+ 
+        printf("#%d %d\n", t_case, sum_num);
+    }
+    return 0;
+}
+void bfs() {
+    int r, c, dir, num, nr, nc; front = 0; rear = 0;
+    for (int k = 1; k <= n; k++) { //원자 다 순환!
+        if (oneJa[k].num != 0) { //num이 0이라는거는 부딪혀서 없어졌다는 소리임
+            r = oneJa[k].r;
+            c = oneJa[k].c;
+            dir = oneJa[k].dir;
+            num = oneJa[k].num;
+            nr = r + dr[dir];
+            nc = c + dc[dir];
+            //printf("%d번째 ) r = %d c = %d dir = %d num = %d  // nr = %d nc = %d  // map[%d][%d] = %d %d %d %d\n", k, r, c, dir, num,nr,nc,nr,nc,map[nr][nc][0], map[nr][nc][1], map[nr][nc][2], map[nr][nc][3]);
+            if (0 <= nr && nr <= 4000 && 0 <= nc && nc <= 4000) {
+                if (map[nr][nc] == 0) {
+                    map[nr][nc] = k;//원자의 번호를 담는거다!
+                }
+                else {
+                    map[nr][nc] *= 1000;
+                    map[nr][nc] += k;
+                }
+                queue[rear++] = nr; queue[rear++] = nc; rear %= max;
+                //일단 맵 안에 들어갔으면 큐에 다 담음
+            }
+            oneJa[k].r = nr;
+            oneJa[k].c = nc;
+             
+        }
+    }
+    while (front != rear) { // 부딪힌 애들 큐에서 처리 혹은 그냥 움직인거도 0처리
+        r = queue[front++];
+        c = queue[front++];
+        front %= max;
+    //  printf("r = %d c = %d\n", r, c);
+        if (map[r][c]/1000 != 0) {
+    //      printf("map[%d][%d][1] = %d\n", r, c, map[r][c][1]);
+            while (map[r][c]%1000 != 0) {
+    //          printf("map[%d][%d][%d] = %d\n",r,c,q,map[r][c][q]);
+                int BunHo = map[r][c]%1000; //번호 받기
+                sum_num += oneJa[BunHo].num;
+    //          printf("원자번호 : %d / 터진 위치 : (%d,%d)  / 원자크기 : %d   =>   현재까지 크기 : %d\n", BunHo, r, c, oneJa[BunHo].num, sum_num);
+                oneJa[BunHo].num = 0;
+                map[r][c] /= 1000;
+            }
+            /*int BunHo = map[r][c] % 2; 
+            sum_num += oneJa[BunHo].num;
+            oneJa[BunHo].num = 0;
+            map[r][c] /= 2;*/
+        }
+        else {
+            map[r][c] = 0; //그냥 움직인대들 map도 0으로 바꿔줌
+        }
+        map[r][c] = 0;
+    }
+     
+}
+void clear() {
+    sum_num = 0;
+    front = 0;
+    rear = 0;
+}
+
+
+
+
+
+
+////내답안
+/*
+
+minTimes 구조체로 변환 시키고
+정렬한 후에 minTimes 구조체 크기 만큼만 조회하고 다 false 만들기
+
+*/
+
+
+
+///////////////////원자로 시뮬레이션 문제
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <queue>
+#include <algorithm>
+#define UP 0
+#define DOWN 1
+#define LEFT 2
+#define RIGHT 3
+
+using namespace std;
+
+typedef struct atom {
+	int x, y;
+	int energy;
+	int dir;
+	bool isAlive;
+}Atom;
+
+typedef struct minExTimes {
+	int num;
+	int ind;
+}MinExTime;
+
+Atom atom[1001];
+queue <int> isExplodeInd[1001];                 //같이 폭발될 index 값들을 각queue 별로 종합
+MinExTime minExTime[1001];
+
+int result;
+
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+		int n;
+		int countAtoms = 0;
+		scanf("%d", &n);
+		result = 0;
+
+		for (int i = 0; i < n; i++){
+			scanf("%d %d %d %d", &atom[i].x, &atom[i].y, &atom[i].dir, &atom[i].energy);
+			atom[i].isAlive = true;
+		}
+
+		for (int i = 0; i < n; i++) //원자 Collection 입니다.
+		{
+			//printf("현재 i값: %d\n", i);
+			while (!isExplodeInd[i].empty())
+			{
+				isExplodeInd[i].pop();
+			}
+
+			minExTime[i].num = 9999.0;
+			minExTime[i].ind = i;
+			
+			isExplodeInd[i].push(int(i));
+
+			for (int j = i; j < n; j++)
+			{
+				int flag;
+				if (atom[i].dir == atom[j].dir) { continue; }
+
+				int isLeftRight = atom[i].x - atom[j].x;
+				int isUpDown = atom[i].y - atom[j].y;
+				//printf("isLeft: %d , isUp: %d\n", isLeftRight, isUpDown);
+
+				if (atom[i].y == atom[j].y)
+				{
+					//printf("j:%d LEFTRIGHT\n", j);
+
+					if (atom[i].dir == LEFT && atom[j].dir == RIGHT) { flag = 1; }
+					else if (atom[i].dir == RIGHT && atom[j].dir == LEFT) { flag = 1; }
+					else { continue; }
+				}
+				else if (atom[i].x == atom[j].x) //상하
+				{
+					//printf("j:%d UPDOWN\n", j);
+
+					if (atom[i].dir == UP && atom[j].dir == DOWN) { flag = 2; }
+					else if (atom[i].dir == DOWN && atom[j].dir == UP) { flag = 2; }
+					else { continue; }
+
+				}
+				else if (abs(isLeftRight) == abs(isUpDown))
+				{
+					//printf("j:%d 방향 엇갈림\n", j);
+					//i기준 방향성 검사
+					if (atom[i].dir == UP)
+					{
+						if (atom[j].dir == LEFT && (isLeftRight > 0 && isUpDown<0)) { flag = 3; }
+						else if (atom[j].dir == RIGHT && (isLeftRight > 0 && isUpDown>0)) { flag = 3; }
+						else { continue; }
+					}
+					else if (atom[i].dir == DOWN)
+					{
+						if (atom[j].dir == LEFT && isLeftRight < 0 && isUpDown > 0) { flag = 3; }
+						else if (atom[j].dir == RIGHT && isLeftRight > 0 && isUpDown > 0) { flag = 3; }
+						else { continue; }
+					}
+					else if (atom[i].dir == LEFT)
+					{
+						if (atom[j].dir == UP && isLeftRight>0 && isUpDown>0) { flag = 3; }
+						else if (atom[j].dir == DOWN && isLeftRight>0 && isUpDown<0) { flag = 3; }
+						else { continue; }
+					}
+					else
+					{
+						if (atom[j].dir == UP && isLeftRight <0 && isUpDown>0) { flag = 3; }
+						else if (atom[j].dir == DOWN&&  isLeftRight <0 && isUpDown<0) { flag = 3; }
+						else { continue; }
+					}
+				}
+				else
+				{
+					continue;
+				}
+
+				if (flag == 1)
+				{
+					int temp;
+					if (minExTime[i].num % 2 == 1) temp = (minExTime[i].num * 2) + 1;
+					else temp = (minExTime[i].num * 2);
+
+					if (abs(isLeftRight) < temp)
+					{
+						minExTime[i].num = abs(isLeftRight)/2;
+						//printf("flag =1 왜 나옴? i: %d j:%d abs(isLeftRiht)/2.0: %d,min: %d\n", i, j, abs(isLeftRight) / 2, minExTime[i].num);
+					
+						while (!isExplodeInd[i].empty())
+						{
+							isExplodeInd[i].pop();
+						}
+						isExplodeInd[i].push(i);
+						isExplodeInd[i].push(j);
+					}
+					else if (abs(isLeftRight) == temp) { isExplodeInd[i].push(j); }
+					else { continue; }
+				}
+				else if (flag == 2)
+				{
+					int temp;
+					if (minExTime[i].num % 2 == 1) temp = (minExTime[i].num * 2) + 1;
+					else temp = (minExTime[i].num * 2);
+
+					//printf("flag 들어온 i값: %d\n", i);					
+					if (abs(isUpDown) < temp)
+					{
+						minExTime[i].num = abs(isUpDown) / 2;
+						//printf("flag =2 왜 나옴? i: %d j:%d abs(isUpDown)/2.0: %.1f,min: %.1f\n", i, j, abs(isUpDown) / 2, minExTime[i].num);
+
+						while (!isExplodeInd[i].empty())
+						{
+							isExplodeInd[i].pop();
+						}
+						isExplodeInd[i].push(i);
+						isExplodeInd[i].push(j);
+
+					}
+					else if (abs(isUpDown) == temp){ isExplodeInd[i].push(j); }
+					else { continue; }
+				}
+				else if (flag == 3)
+				{
+					int temp;
+					if (minExTime[i].num % 2 == 1) temp = (minExTime[i].num) + 1;
+					else temp = (minExTime[i].num);
+
+					if (abs(isLeftRight) < temp)
+					{
+						minExTime[i].num = abs(isLeftRight);
+
+						//printf("flag =3 왜 나옴? i: %d j:%d abs(isLeftRight): %.1f,min: %.1f\n", i, j, abs(isLeftRight), minExTime[i].num);
+						while (!isExplodeInd[i].empty())
+						{
+							isExplodeInd[i].pop();
+						}
+						isExplodeInd[i].push(i);
+						isExplodeInd[i].push(j);
+
+					}
+					else if (abs(isLeftRight) == temp) { isExplodeInd[i].push(j); }
+					else { continue; }
+				}
+			}
+			//printf("하나끝==================================================================\n");
+		}
+
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = i; j < n; j++)
+			{
+				if (minExTime[i].num > minExTime[j].num)
+				{
+					MinExTime temp = minExTime[i];
+					minExTime[i] = minExTime[j];
+					minExTime[j] = temp;
+				}
+			}
+		}
+		
+	
+		for (int i = 0; i <n; i++)
+		{
+			if (atom[minExTime[i].ind].isAlive == false) { continue; }
+			else if (isExplodeInd[minExTime[i].ind].size() <= 1) {continue; }
+			else if (countAtoms == n) { break; }
+			else
+			{
+				while (!isExplodeInd[minExTime[i].ind].empty())
+				{
+					if (atom[isExplodeInd[minExTime[i].ind].front()].isAlive == false)
+					{
+						isExplodeInd[minExTime[i].ind].pop();
+					}
+					else
+					{
+						result += atom[isExplodeInd[minExTime[i].ind].front()].energy;
+						atom[isExplodeInd[minExTime[i].ind].front()].isAlive = false;
+						isExplodeInd[minExTime[i].ind].pop();
+						countAtoms += 1;
+					}
+				}
+			}
+		}
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+/////시간초과본
+
+///////////////////원자로 시뮬레이션 문제
+#include <stdio.h>
+#include <queue>
+#define UP 0
+#define DOWN 1
+#define LEFT 2
+#define RIGHT 3
+
+using namespace std;
+
+typedef struct atom {
+	int x, y;
+	int energy;
+	int dir;
+	bool isAlive;
+}Atom;
+Atom atom[1000];
+
+int result;
+
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+		int n;
+		scanf("%d", &n);
+
+		result = 0;
+		for (int i = 0; i < n; i++)
+		{
+			scanf("%d %d %d %d", &atom[i].x, &atom[i].y, &atom[i].dir, &atom[i].energy);
+			atom[i].isAlive = true;
+		}
+
+		for (int i = 0; i < 2002; i++)
+		{
+			//충돌할 경우 움직임
+			for (int i = 0; i < n; i++)
+			{
+				if (atom[i].isAlive== false) continue;
+
+				if (atom[i].dir == UP && atom[i].isAlive == true) atom[i].y += 1;
+				if (atom[i].dir == DOWN && atom[i].isAlive == true) atom[i].y -= 1;
+				if (atom[i].dir == LEFT && atom[i].isAlive == true) atom[i].x -= 1;
+				if (atom[i].dir == RIGHT && atom[i].isAlive == true) atom[i].x += 1;
+			}
+
+			for (int i = 0; i < n; i++)
+			{
+				if (atom[i].isAlive == false) continue;
+			
+				queue<int> atomEnergy;
+
+				atomEnergy.push(atom[i].energy);
+
+				for (int j = i + 1; j < n; j++)
+				{
+					if (atom[i].x == atom[j].x &&atom[i].y == atom[j].y &&
+						atom[j].isAlive == true)
+					{
+						atom[i].isAlive = false;
+						atom[j].isAlive = false;
+						atomEnergy.push(atom[j].energy);
+					}
+				}
+				if (atomEnergy.size() > 1)
+				{
+					while (!atomEnergy.empty())
+					{
+						result += atomEnergy.front();
+						atomEnergy.pop();
+					}
+				}
+				else
+				{
+					atomEnergy.pop();
+				}
+			}
+		}
+
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}

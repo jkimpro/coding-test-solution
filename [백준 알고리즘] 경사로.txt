@@ -1,0 +1,150 @@
+//경사로
+#include <stdio.h>
+#include <algorithm>
+
+using namespace std;
+
+int arr[101][101];
+bool visit[101][101];
+int n, m;
+
+bool check(int option, int i, int j){
+	if (option == 1) {//높은곳 만났을 때
+		for (int num = j - 1; num >= j - m; num--) {	//이전 것을 확인
+			if (num < 0 || visit[i][num] == true || arr[i][j]-1 !=arr[i][num]) {
+				return false;
+			}
+		}
+		return true;
+	}
+	else if (option == 2) {	//낮은 곳 만났을 때
+		for (int num = j; num < j + m; num++) {	//이후 것을 확인
+			if (num >= n || visit[i][num] == true || arr[i][j] != arr[i][num]) {
+				return false;
+			}
+		}
+		return true;
+	}
+	else if (option == 3) {	//높은곳을 만났을때
+		for (int num = i - 1; num >= i - m; num--) {
+			if (num < 0 || visit[num][j] == true || arr[i][j] - 1 != arr[num][j]) {
+				return false;
+			}
+		}
+		return true;
+	}
+	else{
+		for (int num = i; num < i + m; num++) {
+			if (num>=n || visit[num][j] == true || arr[i][j] != arr[num][j]) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
+int main(){
+	int result = 0;
+	scanf("%d %d", &n, &m);
+
+	result = 2*n;
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			scanf("%d", &arr[i][j]);
+		}
+	}
+
+	for (int i = 0; i < n; i++) {
+		int bar = arr[i][0];
+		for (int j = 0; j < n; j++) {
+			if (bar == arr[i][j]) { continue; }
+			else if (arr[i][j] > bar && arr[i][j] - 1 == bar) {	//높은곳 만났을 때
+				if (check(1,i,j)) {
+					for (int k = j - 1; k >= j - m; k--) {
+						visit[i][k] = true;
+					}
+					bar = arr[i][j];
+				}
+				else {					
+					result -= 1;
+				//	printf("now1 - arr[i][j]:%d i:%d j:%d result:%d\n", arr[i][j], i, j, result);
+
+					break;
+				}
+			}
+			else if (arr[i][j] < bar && arr[i][j] + 1 == bar) {	//낮은 곳 만났을때
+				if (check(2,i,j)) {
+					for (int k = j; k < j + m; k++) {	//이후 것을 확인
+						visit[i][k] = true;
+					}
+					bar = arr[i][j+m-1];
+				}
+				else {
+					result -= 1;
+				//	printf("now2 - arr[i][j]:%d i:%d j:%d result:%d\n", arr[i][j], i, j, result);
+
+					break;
+				}	
+			}
+			else {
+				result -= 1;
+			//	printf("now5 - arr[i][j]:%d i:%d j:%d result:%d\n", arr[i][j], i, j, result);
+
+				break;
+			}
+		}
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			visit[i][j] = false;
+		}
+	}
+
+	for (int j = 0; j < n; j++) {
+		int bar = arr[0][j];
+		for (int i = 0; i < n; i++) {
+			if (bar == arr[i][j]) { continue; }
+			else if (arr[i][j] > bar && arr[i][j] - 1 == bar) {	//높은곳 만났을 때
+				if (check(3,i,j)){
+					for (int k = i - 1; k >= i - m; k--) {
+						visit[k][j] = true;
+					}
+					bar = arr[i][j];
+				}
+				else {
+
+					result -= 1;
+			//		printf("now3 - arr[i][j]:%d i:%d j:%d result:%d\n", arr[i][j], i, j, result);
+
+					break;
+
+				}
+			}
+			else if (arr[i][j] < bar && arr[i][j] + 1 == bar) {	//낮은 곳 만났을때
+				if (check(4,i,j)) {
+					for (int k = i; k < i + m; k++) {
+						visit[k][j] = true;
+					}
+					bar = arr[i + m-1][j];
+				}
+				else {
+					result -= 1;
+				//	printf("now4 - arr[i][j]:%d i:%d j:%d result:%d\n", arr[i][j], i, j, result);
+
+					break;
+				}
+			}
+			else {	
+				result -= 1; 
+			//	printf("now5 - arr[i][j]:%d i:%d j:%d result:%d\n", arr[i][j], i, j, result);
+
+				break;
+			}
+		}
+	}
+
+	printf("%d", result);
+
+	return 0;
+}

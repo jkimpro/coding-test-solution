@@ -1,0 +1,119 @@
+#include <stdio.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct loc {
+	int r, c;
+	int origin;
+	int count;
+}Loc;
+
+int rMove[4] = {-1,0,1,0};
+int cMove[4] = {0,1,0,-1};
+
+int n;
+int result;
+int arr[101][101];
+bool visit[101][101];
+bool visit2[101][101];
+
+
+bool canGo2(int r, int c, int count, int orig) {
+	if (r < 0 || r >= n || c < 0 || c >= n) { return false; }
+	else if (count >= result) { return false; }		//현재 result 보다 큼
+	else if (arr[r][c] == orig) { return false; }		//같은곳
+	else if (visit2[r][c] == true) { return false; }	//이미방문한곳 pass
+	else return true;
+}
+bool canGo(int r, int c) {
+	if (r < 0 || r >= n || c < 0 || c >= n) { return false; }
+	else if (visit[r][c] == true) { return false; }
+	else if (arr[r][c] == 0) { return false; }
+	else { return true; }
+}
+int main() {
+	int count = 1;
+	result = 99999;
+	scanf("%d", &n);
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			scanf("%d", &arr[i][j]);
+			visit[i][j] = false;
+			visit2[i][j] = false;
+		}
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			if (arr[i][j] == 1 && visit[i][j] == false) {
+				queue <Loc> loc;
+				loc.push({i,j});
+				visit[i][j] = true;
+				while (!loc.empty()) {
+					Loc temp = loc.front();
+					loc.pop();
+					arr[temp.r][temp.c] = count;
+					for (int k = 0; k < 4; k++) {
+						if (canGo(temp.r + rMove[k], temp.c + cMove[k])) {
+							loc.push({ temp.r + rMove[k], temp.c + cMove[k] });
+							visit[temp.r + rMove[k]][temp.c + cMove[k]] = true;
+						}
+					}
+				}
+
+				count++;
+			}
+		}
+	}
+	/*
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			printf("%d ", arr[i][j]);
+		}
+		printf("\n");
+	}
+	*/
+	//printf("\n\n");
+
+	//섬 별 숫자 바꾸기
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			//printf("arr[i][j]: %d\n", arr[i][j]);
+			if (arr[i][j] == 0) { continue; }
+			if (arr[i][j] != 0 && visit2[i][j] == false) {
+				queue <Loc> loc;
+				loc.push({ i,j,arr[i][j],-1});
+				visit2[i][j] = true;
+
+				while (!loc.empty()) {
+				//	printf("result: %d\n", result);
+					Loc temp = loc.front();
+					loc.pop();
+
+					if (arr[temp.r][temp.c] != temp.origin && arr[temp.r][temp.c] != 0) {
+						result = min(result, temp.count);
+						break;
+					}
+
+					for (int k = 0; k < 4; k++) {
+						if (canGo2(temp.r + rMove[k], temp.c + cMove[k], temp.count, temp.origin)) {
+							loc.push({ temp.r + rMove[k], temp.c + cMove[k], temp.origin, temp.count+1 });
+							visit2[temp.r + rMove[k]][temp.c + cMove[k]] = true;
+						}
+					}
+				}
+
+				for (int i = 0; i < n; i++) {
+					for (int j = 0; j < n; j++) {
+						visit2[i][j] = false;
+					}
+				}
+
+			}
+		}
+	}
+	printf("%d", result);
+	return 0;
+}

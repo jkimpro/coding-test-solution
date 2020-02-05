@@ -1,0 +1,79 @@
+/////보물상자 비밀번호 내 답안//////
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <algorithm>
+#include <vector>
+#include <string.h>
+#include <functional>
+using namespace std;
+
+int n;
+int k;
+
+char *temp;
+vector <unsigned long long> password;
+
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+		scanf("%d %d", &n, &k);
+		char * arr = (char*)malloc(sizeof(char)*(n+1));
+		char * tmpArr = (char*)malloc(sizeof(char)*(n+1));
+
+		scanf("%s", arr);
+
+		int range = n / 4;
+
+		for (int i = 0; i <range+1; i++)
+		{
+			for (int j = 0; j < n; j+= range)
+			{
+				unsigned long long num = 0;
+				int count = 0;
+				int flag = 0;
+				for (int k = j+ (range)-1; k >=j ; k--)
+				{
+					if (arr[k] >= '0'&& arr[k] <= '9')
+					{
+						num += (unsigned long long)(arr[k] -'0') * (unsigned long long)pow(16.0, count);
+					}
+					else
+					{
+						num += (unsigned long long)((arr[k] - 'A')+10) * (unsigned long long)pow(16.0, count);
+					}
+					count++;
+				} //수 추출
+
+				for (int check = 0; check < password.size(); check++)//복수 확인
+				{
+					unsigned long long compareNum = password.at(check);
+					if (compareNum == num) { flag = 1; break; }
+				}
+				if (flag == 0)		//push
+				{
+					password.push_back(num);
+				}
+			}
+			char temp = arr[n - 1];
+			strcpy(tmpArr, arr);
+			arr[0] = temp;
+			strcpy(arr + 1, tmpArr);
+			arr[n] = NULL;
+		}
+		//sorting
+		sort(password.begin(), password.end(), greater<unsigned long long>());
+
+		//10번째 추출
+		printf("#%d %llu\n", testcase, password.at(k-1));
+		free(arr);
+		free(tmpArr);
+		password.clear();
+
+	}
+	return 0;
+}

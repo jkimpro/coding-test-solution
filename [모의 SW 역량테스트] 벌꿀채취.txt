@@ -1,0 +1,472 @@
+//나의답안
+////==================================================벌꿀 채취 (구조 뜯어고쳐야함)
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+#include <math.h>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct honey {
+	int container;
+	int price;
+	bool myTurn;
+}Honey;
+int n;   //벌통들의 크기
+int m;   //벌통들의 개수
+int c;   //두 일꾼이 채취할수 있는 최대양
+int result = 0;
+int arr[50][50];
+
+Honey honeyA[5];
+Honey subhoneyB[5];
+Honey honeyB[5];
+
+int cal(Honey honey[5])
+{
+	int maxPrice = 0;
+	for (int i = 0; i < m; i++)
+	{
+		if (honey[i].myTurn == true)
+		{
+			maxPrice += honey[i].price;
+		}
+	}
+	//printf("MAXPRICE: %d\n", maxPrice);
+	return maxPrice;
+
+}
+void solve(int n, int m, int c)
+{
+	for (int i = 0; i < n - 1; i++) {
+		for (int j = 0; j < n - m + 1; j++) {
+
+			int maxA = 0;
+
+			for (int tempA = 0; tempA < m; tempA++)
+			{
+				honeyA[tempA].container = arr[i][j + tempA];
+				honeyA[tempA].price = arr[i][j + tempA] * arr[i][j + tempA];
+				honeyA[tempA].myTurn = false;
+			}
+			//honeyA를 탐색하여 이윤이 극대화될수 있는곳
+			for (int a = 0; a < pow(2.0, m); a++)
+			{
+				int sum = 0;
+				for (int b = 0; b < m; b++)
+				{
+					if (!(a&(1 << b))) honeyA[b].myTurn = false;
+					else {
+						honeyA[b].myTurn = true;
+						sum += honeyA[b].container;
+					//	printf("(%d %d) container: %d ", i, j, honeyA[b].container);
+					}
+				}
+				if (sum <= c)
+				{
+					int temp = cal(honeyA);
+					if (temp > maxA) {
+						maxA = temp;
+					}
+				}
+			}
+
+			//같은 라인에 최대 수익이 있는지 확인하기 //없을 경우 다음 경우로 넘어감//////////////////////////////////////////////
+			if ((j + 2 * m) < n)
+			{
+				for (int k = j + m; k < j + 2 * m; k++)
+				{
+					int subMaxB = 0;
+					for (int tempB = 0; tempB < m; tempB++)
+					{
+						subhoneyB[tempB].container = arr[i][k + tempB];
+						subhoneyB[tempB].price = arr[i][k + tempB] * arr[i][k + tempB];
+						subhoneyB[tempB].myTurn = false;
+					}
+					//sub의 honeyB를 탐색하여 이윤이 극대화될수 있는곳
+					for (int a = 0; a < pow(2.0, m); a++)
+					{
+						int sum = 0;
+						for (int b = 0; b < m; b++)
+						{
+							int temp;
+							if (!(a&(1 << b))) subhoneyB[b].myTurn = false;
+							else {
+								subhoneyB[b].myTurn = true;
+								sum += subhoneyB[b].container;
+							}
+						}
+						if (sum <= c)
+						{
+							int temp = cal(subhoneyB);
+							if (temp > subMaxB) subMaxB = temp;
+						}
+					}
+					if ((maxA + subMaxB) > result) {
+						result = maxA + subMaxB;
+					}
+				}
+
+			}
+
+			for (int k = i + 1; k < n; k++)      //행
+			{
+				for (int o = 0; o < n - m + 1; o++)   //열
+				{
+					int maxB = 0;
+					int sumB = 0;
+					int powSumB = 0;
+					for (int tempB = 0; tempB < m; tempB++)
+					{
+						honeyB[tempB].container = arr[k][o + tempB];
+						honeyB[tempB].price = arr[k][o + tempB] * arr[k][o + tempB];
+						honeyB[tempB].myTurn = false;
+					}
+					//honeyB를 탐색하여 이윤이 극대화될수 있는곳
+					for (int a = 0; a < pow(2.0, m); a++)
+					{
+						int sum = 0;
+						for (int b = 0; b < m; b++)
+						{
+							int temp;
+							if (!(a&(1 << b))) honeyB[b].myTurn = false;
+							else {
+								honeyB[b].myTurn = true;
+								sum += honeyB[b].container;
+							}
+						}
+						if (sum <= c)
+						{
+							int temp = cal(honeyB);
+							if (temp > maxB) maxB = temp;
+						}
+					}
+
+					if ((maxA + maxB) > result) {
+						result = maxA + maxB;
+					}
+				}
+			}
+		}
+	}
+}
+int main() {
+	int num;
+	scanf("%d", &num);
+
+	for (int testcase = 1; testcase <= num; testcase++)
+	{
+		result = 0;
+		scanf("%d %d %d", &n, &m, &c);
+
+		for (int i = 0; i < n; i++) {
+
+			for (int j = 0; j < n; j++)
+			{
+				scanf("%d", &arr[i][j]);
+			}
+		}
+
+		solve(n, m, c);
+
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}
+
+
+/////////실패 답안
+////==================================================벌꿀 채취 (구조 뜯어고쳐야함)
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+#include <math.h>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct honey{
+	int container;
+	int price;
+	bool myTurn;
+}Honey;
+int n;   //벌통들의 크기
+int m;   //벌통들의 개수
+int c;   //두 일꾼이 채취할수 있는 최대양
+int result = 0;
+int arr[50][50];
+
+Honey honeyA[5];
+Honey subhoneyB[5];
+Honey honeyB[5];
+
+int cal(Honey honey[5])
+{
+	int maxPrice = 0;
+	for (int i = 0; i < m; i++)
+	{
+		if (honey[i].myTurn == true)
+		{
+			maxPrice += honey[i].price;
+			printf("i: %d\n", honey[i].price);
+		}
+	}
+	printf("%d\n", maxPrice);
+	return maxPrice;
+
+}
+void solve(int n, int m, int c)
+{
+	for (int i = 0; i < n - 1; i++) {
+		for (int j = 0; j < n - m + 1; j++) {
+
+			int maxA = 0;
+
+			for (int tempA = 0; tempA < m; tempA++)
+			{
+				honeyA[tempA].container = arr[i][j + tempA];
+				honeyA[tempA].price = arr[i][j + tempA] * arr[i][j + tempA];
+				honeyA[tempA].myTurn = false;
+			}
+			//honeyA를 탐색하여 이윤이 극대화될수 있는곳
+			for (int a = 0; a < pow(2.0, m); a++)
+			{
+				int sum = 0;
+				for (int b = 0; b < m; b++)
+				{
+					int temp;
+					if (!(a&(1 << b))) honeyA[b].myTurn = false;
+					else {
+						honeyA[b].myTurn = true;
+						sum += honeyA[b].container;
+					}
+					if (sum <= c)
+					{
+						temp = cal(honeyA);
+						if (temp > maxA) {
+							maxA = temp;
+						}
+					}
+				}
+			}
+
+			//같은 라인에 최대 수익이 있는지 확인하기 //없을 경우 다음 경우로 넘어감//////////////////////////////////////////////
+			if ((j + 2 * m) < n)
+			{
+				for (int k = j + m; k < j + 2 * m; k++)
+				{
+					int subMaxB = 0;
+					for (int tempB = 0; tempB < m; tempB++)
+					{
+						subhoneyB[tempB].container = arr[i][k + tempB];
+						subhoneyB[tempB].price = arr[i][k + tempB] * arr[i][k + tempB];
+						subhoneyB[tempB].myTurn = false;
+					}
+					//sub의 honeyB를 탐색하여 이윤이 극대화될수 있는곳
+					for (int a = 0; a < pow(2.0, m); a++)
+					{
+						int sum = 0;
+						for (int b = 0; b < m; b++)
+						{
+							int temp;
+							if (!(a&(1 << b))) subhoneyB[b].myTurn = false;
+							else {
+								subhoneyB[b].myTurn = true;
+								sum += subhoneyB[b].container;
+							}
+							if (sum <= c)
+							{
+								temp = cal(subhoneyB);
+								if (temp > subMaxB) subMaxB = temp;
+							}
+						}
+					}
+					if ((maxA + subMaxB) > result) {
+						result = maxA + subMaxB;
+					}
+				}
+
+			}
+
+			for (int k = i + 1; k < n; k++)      //행
+			{
+				for (int o = 0; o < n - m + 1; o++)   //열
+				{
+					int maxB = 0;
+					int sumB = 0;
+					int powSumB = 0;
+					for (int tempB = 0; tempB < m; tempB++)
+					{
+						honeyB[tempB].container = arr[k][o + tempB];
+						honeyB[tempB].price = arr[k][o + tempB] * arr[k][o + tempB];
+						honeyB[tempB].myTurn = false;
+					}
+					//honeyB를 탐색하여 이윤이 극대화될수 있는곳
+					for (int a = 0; a < pow(2.0, m); a++)
+					{
+						int sum = 0;
+						for (int b = 0; b < m; b++)
+						{
+							int temp;
+							if (!(a&(1 << b))) honeyB[b].myTurn = false;
+							else {
+								honeyB[b].myTurn = true;
+								sum += honeyB[b].container;
+							}
+							if (sum <= c)
+							{
+								temp = cal(honeyB);
+								if (temp > maxB) maxB = temp;
+							}
+						}
+					}
+
+					if ((maxA + maxB) > result) {
+						result = maxA + maxB;
+					}
+				}
+			}
+		}
+	}
+}
+int main() {
+	int num;
+	scanf("%d", &num);
+
+	for (int testcase = 1; testcase <= num; testcase++)
+	{
+		result = 0;
+		scanf("%d %d %d", &n, &m, &c);
+
+		for (int i = 0; i < n; i++){
+		
+			for (int j = 0; j < n; j++)
+			{
+				scanf("%d", &arr[i][j]);
+			}
+		}
+
+		solve(n, m, c);
+
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}
+
+
+
+
+////다른 답안
+#include <stdio.h>
+#include <cstring>
+#include <vector>
+using namespace std;
+ 
+int N = 0, M = 0, C = 0;
+int result = 0, total = 0;
+int honey[11][11] = { 0 };
+int honey_visited[11][11] = { 0 };
+int check_visited[5] = { 0 };
+vector <pair<int, int>> v;
+vector <int> check; // 행 번호 입력되있음
+ 
+void Compare(int index, int temp){
+    if (check_visited[index] == 1) return;
+    check_visited[index] = 1;
+ 
+    if (temp <= C){
+        //printf("%d\n", temp);
+        total = total + (honey[v[index].first][v[index].second] * honey[v[index].first][v[index].second]);
+        if (result < total){
+            result = total;
+             
+            check.clear();
+            check.push_back(v[index].first);
+            //printf("%d %d\n", check.front().first, check.front().second);
+        }
+         
+        for (int i = index + 1; i < v.size(); i++){
+            if (temp + honey[v[i].first][v[i].second] > C) continue;
+            else{
+                Compare(i, temp + honey[v[i].first][v[i].second]);
+                 
+                // 초기화
+                check_visited[i] = 0;
+                total = total - (honey[v[i].first][v[i].second] * honey[v[i].first][v[i].second]);
+            }
+        }
+    }
+}
+ 
+void Go(int x, int y, int cnt){
+    if (cnt == M){
+        for (int i = 0; i < v.size(); i++){
+            if (honey_visited[v[i].first][v[i].second] == 1) continue;
+            int value = honey[v[i].first][v[i].second];
+            Compare(i, value);
+            //printf("%d\n",check.size());
+             
+            // 초기화
+            for (int i = 0; i < 5; i++){
+                check_visited[i] = 0;
+            }
+            total = 0;
+        }
+    }
+    else{
+        v.push_back(make_pair(x, y));
+        Go(x, y + 1, cnt+1);
+    }
+}
+ 
+int main(void){
+    int testcase = 0, hap = 0;
+    scanf("%d", &testcase);
+ 
+    for (int tc = 0; tc < testcase; tc++){
+        scanf("%d %d %d", &N, &M, &C);
+ 
+        for (int i = 0; i < N; i++){
+            for (int j = 0; j < N; j++){
+                scanf("%d", &honey[i][j]);
+            }
+        }
+ 
+        for (int number = 0; number < 2; number++){
+            for (int i = 0; i < N; i++){
+                for (int j = 0; j < N; j++){
+                    if (j + 1 >= N) continue;
+                    Go(i, j, 0);
+                    v.clear();
+                }
+            }
+ 
+            for (int i = 0; i < N; i++){
+                honey_visited[check.front()][i] = 1;
+            }
+            /*for (int i = 0; i < N; i++){
+                for (int j = 0; j < N; j++){
+                    printf("%d ", honey_visited[i][j]);
+                }
+                printf("\n");
+            }
+            printf("%d\n", result);*/
+             
+            hap += result;
+ 
+            result = 0;
+        }
+ 
+        printf("#%d %d\n", tc + 1, hap);
+ 
+        // 초기화
+        result = 0, hap = 0;
+        memset(honey, 0, sizeof(honey));
+        memset(honey_visited, 0, sizeof(honey_visited));
+        check.clear();
+        v.clear();
+    }
+ 
+    return 0;
+}

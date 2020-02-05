@@ -1,0 +1,62 @@
+//미생물 배양
+#include <stdio.h>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+	int test;
+
+	scanf("%d", &test);
+
+	for (int testcase = 1; testcase <= test; testcase++) {
+	
+		// dynammic programming
+		long long s, t, a, b;
+
+		scanf("%lld %lld %lld %lld", &s, &t, &a, &b);
+
+		long long mulcnt = 0;
+		long long mulnum = 1;
+		long long result = 987654321987654321;
+
+		if (b == 1)
+		{
+			if ((t - s) % a == 0)
+			{
+				printf("#%d %lld\n", testcase, (t - s) /a);
+			}
+			else
+			{
+				printf("#%d -1\n", testcase);
+			}
+			continue;
+		}
+		while (s*mulnum <= t) {
+
+			long long gap = t - (s*mulnum);
+			if (gap%a == 0) {
+				long long totalAddCnt = gap / a;
+				long long tmpMulNum = mulnum;
+				long long cmpAddCnt = 0;
+				while (tmpMulNum > 0) {
+					cmpAddCnt += totalAddCnt / tmpMulNum;
+					totalAddCnt %= tmpMulNum;
+					tmpMulNum /= b;
+				}
+				result = min(result, mulcnt + cmpAddCnt);
+			}
+			mulnum *= b;
+			mulcnt++;
+		}
+		if (result == 987654321987654321) {
+			printf("#%d -1\n", testcase);
+		}
+		else {
+			printf("#%d %lld\n", testcase, result);
+		}
+	}
+
+
+	return 0;
+}

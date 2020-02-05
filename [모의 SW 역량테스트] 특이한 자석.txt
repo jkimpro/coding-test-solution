@@ -1,0 +1,128 @@
+//특이한자석 내답안
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct guide {
+	int dir;
+	int moveind;
+}Guide;
+int result;
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+		int arr[4][8];
+
+		int k;
+		int size;
+		result = 0;
+		queue <Guide> guide;
+		scanf("%d", &k);
+
+		//N극 0, S극 1
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				scanf("%d", &arr[i][j]);
+			}
+		}
+
+		for (int i = 0; i < k; i++)
+		{
+			Guide temp;
+			scanf("%d %d", &temp.moveind, &temp.dir);
+			guide.push(temp);
+		}
+
+		while(!guide.empty())
+		{
+
+			//회전 방향 1 = 시계방향
+			//회전 방향 -1 = 반시계 방향
+			int rotate[4] = { 0,0,0,0 }; //시계1 , 반시계 -1, 0 멈춤
+
+			Guide use = guide.front(); 
+			guide.pop();
+			rotate[use.moveind - 1] = use.dir;
+
+			//각 배열별 2번 => 오른쪽 맞닿음  // 6번 왼쪽 맞닿음
+			for (int watch = (use.moveind-1); watch < 3; watch++)		//오른쪽 탐색
+			{
+				if (watch == 3) { break; }	//멈춤 상태라면나도멈춤
+				else if (rotate[watch] == 0) { break; }
+				else
+				{
+					if (rotate[watch] == 1)		//시계방향
+					{
+						if (arr[watch][2] != arr[watch + 1][6]) { rotate[watch + 1] = -1; }
+						else { rotate[watch + 1] = 0; }
+					}
+					else if (rotate[watch] == -1)	//반시계방향
+					{
+						if (arr[watch][2] != arr[watch + 1][6]) { rotate[watch + 1] = 1; }
+						else { rotate[watch + 1] = 0; }
+					}
+				}
+			}
+
+			for (int watch = (use.moveind - 1); watch > 0; watch--)	//왼쪽 탐색
+			{
+				if (watch == 0) { break; }
+				else if (rotate[watch] == 0) { break; }
+				else
+				{
+					if (rotate[watch] == 1)		//시계방향
+					{
+						if (arr[watch][6] != arr[watch - 1][2]) { rotate[watch - 1] = -1; }
+						else { rotate[watch - 1] = 0; }
+					}
+					else if (rotate[watch] == -1)	//반시계방향
+					{
+						if (arr[watch][6] != arr[watch - 1][2]) { rotate[watch - 1] = 1; }
+						else { rotate[watch - 1] = 0; }
+					}
+				}
+			}
+
+			for (int i = 0; i < 4; i++)
+			{
+				if (rotate[i] == 0) { continue; }
+				else if (rotate[i] == 1) //시계방향
+				{
+					int temp = arr[i][7];
+					for (int j = 6; j >= 0; j--) {
+						arr[i][j+1] = arr[i][j];
+					}
+					arr[i][0] = temp;
+				}
+				else					//반시계방향
+				{
+					int temp = arr[i][0];
+					for (int j = 1; j <= 7; j++) {
+						arr[i][j-1] = arr[i][j];
+					}
+					arr[i][7] = temp;
+				}
+			}
+		}
+		for (int i = 0; i < 4; i++)
+		{
+			if (arr[i][0] == 0) { continue; }
+			else
+			{
+				result += (int)pow(2.0, i);
+				//printf("reuslt: %d\n", result);
+			}
+		}
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}

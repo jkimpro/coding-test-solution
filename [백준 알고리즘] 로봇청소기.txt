@@ -1,0 +1,95 @@
+//로봇청소기 문제
+ 
+#include <stdio.h>
+#include <stdlib.h>
+
+using namespace std;
+
+typedef struct robot{
+	int row;
+	int col;
+	int dir;
+	
+}Robot;
+
+typedef struct map{
+	int num;
+	bool clean;
+}Map;
+
+
+int rd[4] = {-1,0,1,0};
+int cd[4] = {0,1,0,-1};
+
+Map map[100][100];
+
+int n,m;
+
+int count;
+Robot robot;
+
+int main(){
+	
+	scanf("%d %d", &n, &m);
+	scanf("%d %d %d", &robot.row, &robot.col, &robot.dir);
+	count =0;
+	
+	for(int i =0; i<n; i++){
+		for(int j =0; j<m; j++){
+			scanf("%d", &map[i][j].num);
+			map[i][j].clean = false;
+		}
+	}
+	map[robot.row][robot.col].clean = true;
+	count++;
+	
+	while(1){
+		
+		int flag =0;
+		int tempDir;
+		//청소 
+		map[robot.row][robot.col].clean = true;
+			
+		tempDir = robot.dir;
+		
+		for(int i =0; i<4; i++){
+			
+			tempDir -=1;
+			if(tempDir ==-1){tempDir+=4;}
+			
+			int tempR = robot.row +rd[tempDir];
+			int tempC = robot.col +cd[tempDir];
+			
+			if(map[tempR][tempC].clean == true || map[tempR][tempC].num ==1){
+				continue;
+			}
+			else if(map[tempR][tempC].clean == false&&map[tempR][tempC].num ==0){
+				robot.dir = tempDir;
+				robot.row = tempR;
+				robot.col = tempC;
+				count++;
+				flag =1;
+				break;
+			}			
+		}
+		
+		if(flag ==0){
+			tempDir = (robot.dir+2)%4;
+			//벽인 경우 break;
+			int tempR = robot.row +rd[tempDir];
+			int tempC = robot.col +cd[tempDir];
+			
+			if(map[tempR][tempC].num ==1){
+				break;
+			}
+			else{
+				robot.row = tempR;
+				robot.col = tempC;
+			}
+			//벽이 아닌 경우 후 
+		}
+	}
+	printf("%d", count);
+
+	return 0;
+}

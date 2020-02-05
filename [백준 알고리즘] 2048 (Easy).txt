@@ -1,0 +1,109 @@
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+int n;
+int arr[21][21];
+int result = 0;
+
+void dfs(int ind, int arr[21][21]) {	
+	int temp[4][21][21];
+	
+	
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			result = max(result, arr[i][j]);
+			//printf("result: %d\n", result);
+			for (int k = 0; k < 4; k++) {
+				temp[k][i][j] = arr[i][j];
+			}
+		}
+	}
+	if (ind == 5) { return; }
+
+	vector <int> store[4];
+
+	//윗방향 //밑에서 위로
+	for (int i = 0; i < n; i++) {
+		for (int j = n - 1; j >= 0; j--) {
+			if (temp[0][i][j] != 0) { store[0].push_back(temp[0][i][j]); temp[0][i][j] = 0; }
+			if (temp[1][j][i] != 0) { store[1].push_back(temp[1][j][i]); temp[1][j][i] = 0;}
+		}
+		//각각 처리 후
+		for (int num = 0; num < 2; num++) {
+			if (store[num].size() > 1) {
+				for (int j = 0; j < store[num].size(); j++) {
+					
+					if (j + 1 < store[num].size()) {
+						if (store[num][j] == store[num][j + 1]) { //여기서 범위를 벗어나게 됨.
+							store[num][j] += store[num][j + 1];
+							store[num].erase(store[num].begin() + (j + 1));
+						}
+					}
+				}
+			}
+		}
+
+		//다시 배치
+		int count = 0;
+		for (int j = n - 1; j >= 0; j--) {
+			if (count < store[0].size()) { temp[0][i][j] = store[0][count]; }
+			if (count < store[1].size()) { temp[1][j][i] = store[1][count]; }
+			count++;
+		}
+		store[0].clear();
+		store[1].clear();
+
+	}
+	dfs(ind + 1, temp[0]);//dfs 호출
+	dfs(ind + 1, temp[1]);//dfs 호출
+
+
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			if (temp[2][i][j] != 0) { store[2].push_back(temp[2][i][j]); temp[2][i][j] = 0; }
+			if (temp[3][j][i] != 0) { store[3].push_back(temp[3][j][i]); temp[3][j][i] = 0; }
+		}
+		for (int num = 2; num < 4; num++) {
+			
+			if (store[num].size() > 1) {
+				for (int j = 0; j < store[num].size(); j++) {
+					if (j + 1 < store[num].size()) {
+						if (store[num][j] == store[num][j + 1]) { //여기서 범위를 벗어나게 됨.
+							store[num][j] += store[num][j + 1];
+							store[num].erase(store[num].begin() + (j + 1));
+						}
+					}
+				}
+			}
+		}
+		int count = 0;
+		for (int j =0; j<n; j++) {
+			if (count < store[2].size()) { temp[2][i][j] = store[2][count]; }
+			if (count < store[3].size()) { temp[3][j][i] = store[3][count]; }
+			count++;
+		}
+		store[2].clear();
+		store[3].clear();
+	}
+	dfs(ind + 1, temp[2]);//dfs 호출
+	dfs(ind + 1, temp[3]);//dfs 호출
+
+}
+
+int main()
+{
+	scanf("%d", &n);
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			scanf("%d", &arr[i][j]);
+		}
+	}
+	dfs(0,arr);
+	printf("%d", result);
+	return 0;
+}

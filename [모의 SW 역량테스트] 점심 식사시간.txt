@@ -1,0 +1,293 @@
+/////정석 답안
+////==================================================점심시간
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct stair {
+	int w, h, t, use;
+}Stair;
+
+typedef struct person{
+	int w, h;
+	int s1, s2;
+	int go, state, left;
+}Person;
+
+
+int pNum, stairNum;
+Person person[20];
+Stair stair[2];
+
+int minimum;
+
+int solution(int time) {
+
+	if (time > minimum) return minimum;
+
+	for (int i = 0; i < pNum; i++) {
+		person[i].left--;
+	}
+	for (int i = 0; i < pNum; i++) {
+		if (person[i].state == 1 && person[i].left == 0) {
+			person[i].state = 2;
+			stair[person[i].go].use--;
+		}
+	}
+
+	for (int i = 0; i < pNum; i++) {
+		if (person[i].state == 0 && person[i].left <= 0) {
+			if (stair[person[i].go].use < 3) {
+				person[i].state = 1;
+				person[i].left = stair[person[i].go].t;
+				stair[person[i].go].use++;
+			}
+		}
+	}
+	int fincnt = 0;
+	for (int i = 0; i < pNum; i++) {
+		if (person[i].state == 2) fincnt++;
+	}
+	if (fincnt == pNum) return time;
+
+	return solution(time + 1);
+}
+int main(){
+	int num;
+	scanf("%d", &num);
+
+	for (int testcase = 1; testcase <= num; testcase++)
+	{
+		int n;
+		stairNum =0, pNum=0;
+		minimum = 0x7FFFFFFF;
+
+		scanf("%d", &n);
+
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				int temp;
+				scanf("%d", &temp);
+				if (temp > 1)
+					stair[stairNum++] = { i,j,temp };
+				if (temp == 1)
+					person[pNum++] = {i,j};
+			}
+		}
+		//미리 계산을 한부분
+		for (int i = 0; i < pNum; i++)
+		{
+			person[i].s1 = abs(person[i].w - stair[0].w) + abs(person[i].h - stair[0].h);
+			person[i].s2 = abs(person[i].w - stair[1].w) + abs(person[i].h - stair[1].h);
+		}
+
+		//두 가지 인자일때
+		for (int i = 0; i < pow(2.0, pNum); i++) {
+			int st, ans;
+			stair[0].use = stair[1].use = 0;
+			for (int j = 0; j < pNum; j++) {
+				
+				person[j].state = 0;
+				
+				if (!(i & (1 << j))) st = 0;
+				else st = 1;
+				
+				person[j].go = st;
+
+				if (st == 0) person[j].left = person[j].s1;
+				if (st == 1) person[j].left = person[j].s2;
+			}
+
+			ans = solution(1);
+			
+			minimum = minimum < ans ? minimum : ans;
+		}
+		printf("#%d %d\n", testcase, minimum+1);
+	}
+	return 0;
+}
+
+
+
+
+
+////// 내 답 (시간초과)
+////==================================================점심시간
+#include <stdio.h>
+#include <stdlib.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct person{
+	int w;
+	int h;
+	int spendTime;
+	bool isStair;
+	int ind;
+	int distanceA;
+	int distanceB;
+	bool isGroupA;
+}Person;
+
+typedef struct stair {
+	int w, h;
+	int time;
+	queue <Person> inside;
+}Stair;
+
+Person person[100];
+Stair stair[2];
+
+int pNum;
+int arr[100][100];
+int result = 9999;
+
+void simulation()
+{
+	int outCount = 0;
+	for (int nowTime = 0; ; nowTime++)
+	{
+		if (nowTime >= result) { break; }
+		
+		for (int i = 0; i < pNum; i++)
+		{
+			//A나오기
+			if (person[i].isGroupA == true && person[i].isStair == true && person[i].spendTime == stair[0].time)
+			{
+				stair[0].inside.pop();
+				outCount++;
+			}//B나오기
+			else if (person[i].isGroupA == false && person[i].isStair == true && person[i].spendTime == stair[1].time)
+			{
+				stair[1].inside.pop();
+				outCount++;
+			}
+		}
+
+		//들어가기
+		for (int i = 0; i < pNum; i++)
+		{
+			if (person[i].isGroupA == true && person[i].distanceA <= person[i].spendTime && person[i].isStair == false)
+			{
+				//입장 가능 여부 확인
+				if (stair[0].inside.size() < 3) {
+					stair[0].inside.push(person[i]);
+					person[i].isStair = true;
+					person[i].spendTime = 0;
+				}
+			}
+			else if (person[i].isGroupA == false && person[i].distanceB <= person[i].spendTime && person[i].isStair == false)
+			{
+				if (stair[1].inside.size() < 3) {
+					
+					stair[1].inside.push(person[i]);
+					person[i].isStair = true;
+					person[i].spendTime = 0;
+				}
+			}
+			person[i].spendTime++;
+		}
+
+		if (outCount == pNum && nowTime <= result) {
+			result = nowTime;
+			break;
+		}
+	}
+}
+
+
+void input(int standard)
+{
+	for (int i = standard+1; i < pNum; i++)
+	{
+		if (i == pNum) break;
+
+		//printf("standard: %d\n", standard+1);
+		for (int i = 0; i < pNum; i++) {
+			person[i].isStair = false;
+			person[i].spendTime = 0;
+		}
+		person[i].isGroupA = true;
+		simulation();
+		input(i);
+		person[i].isGroupA = false;
+	}
+}
+
+int main(){
+	int num;
+	scanf("%d", &num);
+
+	for (int testcase = 1; testcase <= num; testcase++)
+	{
+		int temp;
+		int n;
+		int stairNum = 0;
+
+		scanf("%d", &n);
+
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				scanf("%d", &arr[i][j]);
+				
+				if (arr[i][j] == 1) 
+				{
+					person[pNum].w = i;
+					person[pNum].h = j;
+					person[pNum].isStair = false;
+					person[pNum].spendTime = 0;
+					person[pNum].ind = pNum;
+					person[pNum].isGroupA = false;
+					pNum++;
+				}
+				else if(arr[i][j] > 1)
+				{
+					stair[stairNum].w = i;
+					stair[stairNum].h = j;
+					stair[stairNum].time = arr[i][j];
+					stairNum++;
+				}
+			}
+		}
+
+		for (int i = 0; i < pNum; i++)
+		{
+			person[i].distanceA = abs(person[i].w - stair[0].w) + abs(person[i].h - stair[0].h);
+			person[i].distanceB = abs(person[i].w - stair[1].w) + abs(person[i].h - stair[1].h);
+		}
+
+		simulation();
+
+		for(int i = 0; i < pNum; i++)
+		{
+			for (int j= 0; j < pNum; j++) {
+				person[j].isStair = false;
+				person[j].spendTime = 0;
+			}
+
+			person[i].isGroupA = true;
+			simulation();
+			input(i);
+			person[i].isGroupA = false;
+
+		}
+
+		printf("#%d %d\n", testcase, result-1);
+		result = 9999;
+	}
+	return 0;
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////

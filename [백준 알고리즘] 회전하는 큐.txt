@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+int n,m;
+int num;
+int result;
+vector <int> root;
+
+int main() {
+	queue <int> collection;
+	result = 0;
+	scanf("%d %d", &n, &m);
+
+	for (int i = 1; i <= n; i++) {
+		root.push_back(i);
+	}
+	for (int i = 0; i < m; i++) {
+		int temp;
+		scanf("%d", &temp);
+		collection.push(temp);
+	}
+	while (!collection.empty()) {
+		int size1 = 0, size2 = 0;
+		num = collection.front();
+		collection.pop();
+
+		if (num == root[0]) {
+			root.erase(root.begin());
+			continue;
+		}
+		//정방향 계산
+		for (int i = 0; i < root.size(); i++) {
+			if (root[i] == num) {break;}
+			size1++;
+		}
+		//역방향 계산
+		for (int i = root.size() - 1; i >= 0; i--) {
+			size2++;
+			if (root[i] == num) {break;}
+		}
+
+		for (int i = 0; i < size1; i++) {
+			int temp = root.front();
+			root.push_back(temp);
+			root.erase(root.begin());
+		}
+		//printf("%d\n", root.front());
+		root.erase(root.begin());
+
+		result += min(size1, size2);
+	}
+
+	printf("%d", result);
+	return 0;
+}

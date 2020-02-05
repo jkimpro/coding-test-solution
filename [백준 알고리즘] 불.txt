@@ -1,0 +1,108 @@
+#include <stdio.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct loc {
+	int r, c;
+	int count;
+}Loc;
+
+Loc J;
+Loc start;
+
+int dr[4] = { -1,0,1,0 };
+int dc[4] = { 0,1,0,-1 };
+
+char arr[1001][1001];
+bool visit[1002][1002];
+int n, m;
+
+queue <Loc> fire;
+queue <Loc> root;
+
+bool fireGo(int r, int c) {
+	if (r<0 || r >= n || c < 0 || c >= m) { return false; }
+	else if (arr[r][c] == '#') { return false; }
+	else if (arr[r][c] == 'F') { return false; }
+	else if (arr[r][c] == '.' || arr[r][c] == 'J') {
+		return true;
+	}
+}
+bool canGo(int r, int c) {
+	if (r<0 || r>=n || c < 0 || c >= m) { return false; }
+	else if (arr[r][c] == 'F') { return false; }
+	else if (arr[r][c] == '#') { return false; }
+	else if (visit[r][c] == true) { return false; }
+	else if(arr[r][c] == '.') {
+		return true;
+	}
+}
+int main()
+{
+	int result = 0;
+	bool escape = false;
+
+	scanf("%d %d", &n, &m);
+
+	for (int i = 0; i < n; i++) {
+		scanf("%s", arr[i]);
+		for(int j = 0; j < m; j++) {
+			if (arr[i][j] == 'F') {
+				fire.push({ i, j, 0 });
+			}
+			if (arr[i][j] == 'J') {
+				J.r = i; J.c = j;
+			}
+		}
+	}	
+	root.push({J.r, J.c, 0});
+
+
+	for (int time = 0; ; time++) {
+
+		while (!fire.empty() && fire.front().count==time) {	//time ÀÌ¶û ¾È¸ÂÀ» ¶§ ÀÚµ¿Å»Ãâ
+			Loc temp = fire.front();
+			fire.pop();
+
+			for (int dir = 0; dir < 4; dir++) {
+				if (fireGo(temp.r + dr[dir], temp.c + dc[dir])) {
+					arr[temp.r + dr[dir]][temp.c + dc[dir]] = 'F';
+					fire.push({ temp.r + dr[dir], temp.c + dc[dir], temp.count+1});
+				}
+			}
+		}
+
+		while (!root.empty() && root.front().count == time) {
+			Loc temp = root.front();
+			root.pop();
+
+			if (temp.r == n-1 || temp.c == m-1 || temp.r == 0 || temp.c == 0) {
+				result = temp.count;
+				escape = true;
+				break;
+			}
+			else {
+				for (int dir = 0; dir < 4; dir++) {
+					if (canGo(temp.r + dr[dir], temp.c + dc[dir])) {
+						visit[temp.r + dr[dir]][temp.c + dc[dir]] = true;
+						root.push({ temp.r + dr[dir], temp.c + dc[dir], temp.count+1});
+					}
+				}
+			}
+		}
+		if (escape == true) {
+			break;
+		}
+		if (root.empty() && fire.empty()) {
+			break;
+		}
+	}
+
+
+	if (escape == false) { printf("IMPOSSIBLE"); }
+	else {
+		printf("%d", result+1);
+	}
+	return 0;
+}

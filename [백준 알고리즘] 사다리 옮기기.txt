@@ -1,0 +1,118 @@
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct loc{
+	int r, c;
+}Loc;
+
+int arr[100][100];
+
+int n, m, h;
+int result;
+
+bool canDraw(int r, int c) {
+	if (r > h || r <= 0 || c >=n || c <= 0) {
+		return false;
+	}
+	if (c - 1 > 0) {
+		if (arr[r][c - 1] == 1) {
+			return false;
+		}
+	}
+	if (arr[r][c] == 1) {
+		return false;
+	}
+	if (c + 1 < n) {
+		if (arr[r][c + 1] == 1) {
+			return false;
+		}
+	}
+	//printf("true\n");
+
+	return true;
+	
+}
+void dfs(int start, int count) {
+
+	if (result < count || count >3) { return; }
+
+	//printf("count:%d\n", count);
+	//printf("start:%d start2:%d count:%d\n", start, start2, count);
+	/*for (int i = 1; i <= h; i++) { //행
+		for (int j = 1; j <= n; j++) {	//열
+			printf("%d	", arr[i][j]);
+		}
+		printf("\n");
+	}
+	*/
+
+	if (count <= 3) {	//simulation
+		int flag = 0;
+		for (int i = 1; i <= n; i++) {			//행관련
+			int state = i;
+		//	printf("state:%d\n", i);
+			for (int j = 1; j <= h; j++) {		//동시에 두줄이 있을리는 만무하기 때문
+				if (arr[j][state] == 1) {	//오른쪽 이동
+			//		printf("오른쪽 이동\n");
+					state += 1;
+				}
+				else if (state > 1) {
+					if (arr[j][state - 1] == 1) {	//왼쪽이동
+			//			printf("왼쪽 이동\n");
+						state -= 1;
+					}
+				}
+			}
+			if (state != i) { flag = 1; break; }
+		}
+
+		if (flag == 0) {
+			//printf("flag success count: %d\n", count);
+			result = count;
+		}
+	}
+	if (result < count || count >3) { return; }
+
+	for (int i = start; i <=h; i++) {
+		for (int j = 0; j <n; j++) {
+			if (canDraw(i,j)) {
+				arr[i][j] = 1;
+			//	printf("i:%d j:%d \n", i, j);
+				dfs(i,count + 1);
+				arr[i][j] = 0;
+			}
+		}
+	}
+	
+}
+int main() {
+	result = 4;
+
+	scanf("%d %d %d", &n, &m, &h);
+
+	for (int i = 1; i <= h; i++) { //행
+		for (int j = 1; j <= n; j++) {	//열
+			arr[i][j] = 0;
+		}
+	}
+
+	for (int i = 0; i < m; i++){
+		int a, b;
+		scanf("%d %d", &a, &b); //a 행 b열
+		arr[a][b] = 1;
+	}
+
+	dfs(1,0);
+
+	if (result == 4) {
+		printf("%d", -1);
+	}
+	else {
+		printf("%d", result);
+	}
+	
+	return 0;
+}

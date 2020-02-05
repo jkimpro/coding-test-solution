@@ -1,0 +1,44 @@
+//안정적인 문자열
+#include <iostream>
+#include <cstdio>
+#include <stdlib.h>
+
+using namespace std;
+
+int main() {
+	int test = 1;
+	while (1) {
+		int result = 0;
+		char arr[2003];
+		scanf("%s", arr);
+		if (arr[0] == '-'&&arr[1] == '-') { break; }
+		else {
+			int i = 0;
+			int open = 0;
+			int close = 0;
+
+			if (arr[0] == '{') { open++; }
+			else { close++; }
+			while (arr[i] != '\0') {
+				//close 가 open 을 초과하게 되면 바로 바꾸고
+				//result +=1가 됨.
+			
+				if (close > open) { 
+					open += 1;
+					close -= 1;
+					result += 1;
+				}
+				i++;
+
+				if (arr[i] == '{') { open++; }
+				else if(arr[i] == '}'){ close++; }
+				else { break; }
+			}
+			result += abs(open - close)/2;
+		}
+
+		printf("%d. %d\n", test, result);
+		test++;
+	}
+	return 0;
+}

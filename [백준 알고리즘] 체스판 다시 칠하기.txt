@@ -1,0 +1,54 @@
+//체스판 다시 칠하기
+#include <stdio.h>
+#include <algorithm>
+
+using namespace std;
+
+int result;
+int n, m;
+char arr[100][100];
+char ind[2] = { 'W','B' };
+int main() {
+	result = 99999;
+	scanf("%d %d", &n, &m);
+	for (int i = 0; i < n; i++) {
+		scanf("%s", arr[i]);
+	}
+
+	for (int i = 0; i < n-7; i++) {
+		for (int j = 0; j < m-7; j++) {
+			//시작점 기준
+			int start, origin;
+			int count = 0;
+			if (arr[i][j] == 'W') { start = origin = 0; }	//white의 경우
+			else { start = origin = 1; }//black 의경우
+			
+			for (int k = i; k < i + 8; k++) {
+				for (int d = j; d < j + 8; d++) {
+					if (ind[start] != arr[k][d]) {
+						count++;
+					}
+					start = (start + 1) % 2;
+				}
+				start = (start + 1) % 2;
+			}
+			result = min(count, result);
+
+			count = 0;
+			start = (origin + 1) % 2;
+			for (int k = i; k < i + 8; k++) {
+				for (int d = j; d < j + 8; d++) {
+					if (ind[start] != arr[k][d]) {
+						count++;
+					}
+					start = (start + 1) % 2;
+				}
+				start = (start + 1) % 2;
+			}
+			result = min(count, result);
+
+		}
+	}
+	printf("%d", result);
+	return 0;
+}

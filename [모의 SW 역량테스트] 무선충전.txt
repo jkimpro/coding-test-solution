@@ -1,0 +1,356 @@
+///재풀이
+#include <stdio.h>
+#include <stdlib.h>
+#include <algorithm>
+#include <vector>
+#include <queue>
+using namespace std;
+
+typedef struct ap {
+	int r, c;
+	int range;
+	int perfor;
+}AP;
+typedef struct loc{
+	int r, c;
+}Loc;
+
+int dr[5] = {0,-1,0,1,0};
+int dc[5] = { 0,0,1,0,-1 }; //index 별 접근
+
+vector <AP> centers;
+queue <int> dir[2];
+
+Loc nodeA;
+Loc nodeB;
+
+int main() {
+	int test;
+	scanf("%d", &test);
+	
+	for (int testcase = 1; testcase <= test; testcase++) {
+
+		int m, a;
+		int result = 0;
+
+		scanf("%d %d", &m, &a); //총이동번수 m, 최종 a
+
+		for (int i = 0; i < m; i++) {
+			int temp;
+			scanf("%d", &temp);
+			dir[0].push(temp);
+		}
+		for (int i = 0; i < m; i++) {
+			int temp;
+			scanf("%d", &temp);
+			dir[1].push(temp);
+		}
+
+		for (int i = 0; i < a; i++) {
+			AP center;
+			scanf("%d %d %d %d", &center.c, &center.r, &center.range, &center.perfor);
+			centers.push_back(center);
+		} //push 완료 했음
+
+		nodeA.r = 1; nodeA.c = 1;
+		nodeB.r = 10; nodeB.c = 10;
+ 
+		for (int time = 0; time <= m; time++) {
+			
+			int resultA = 0;
+			int resultB = 0;
+			int maxResult =0;
+			int maxnum = 0;
+			int second = 0;
+			vector <int> compare;
+
+			for (int i = 0; i < centers.size(); i++) {
+				bool check1 = false;
+				bool check2 = false;
+
+				int disA = abs(nodeA.r - centers[i].r) + abs(nodeA.c - centers[i].c);
+				int disB = abs(nodeB.r - centers[i].r) + abs(nodeB.c - centers[i].c);
+
+				if (disA <= centers[i].range) {
+					check1 = true;
+				}
+				if (disB <= centers[i].range) {
+					check2 = true;
+				}
+
+				if (check1 == true && check2 == true) {
+					//동시에 같은 곳에있다는 뜻
+					compare.push_back(centers[i].perfor);		//동시에 되는 거 한옵션
+				}
+				else {//동시에 같은 곳이 아닐 경우 -> 최고의 시너지 효과 찾기
+					if (check1 == true && check2 == false) {
+						resultA = max(resultA, centers[i].perfor);		//A만되는거 한옵션
+					}
+					else if (check1 == false && check2 == true) {
+						resultB = max(resultB, centers[i].perfor);		//B만 되는거 한옵션
+					}
+					else {												//이렇게 세가지 됩니다.
+						continue;
+					}
+				}
+			}
+			
+			if (!compare.empty()) {
+				sort(compare.begin(), compare.end());
+				maxnum = compare[compare.size() - 1];
+				if (compare.size() >= 2) {
+					second = compare[compare.size() - 2];
+				}
+			}
+
+
+
+			//(두개가 모두 0일경우) -> compare도 있는지 없는지 여부 확인후 없을 경우 pass, 있을 경우 result에 그대로 더하기
+			//(두개중 한가지 일경우)
+			compare.clear();
+
+			compare.push_back(resultA + resultB);
+			compare.push_back(maxnum + second);
+			compare.push_back(resultA + maxnum);
+			compare.push_back(resultB + maxnum);
+			
+
+			for (int i = 0; i < compare.size(); i++) {
+				maxResult = max(maxResult, compare[i]);
+			}
+			result += maxResult;
+
+			//더하기 (방향 전환)
+			if (time == m) { break; }
+			nodeA.r += dr[dir[0].front()];	nodeA.c += dc[dir[0].front()];
+			dir[0].pop();
+			nodeB.r += dr[dir[1].front()];	nodeB.c += dc[dir[1].front()];
+			dir[1].pop();
+		}
+		centers.clear();
+		while (!dir[0].empty()) { dir[0].pop(); }
+		while (!dir[1].empty()) { dir[1].pop(); }
+
+		printf("#%d %d\n", testcase, result);
+	}
+
+
+	return 0;
+}
+
+
+///////////////내 답안 무선충전
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <queue>
+#include <math.h>
+
+#define STOP 0
+#define UP 1
+#define RIGHT 2
+#define DOWN 3
+#define LEFT 4
+
+using namespace std;
+
+typedef struct center {
+	int x, y;
+	int cov;
+	int p;
+}Center;
+
+typedef struct person {
+	queue <int> ways;
+	int x, y;
+}Person;
+
+Center center[9];
+Person mantmp1;
+Person mantmp2;
+Person man[2];
+
+int m;
+int a;
+int dir;
+int result;
+
+Person move(Person person)
+{
+//	printf("person queue size: %d\n", person.ways.size());
+	int temp = person.ways.front();
+	person.ways.pop();
+
+	if (temp == STOP) { return person; }
+	else if (temp == UP) { person.y -= 1; }
+	else if (temp == DOWN) { person.y += 1; }
+	else if (temp == LEFT) { person.x -= 1; }
+	else { person.x += 1; }
+
+	return person;
+}
+
+void solve() {
+	int sum = 0;
+	int size1 = 0;
+	int size2 = 0;
+	int max = 0;
+	
+	for (int time = 0; time <= m; time++)
+	{
+		queue <int> manCenterInd1;
+		queue <int> manCenterInd2;
+		queue <int> backupInd2;
+
+		max = 0;
+		//printf("time: %d, sum: %d, Person1 row:%d col:%d  Person2 row:%d col:%d\n", time, sum, man[0].x, man[0].y, man[1].x, man[1].y);
+
+		for (int i = 0; i < a; i++) {
+			int distance1 = abs(man[0].x - center[i].x) + abs(man[0].y - center[i].y);
+			int distance2 = abs(man[1].x - center[i].x) + abs(man[1].y - center[i].y);
+			if (distance1 <= center[i].cov) { manCenterInd1.push(i); }
+			if (distance2 <= center[i].cov) { manCenterInd2.push(i); }
+		}
+		size1 = manCenterInd1.size();
+		size2 = manCenterInd2.size();
+		backupInd2 = manCenterInd2;
+
+		if (time == m) {											//time20일때 어떻게 대처할지 -> 중간중간 삽입해야함.
+			if (size1 == 0 && size2 == 0) {
+				sum = sum;
+			}
+			else if (size1 > 0 && size2 == 0) {
+				max = 0;
+				for (int i = 0; i < size1; i++)
+				{
+					int ind = manCenterInd1.front();
+					manCenterInd1.pop();
+					if (center[ind].p > max) { max = center[ind].p; }
+				}
+				sum += max;
+			}
+			else if (size1 == 0 && size2 > 0) {
+				max = 0;
+				for (int i = 0; i < size2; i++)
+				{
+					int ind = manCenterInd2.front();
+					manCenterInd2.pop();
+					if (center[ind].p > max) { max = center[ind].p; }
+				}
+				sum += max;
+			}
+			else 
+			{
+				max = 0;
+				for (int i = 0; i < size1; i++)
+				{
+					int ind1 = manCenterInd1.front();
+					for (int j = 0; j < size2; j++)
+					{
+						int ind2 = manCenterInd2.front();
+						manCenterInd2.pop();
+						if (ind1 == ind2) {
+							if (max < center[ind1].p) { max = center[ind1].p; }
+						}
+						else if (center[ind1].p + center[ind2].p > max) { max = center[ind1].p + center[ind2].p; }
+					}
+					manCenterInd1.pop();
+					manCenterInd2 = backupInd2;
+				}
+				sum += max;
+			}
+			result = sum;
+		}
+		else
+		{
+			if (size1 == 0 && size2 == 0) {
+				man[0] = move(man[0]);
+				man[1] = move(man[1]);
+				sum = sum;
+			}
+			else if (size1 > 0 && size2 == 0) {
+				max = 0;
+				for (int i = 0; i < size1; i++)
+				{
+					int ind = manCenterInd1.front();
+					manCenterInd1.pop();
+					if (max < center[ind].p) { max = center[ind].p; }
+				}
+				man[0] = move(man[0]);
+				man[1] = move(man[1]);
+				sum += max;
+			}
+			else if (size1 == 0 && size2 > 0) {
+				max = 0;
+				for (int i = 0; i < size2; i++)
+				{
+					int ind = manCenterInd2.front();
+					manCenterInd2.pop();
+					if (max < center[ind].p) { max = center[ind].p; }
+				}
+				man[0] = move(man[0]);
+				man[1] = move(man[1]);
+				sum += max;
+			}
+			else
+			{
+				int flag = 0;
+				max = 0;
+				for (int i = 0; i < size1; i++)
+				{
+					int ind1 = manCenterInd1.front();
+					for (int j = 0; j < size2; j++)
+					{
+						int ind2 = manCenterInd2.front();
+						manCenterInd2.pop();
+
+						if (ind1 == ind2) { 
+							if (max < center[ind1].p) { max = center[ind1].p; }
+						}
+						else if (center[ind1].p + center[ind2].p > max) { max = (center[ind1].p + center[ind2].p); }
+					}
+					manCenterInd1.pop();
+					manCenterInd2 = backupInd2;
+				}
+				man[0] = move(man[0]);
+				man[1] = move(man[1]); 
+				sum += max;
+			}
+		}
+	}
+}
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+		result = 0;
+		scanf("%d %d", &m, &a); //총이동시간 20-100 center 개수 = a /
+		//사용자 이동정보
+
+		for (int i = 0; i < m; i++)
+		{
+			scanf("%d", &dir);
+			man[0].x = 1; 
+			man[0].y = 1;
+			man[0].ways.push(dir);
+		}
+		for (int i = 0; i < m; i++)
+		{
+			scanf("%d", &dir);
+			man[1].x = 10; 
+			man[1].y = 10;
+			man[1].ways.push(dir);
+		}
+		for (int i = 0; i < a; i++)
+		{
+			scanf("%d %d %d %d", &center[i].x, &center[i].y, &center[i].cov, &center[i].p);
+		}
+
+		solve();
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}

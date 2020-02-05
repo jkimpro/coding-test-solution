@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+typedef struct curve {
+	int c, r;
+	int dir;
+	int gen;
+}Curve;
+
+vector <Curve> curve;
+vector <int> store;
+
+int rMove[4] = { 0,-1,0,1 };
+int cMove[4] = { 1,0,-1,0 };
+
+int n;
+int result = 0;
+int map[101][101]; 
+
+bool canRecord(int r, int c) {
+	if (r < 0 || r>100 || c < 0 || c>100) { return false; }
+	else { return true; }
+}
+int main(){
+
+	scanf("%d", &n);
+	for (int i = 0; i <= 100; i++) {
+		for (int j = 0; j <= 100; j++) {
+			map[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < n; i++) {
+		Curve temp;
+		scanf("%d %d %d %d", &temp.c, &temp.r, &temp.dir, &temp.gen);//c´Â xÁÂÇ¥ //rÀº yÁÂÇ¥
+		map[temp.r][temp.c] = 1;
+		curve.push_back(temp);
+	}
+
+	for (int i = 0; i < n; i++) {
+		Curve now = curve[i];
+		int originDir = now.dir;
+
+		for (int nowGen = 0; nowGen <= now.gen; nowGen++) {
+
+			if (nowGen == 0) {
+				now.r = now.r + rMove[now.dir];
+				now.c = now.c + cMove[now.dir];
+
+				if (canRecord(now.r, now.c)) { map[now.r][now.c] = 1; }
+
+				store.push_back((now.dir + 1) % 4);
+			}
+			else {
+				int firstInd = store.size() - 1;
+
+				for (int j = firstInd; j >= 0; j--) {
+
+					now.r = now.r + rMove[store[j]];
+					now.c = now.c + cMove[store[j]];
+
+					if (canRecord(now.r, now.c)) { map[now.r][now.c] = 1; }
+
+					store.push_back((store[j] + 1) % 4);
+				}
+			}
+			/*
+			for (int j = 0; j < store.size(); j++) {
+				printf("%d ", store[j]);
+			}
+			printf("\n");
+			*/
+		}
+		store.clear();
+
+	}
+	
+
+	for (int i = 0; i < 100; i++) {
+		for (int j = 0; j < 100; j++) {
+			if (map[i][j] == 1 && map[i][j + 1] == 1 && map[i + 1][j] == 1 && map[i + 1][j + 1] == 1) {
+				result += 1;
+			}
+		}
+	}
+	printf("%d", result);
+	return 0;
+}

@@ -1,0 +1,431 @@
+//또다른 풀이
+//가스관 문제
+#include <stdio.h>
+#include <algorithm>
+#define UP 0
+#define RIGHT 1
+#define DOWN 2
+#define LEFT 3
+
+using namespace std;
+
+int dr[4] = { -1,0,1,0 };
+int dc[4] = { 0,1,0,-1 };
+
+typedef struct loc {
+	int r, c;
+	char pipe;
+	int dir;
+}Loc;
+
+int n, m;
+bool visit[100][100];
+char arr[100][100];
+int whole;
+Loc result;
+Loc resultTemp;
+
+void dfs(Loc M, int count) {
+	//printf("%d %d dir: %d    in real:%d\n", M.r, M.c, M.dir);
+
+	Loc temp = {M.r +dr[M.dir], M.c+dc[M.dir]};
+
+	if (temp.r< 0 || temp.r>= n || temp.c < 0 || temp.c >= m) { return; }
+
+	if (arr[temp.r][temp.c] == '.') {
+		if (count == 1) {return; }
+		else {
+			if (M.dir == UP || M.dir == DOWN) {
+				arr[temp.r][temp.c] == '|';
+				resultTemp = { temp.r, temp.c, '|' };
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r, temp.c,arr[temp.r][temp.c],M.dir }, count + 1);
+				visit[temp.r][temp.c] = false;
+			}
+			if (M.dir == LEFT || M.dir == RIGHT) {
+				arr[temp.r][temp.c] == '-';
+				resultTemp = { temp.r, temp.c, '-' };
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r, temp.c,arr[temp.r][temp.c],M.dir }, count + 1);
+				visit[temp.r][temp.c] = false;
+			}
+
+			arr[temp.r][temp.c] == '1';
+			resultTemp = { temp.r, temp.c, '1' };
+			if (M.dir == UP) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count+1); 
+				visit[temp.r][temp.c] = false;
+			}
+			else if (M.dir == LEFT) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN }, count + 1);
+				visit[temp.r][temp.c] = false;
+			}
+
+			arr[temp.r][temp.c] == '2';
+			resultTemp = { temp.r, temp.c, '2' };
+			if (M.dir == DOWN) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count+1);
+				visit[temp.r][temp.c] = false;
+			}
+			else if (M.dir == LEFT) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP }, count + 1);
+				visit[temp.r][temp.c] = false;
+			}
+
+			arr[temp.r][temp.c] == '3';
+			resultTemp = { temp.r, temp.c, '3' };
+			if (M.dir == RIGHT) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP }, count+1); 
+				visit[temp.r][temp.c] = false;
+			}
+			else if (M.dir == DOWN) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count + 1); 
+				visit[temp.r][temp.c] = false;
+			}
+
+			arr[temp.r][temp.c] == '4';
+			resultTemp = { temp.r, temp.c, '4' };
+			if (M.dir == RIGHT) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN }, count+1);
+				visit[temp.r][temp.c] = false;
+			}
+			else if (M.dir == UP) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count+1); 
+				visit[temp.r][temp.c] = false;
+			}
+		}
+	}
+	else {
+		if (arr[temp.r][temp.c] == 'Z') {		//어쩃든 끝에는 도달하여야 함.
+			//true 계산 
+			int set = 0;
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					if (visit[i][j] == true) { set++; }
+				}
+			}
+		//	printf("%d %d\n", set, whole);
+			if (set == whole) { result = resultTemp; }
+			return;
+		}
+		else if (arr[temp.r][temp.c] == '+') {
+			visit[temp.r][temp.c] = true;
+			dfs({ temp.r, temp.c,arr[temp.r][temp.c],M.dir }, count);
+			visit[temp.r][temp.c] = false;
+		}
+		else if (arr[temp.r][temp.c] == '|') {
+			if (M.dir == UP) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP }, count);
+				visit[temp.r][temp.c] = false;
+			}
+			else if (M.dir == DOWN) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN }, count); 
+				visit[temp.r][temp.c] = false;
+			}
+			else { return; }
+		}
+		else if (arr[temp.r][temp.c] == '-') {
+			if (M.dir == LEFT) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count); 
+				visit[temp.r][temp.c] = false;
+			}
+			else if (M.dir == RIGHT) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count);
+				visit[temp.r][temp.c] = false;
+			}
+			else { return; }
+		}	
+		else if(arr[temp.r][temp.c] == '1') {
+			if (M.dir == UP) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count);
+				visit[temp.r][temp.c] = false;
+			}
+			else if (M.dir == LEFT) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN }, count);			
+				visit[temp.r][temp.c] = false;
+			}
+			else { return; }
+		}
+		else if (arr[temp.r][temp.c] == '2') {
+			if (M.dir == DOWN) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count); 
+				visit[temp.r][temp.c] = false;
+			}
+			else if (M.dir == LEFT) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP }, count);
+				visit[temp.r][temp.c] = false;
+			}
+			else { return; }
+		}
+		else if (arr[temp.r][temp.c] == '3') {
+			if (M.dir == RIGHT) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP}, count);
+				visit[temp.r][temp.c] = false;
+			}
+			else if (M.dir == DOWN) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count);
+				visit[temp.r][temp.c] = false;
+			}
+			else { return; }
+		}
+		else if (arr[temp.r][temp.c] == '4') {
+			if (M.dir == RIGHT) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN}, count);
+				visit[temp.r][temp.c] = false;
+			}
+			else if (M.dir == UP) {
+				visit[temp.r][temp.c] = true;
+				dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count);
+				visit[temp.r][temp.c] = false;
+			}
+			else { return; }
+		}
+	}
+}
+int main() {
+	Loc M;
+	whole = 0;
+	scanf("%d %d", &n, &m);
+	
+	for (int i = 0; i < n; i++) {
+		scanf("%s", arr[i]);
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			visit[i][j] = false;
+			if (arr[i][j] != '.') { whole += 1; }
+			if (arr[i][j] == 'M'){
+				M.r = i;
+				M.c = j;
+				visit[i][j] = true;
+			}
+		}
+	}
+	//M주위탐색
+
+	for (int i = 0; i < 4; i++){
+		if (M.r + dr[i] < 0 || M.r + dr[i] >= n || M.c + dc[i] >= m || M.c + dc[i] < 0) {continue;}
+		else if (arr[M.r + dr[i]][M.c + dc[i]] == 'Z') { continue; }
+		else if(arr[M.r + dr[i]][M.c + dc[i]] != '.'){
+			M.r += dr[i];
+			M.c += dc[i];
+			M.pipe = arr[M.r + dr[i]][M.c + dc[i]];
+			M.dir = i;
+			visit[M.r][M.c] = true;
+			dfs(M, 0);
+			break;
+		}
+	}
+
+	printf("%d %d %c\n", result.r+1, result.c + 1, result.pipe);
+
+	return 0;
+}
+
+
+
+//가스관 문제
+#include <stdio.h>
+#include <algorithm>
+#define UP 0
+#define RIGHT 1
+#define DOWN 2
+#define LEFT 3
+
+using namespace std;
+
+int dr[4] = { -1,0,1,0 };
+int dc[4] = { 0,1,0,-1 };
+
+typedef struct loc {
+	int r, c;
+	char pipe;
+	int dir;
+}Loc;
+
+int n, m;
+char arr[100][100];
+Loc result;
+Loc resultTemp;
+
+void dfs(Loc M, int count, int flag) {
+	//printf("%d %d dir: %d    in\n", M.r, M.c, M.dir);
+
+	//무조건 1직선?
+	Loc temp = {M.r +dr[M.dir], M.c+dc[M.dir]};
+
+	if (temp.r< 0 || temp.r>= n || temp.c < 0 || temp.c >= m) { return; }
+
+	if (arr[temp.r][temp.c] == '.') {
+		if (count == 1) {return; }
+		else {
+
+			if (M.dir == UP || M.dir == DOWN) {
+				arr[temp.r][temp.c] == '|';
+				resultTemp = { temp.r, temp.c, '|' };
+				dfs({ temp.r, temp.c,arr[temp.r][temp.c],M.dir }, count + 1, 0);
+			}
+			if (M.dir == LEFT || M.dir == RIGHT) {
+				arr[temp.r][temp.c] == '-';
+				resultTemp = { temp.r, temp.c, '-' };
+				dfs({ temp.r, temp.c,arr[temp.r][temp.c],M.dir }, count + 1, 0);
+			}
+
+			arr[temp.r][temp.c] == '1';
+			resultTemp = { temp.r, temp.c, '1' };
+			if (M.dir == UP) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count+1,0); }
+			else if (M.dir == LEFT) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN }, count + 1, 0); }
+
+			arr[temp.r][temp.c] == '2';
+			resultTemp = { temp.r, temp.c, '2' };
+			if (M.dir == DOWN) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count+1, 0); }
+			else if (M.dir == LEFT) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP }, count + 1, 0); }
+
+			arr[temp.r][temp.c] == '3';
+			resultTemp = { temp.r, temp.c, '3' };
+			if (M.dir == RIGHT) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP }, count+1, 0); }
+			else if (M.dir == DOWN) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count + 1, 0); }
+
+			arr[temp.r][temp.c] == '4';
+			resultTemp = { temp.r, temp.c, '4' };
+			if (M.dir == RIGHT) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN }, count+1, 0); }
+			else if (M.dir == UP) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count + 1, 0); }
+		}
+	}
+	else {
+		if (arr[temp.r][temp.c] == 'Z') {		//어쩃든 끝에는 도달하여야 함.
+			if (flag == 0)
+			{
+				result = resultTemp;
+			}
+			return;
+		}
+		else if (arr[temp.r][temp.c] == '+') { dfs({ temp.r, temp.c,arr[temp.r][temp.c],M.dir }, count, 0); }
+
+		else if (arr[temp.r][temp.c] == '|') {
+			if (M.dir == UP) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP }, count, 0); }
+			else if (M.dir == DOWN) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN }, count, 0); }
+			else { return; }
+		}
+		else if (arr[temp.r][temp.c] == '-') {
+			if (M.dir == LEFT) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count, 0); }
+			else if (M.dir == RIGHT) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count, 0); }
+			else { return; }
+		}	
+		else if(arr[temp.r][temp.c] == '1') {
+			if (M.dir == UP) {dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count, 0);}
+			else if (M.dir == LEFT) {dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN }, count, 0);}
+			else { return; }
+		}
+		else if (arr[temp.r][temp.c] == '2') {
+			if (M.dir == DOWN) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count, 0); }
+			else if (M.dir == LEFT) {dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP }, count, 0);}
+			else { return; }
+		}
+		else if (arr[temp.r][temp.c] == '3') {
+			if (M.dir == RIGHT) {dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP}, count, 0);}
+			else if (M.dir == DOWN) {dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count, 0);}
+			else { return; }
+		}
+		else if (arr[temp.r][temp.c] == '4') {
+			if (M.dir == RIGHT) {dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN}, count, 0);}
+			else if (M.dir == UP) {dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count, 0);}
+			else { return; }
+		}
+	}
+}
+int main() {
+	Loc M;
+	scanf("%d %d", &n, &m);
+	
+	for (int i = 0; i < n; i++) {
+		scanf("%s", arr[i]);
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			if (arr[i][j] == 'M'){
+				M.r = i;
+				M.c = j;
+			}
+		}
+	}
+	//M주위탐색
+
+	for (int i = 0; i < 4; i++){
+		if (M.r + dr[i] < 0 || M.r + dr[i] >= n || M.c + dc[i] >= m || M.c + dc[i] < 0) {continue;}
+		else if (arr[M.r + dr[i]][M.c + dc[i]] == 'Z') { continue; }
+		else if (arr[M.r + dr[i]][M.c + dc[i]] == '.') {
+			
+			Loc temp = { M.r + dr[i],M.c + dc[i] };
+			int count = 0;
+		//	printf("temp.r: %d temp.c: %d\n", temp.r, temp.c);
+
+			if (i == UP || i == DOWN) {
+				arr[temp.r][temp.c] == '|';
+				resultTemp = { temp.r, temp.c, '|' };
+				dfs({ temp.r, temp.c,arr[temp.r][temp.c],i}, count + 1,1);
+			}
+			if (i == LEFT || i == RIGHT) {
+				arr[temp.r][temp.c] == '-';
+				resultTemp = { temp.r, temp.c, '-' };
+				dfs({ temp.r, temp.c,arr[temp.r][temp.c],i}, count + 1, 1);
+			}
+
+			arr[temp.r][temp.c] == '1';
+			resultTemp = { temp.r, temp.c, '1' };
+			if (i == UP) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count + 1, 1); }
+			else if (i == LEFT) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN }, count + 1, 1); }
+
+			arr[temp.r][temp.c] == '2';
+			resultTemp = { temp.r, temp.c, '2' };
+			if (i == DOWN) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],RIGHT }, count + 1, 1); }
+			else if (i == LEFT) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP }, count + 1, 1); }
+
+			arr[temp.r][temp.c] == '3';
+			resultTemp = { temp.r, temp.c, '3' };
+			if (i == RIGHT) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],UP }, count + 1, 1); }
+			else if (i == DOWN) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count + 1, 1); }
+
+			arr[temp.r][temp.c] == '4';
+			resultTemp = { temp.r, temp.c, '4' };
+
+			if (i == RIGHT) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],DOWN }, count + 1, 1); }
+			else if (i == UP) { dfs({ temp.r,temp.c,arr[temp.r][temp.c],LEFT }, count + 1, 1); }
+
+		}
+		else if(arr[M.r + dr[i]][M.c + dc[i]]!='.'){		//여기에 헛점
+			M.r += dr[i];
+			M.c += dc[i];
+			M.pipe = arr[M.r + dr[i]][M.c + dc[i]];
+			M.dir = i;
+			dfs(M, 0,0);
+			break;
+		}
+	}
+
+
+	printf("%d %d %c\n", result.r+1, result.c + 1, result.pipe);
+
+	return 0;
+}

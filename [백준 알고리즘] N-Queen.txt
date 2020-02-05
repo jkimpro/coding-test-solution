@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <algorithm>
+
+using namespace std;
+
+int rMove[4] = {-1,-1,1,1};
+int cMove[4] = {-1,1,1,-1}; //방향 검사
+bool colVisit[20];
+
+int n;
+long long result;
+int arr[20][20];
+
+bool check(int r, int c) {
+	int tempR, tempC;
+	for (int i = 0; i < 4; i++) { //각 방향 체크
+		tempR = r;
+		tempC = c;
+		while (tempR >= 0 && tempR <n && tempC >=0 && tempC < n) {
+			if (arr[tempR][tempC] == 1) { return false; }
+			else {
+				tempR += rMove[i];
+				tempC += cMove[i];
+			}
+		}
+	}
+	return true;
+}
+
+void solve(int i) {
+	if (i == n) { result += 1; return; }
+	else {
+		for (int j = 0; j < n; j++) {
+			if (colVisit[j] == true) { continue; }
+			if (check(i, j)) {
+				arr[i][j] = 1;
+				colVisit[j] = true;
+				solve(i + 1);
+				colVisit[j] = false;
+				arr[i][j] = 0;
+			}
+		}
+	}
+}
+int main() {
+	
+	result = 0;
+	scanf("%d", &n);
+	
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			arr[i][j] = 0;
+		}
+		colVisit[i] = false;
+	}
+
+	//퀸의 법칙 행/열/대각선 모두 놓을 수 있음
+	//같은 행/ 열 대각선에 존재하여야 하지 않음
+	for (int j= 0; j < n; j++) {
+		arr[0][j] = 1;
+		colVisit[j] = true;
+		solve(1);
+		colVisit[j] = false;
+		arr[0][j] = 0;
+	}
+	printf("%lld", result);
+	return 0;
+}

@@ -1,0 +1,224 @@
+///////나의 정답
+////////////////////////제한시간 초과본
+// 디저트카페 문제
+
+#include <stdio.h>
+#include <math.h>
+#include <queue>
+
+#define DOWNRIGHT 1
+#define DOWNLEFT 2
+#define UPLEFT 3
+#define UPRIGHT 4
+
+using namespace std;
+
+int cafe[100][100];
+int result;
+
+int mainW;
+int mainH;
+int n;
+int cellCount;
+int root[1000];
+
+bool canGo(int i, int j)
+{
+	if (i < 0 || j < 0 || i >= n || j >= n) { return false; }
+	else { return true; }
+}
+void dfs(int i, int j, int sum, int dir)
+{
+	if (i == mainW && j == mainH) {
+
+		if (result < sum) { 
+			result = sum; 
+		}
+		return;
+	}
+
+	//확인절차
+	for (int temp = 0; temp <= sum; temp++)
+	{
+		if (root[temp] == cafe[i][j]) { 
+			return; 
+		}
+	}
+	sum += 1;
+	root[sum] = cafe[i][j];
+	
+	if (dir == DOWNRIGHT)
+	{
+		if (canGo(i + 1, j + 1)) { dfs(i + 1, j + 1, sum, DOWNRIGHT); }
+		if (canGo(i + 1, j - 1)) { dfs(i + 1, j - 1, sum, DOWNLEFT); }
+
+	}
+	else if (dir == DOWNLEFT)
+	{
+		if (canGo(i + 1, j - 1)) { dfs(i + 1, j - 1, sum, DOWNLEFT); }
+		if (canGo(i - 1, j - 1)) { dfs(i - 1, j - 1, sum, UPLEFT); }
+	}
+	else if (dir == UPLEFT)
+	{
+		if (canGo(i - 1, j - 1)) { dfs(i - 1, j - 1, sum, UPLEFT); }
+		if (canGo(i - 1, j + 1)) { dfs(i - 1, j + 1, sum, UPRIGHT); }
+	}
+	else
+	{
+		if (canGo(i - 1, j + 1)) { dfs(i - 1, j + 1, sum, UPRIGHT); }
+	}
+}
+
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++) {
+		result = -1;
+		scanf("%d", &n);
+
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				scanf("%d", &cafe[i][j]);
+			}
+		}
+
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				int sum = 0;
+				mainW = i; mainH = j;
+
+				root[0] = cafe[i][j];
+				cellCount = 1;
+
+				if (canGo(i + 1, j + 1))
+				{
+					dfs(i + 1, j + 1, sum+1, DOWNRIGHT);
+				}
+
+				for (int temp = 0; temp < result; temp++)
+				{
+					root[temp] = 0;
+				}
+			}
+		}
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}
+
+
+
+////////////////////////제한시간 초과본
+// 디저트카페 문제
+
+#include <stdio.h>
+#include <math.h>
+#include <queue>
+
+#define DOWNRIGHT 1
+#define DOWNLEFT 2
+#define UPLEFT 3
+#define UPRIGHT 4
+
+using namespace std;
+
+int cafe[100][100];
+int result;
+
+int mainW;
+int mainH;
+int n;
+
+
+bool canGo(int i, int j)
+{
+	if (i < 0 || j < 0 || i >= n || j >= n) { return false; }
+	else { return true; }
+}
+void dfs(int i, int j, int sum, queue <int> root, int dir)
+{
+	if (i == mainW && j==mainH){
+		
+		if (result < sum) { result = sum; }
+		return;
+	}
+	//확인절차
+	queue <int> backup;
+	backup = root;
+
+	while (!root.empty())
+	{
+		int temp = root.front();
+		root.pop();
+		if (temp == cafe[i][j]) { return; }
+	}
+	root = backup;
+	root.push(cafe[i][j]);
+	sum += 1;
+	
+	if (dir == DOWNRIGHT)
+	{
+		if (canGo(i + 1, j + 1)) { dfs(i + 1, j + 1, sum, root, DOWNRIGHT); }
+		if (canGo(i + 1, j - 1)) { dfs(i + 1, j - 1, sum, root, DOWNLEFT); }
+
+	}
+	if (dir == DOWNLEFT)
+	{
+		if (canGo(i + 1, j - 1)) { dfs(i + 1, j - 1, sum, root, DOWNLEFT); }
+		if (canGo(i - 1, j - 1)) { dfs(i - 1, j - 1, sum, root, UPLEFT); }
+	}
+	if (dir == UPLEFT)
+	{
+		if (canGo(i - 1, j - 1)) { dfs(i - 1, j - 1, sum, root, UPLEFT); }
+		if (canGo(i - 1, j + 1)) { dfs(i- 1, j + 1, sum, root, UPRIGHT); }
+	}
+	if (dir == UPRIGHT)
+	{
+		if (canGo(i - 1, j + 1)) { dfs(i - 1, j + 1, sum, root, UPRIGHT); }
+	}
+}
+
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++){
+		result = -1;
+		scanf("%d", &n);
+
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				scanf("%d", &cafe[i][j]);
+			}
+		}
+		
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				int sum = 0;
+				mainW = i; mainH = j;
+				queue <int> root;
+				root.push(cafe[i][j]);
+				sum += 1;
+				if (canGo(i + 1, j + 1))
+				{
+					dfs(i + 1, j + 1, sum, root, DOWNRIGHT);
+				}
+			}
+		}
+
+		printf("#%d %d\n", testcase, result);		
+	}
+	return 0;
+}
+

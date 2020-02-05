@@ -1,0 +1,75 @@
+#include <stdio.h>
+#include <algorithm>
+#include <math.h>
+
+
+using namespace std;
+
+typedef struct element{
+   int num;
+   int option[4];
+}Element;
+
+int n;
+int arr[101];
+int option[4];
+
+int maxNum =-9999999999;
+int minNum = 999999999;   
+
+void dfs(Element temp, int ind){
+   
+   
+   int num;
+   int real;
+   
+   if(temp.option[0] >0){ 
+      num = temp.option[0]-1;
+      dfs({temp.num+arr[ind+1],{num,temp.option[1],temp.option[2],temp.option[3]}}, ind+1);
+   }
+   if(temp.option[1] >0){
+      num = temp.option[1]-1;
+      dfs({temp.num-arr[ind+1],{temp.option[0],num,temp.option[2],temp.option[3]}}, ind+1);
+   }
+   if(temp.option[2] >0){
+      num = temp.option[2]-1;
+      dfs({temp.num*arr[ind+1],{temp.option[0],temp.option[1],num,temp.option[3]}}, ind+1);
+   }
+   if(temp.option[3] >0){
+      num = temp.option[3]-1;
+      
+      if(temp.num<0){
+         real = -(abs(temp.num)/arr[ind+1]);
+      }
+      else{
+         real = temp.num/arr[ind+1];
+      }
+      dfs({real,{temp.option[0],temp.option[1],temp.option[2],num}}, ind+1);
+   }
+
+   if(temp.option[0] ==0 &&temp.option[1] ==0 &&temp.option[2] ==0 &&temp.option[3] ==0)
+   {
+      int num = temp.num;
+      maxNum=max(maxNum,num);
+      minNum=min(minNum, num);
+      return;
+   }
+}
+
+int main(){
+   scanf("%d", &n);
+   
+   for(int i =0; i<n; i++){
+      scanf("%d", &arr[i]);
+   }
+   
+   for(int i =0; i<4; i++){
+      scanf("%d", &option[i]);
+   }
+   
+   dfs({arr[0],{option[0],option[1],option[2],option[3]}}, 0);
+   
+   printf("%d\n%d", maxNum, minNum);
+   
+   return 0;
+}

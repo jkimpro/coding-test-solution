@@ -1,0 +1,81 @@
+//테트로미노
+//기준점으로 어느방향이든 4개를 가면 그만인 문제 DFS로 풀수 잇음 
+#include <stdio.h>
+#include <algorithm>
+#define UP 0
+#define RIGHT 1
+#define DOWN 2
+#define LEFT 3
+
+using namespace std;
+ 
+int n,m;
+int result;
+int arr[501][501];
+
+int rDir[4]={-1,0,1,0};
+int cDir[4]={0,1,0,-1};
+int option5[3] = {LEFT,DOWN, RIGHT}; //중앙점 기준한번에 테스트
+
+bool canGo(int r, int c){
+   if(r>=n || r<0 || c>=m || c<0) {return false;}
+   else {return true;}
+}
+
+void dfs(int i,int j, int time,int sum, int dir){
+   if(time ==3){
+      sum += arr[i][j];
+      result = max(sum, result);
+      return;
+   }
+   else{
+      for(int go =0; go<4; go++){
+         if((dir+2)%4 ==go) {continue;}
+         if(canGo(i+rDir[go],j+cDir[go])) {dfs(i+rDir[go],j+cDir[go],time+1,sum +arr[i][j], go);}
+      }
+   }   
+} 
+int main(){
+   result =0;
+   scanf("%d %d", &n, &m);
+   
+   for(int i =0; i<n; i++){
+      for(int j =0; j<m; j++){
+         scanf("%d", &arr[i][j]);         
+      }
+   }
+    
+   for(int i =0; i<n; i++){   //1번, 2번 도형 처리 
+       for(int j =0; j<m; j++){
+          for(int go =0; go<4; go++){
+            if(canGo(i+rDir[go],j+cDir[go])) {dfs(i+rDir[go],j+cDir[go],1,arr[i][j],go);}
+            
+            //이번도형 한번더
+             int count = arr[i][j];
+         
+            int dir0 = (option5[0]+go)%4;
+            int dir1 = (option5[1]+go)%4;
+            int dir2 = (option5[2]+go)%4;
+            
+            if(canGo(i+rDir[dir0], j+cDir[dir0])){
+               count+=arr[i+rDir[dir0]][j+cDir[dir0]];
+            }
+            else{continue;}
+            
+            if(canGo(i+rDir[dir1], j+cDir[dir1])){
+               count+=arr[i+rDir[dir1]][j+cDir[dir1]];
+            }
+            else{continue;}
+            
+            if(canGo(i+rDir[dir2], j+cDir[dir2])){
+               count+=arr[i+rDir[dir2]][j+cDir[dir2]];
+            }
+            else{continue;}
+            
+            result = max(result, count);   
+         }
+      }
+   } 
+   printf("%d", result);
+   return 0;
+} 

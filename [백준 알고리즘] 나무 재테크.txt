@@ -1,0 +1,132 @@
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+typedef struct tree{
+   int x,y,z;
+}Tree;
+
+vector <Tree> tree[11][11];
+queue <Tree> aut;
+queue <Tree> plus;
+
+int nu[11][11];
+int now[11][11];
+
+int n,d,k;
+int result;
+
+bool comp(const Tree& t1, const Tree& t2){
+   return t1.z < t2.z;   
+}
+int main()
+{
+	result =0;
+   scanf("%d %d %d", &n,&d,&k);
+   
+   for(int i =1; i<=n; i++){
+      for(int j =1; j<=n; j++){
+         scanf("%d", &nu[i][j]);
+         now[i][j] =5;
+      }   
+   }
+   
+   for(int j =0; j<d; j++){
+      Tree temp;      
+      scanf("%d %d %d", &temp.x,&temp.y,&temp.z);
+      tree[temp.x][temp.y].push_back(temp);
+   }
+   
+   
+   for(int i =0; i<k ;i++){         //k년이 지난 후 
+      //봄 
+		for(int j =1; j<=n; j++){
+			for(int l =1; l<=n; l++){
+	        	if(tree[j][l].empty()){ continue;}
+				else{
+					int temp =0;
+					sort(tree[j][l].begin(),tree[j][l].end(),comp);
+					
+					for(int m = 0; m<tree[j][l].size(); m++){
+						if(now[j][l]>=tree[j][l][m].z){
+		            		
+							now[j][l]-=tree[j][l][m].z;
+		            		
+		           			tree[j][l][m].z +=1;
+					    	
+							if(tree[j][l][m].z%5 ==0){
+			               		aut.push(tree[j][l][m]);
+							}
+				   		}
+				   		else{   //양분이 없으면 죽어야지 
+				            temp += (tree[j][l][m].z/2);
+				            tree[j][l].erase(tree[j][l].begin()+m);
+				            m--;
+			        	}
+		        	}
+		        	now[j][l]+=temp;
+				}
+			}
+		}
+      
+      //여름 + 겨울 
+      for(int j =1; j<=n; j++){
+         for(int l =1; l<=n; l++){
+            now[j][l]+=nu[j][l];
+         }
+      }
+        
+      //가을 -> 이놈들만 따로 큐처리 
+        while(!aut.empty()){
+        	
+        	int nx,ny;
+           	nx = aut.front().x;
+            ny = aut.front().y;
+             
+           	if ((ny - 1)>=1) {      
+              tree[nx][ny - 1].push_back({nx,ny-1,1});   
+           	}
+        	if ((ny + 1)<=n) {   
+              tree[nx][ny + 1].push_back({nx,ny+1,1});   
+           	}
+            if ((nx - 1)>=1) {
+	            
+				tree[nx - 1][ny].push_back({nx-1,ny,1});
+				   
+	            if((ny - 1)>=1)
+	        	{
+	                tree[nx-1][ny-1].push_back({nx-1,ny-1,1});   
+	        	}
+	            if((ny + 1)<=n)
+	            {
+	                tree[nx-1][ny+1].push_back({nx-1,ny+1,1});   
+	        	}
+            } 
+            if ((nx+1)<=n){
+	            tree[nx+1][ny].push_back({nx+1,ny,1});   
+	            if((ny - 1)>=1)
+	            {
+	            	tree[nx+1][ny-1].push_back({nx+1,ny-1,1});   
+	            }
+	            if ((ny + 1)<=n)
+				{
+	            	tree[nx+1][ny+1].push_back({nx+1,ny+1,1});   
+	        	}
+         	}
+            aut.pop();
+     	}
+   }
+   
+   for(int i =1; i<=n; i++){
+   	for(int j=1; j<=n; j++){
+   		result += tree[i][j].size();
+	   }
+   }
+   
+   printf("%d\n", result);
+
+   return 0;
+}

@@ -1,0 +1,119 @@
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+using namespace std;
+
+int n;
+int result;
+int pplSum;
+int ppl[12];
+bool check[12];
+bool visitA[12];
+bool visitB[12];
+
+vector <int> city[12];
+vector <int> groupA;
+vector <int> groupB;
+
+int countA = 0;
+int countB = 0;
+
+void bSearch(int ind) {
+	for (int i = 0; i < city[ind].size(); i++) {
+		if (check[city[ind][i]] == false && visitB[city[ind][i]] == false) {
+			countB++;
+			visitB[city[ind][i]] = true;
+			bSearch(city[ind][i]);
+		}
+	}
+}
+
+void aSearch(int ind) {
+	for (int i = 0; i < city[ind].size(); i++) {
+		if (check[city[ind][i]] == true && visitA[city[ind][i]] == false) {
+			countA++;
+			visitA[city[ind][i]] = true;
+			aSearch(city[ind][i]);
+		}
+	}
+}
+
+void dfs(int sum, int groupASum, int ind) {
+	if (sum == n) {
+		return;
+	}
+	else if (result == 0) {
+		return;
+	}
+	else {
+		if (result > abs(groupASum-(pplSum-groupASum))) {
+			//search
+			countA = 1; countB = 1;
+			for (int i = 1; i <= n; i++) {
+				visitA[i] = false;
+				visitB[i] = false;
+				if (check[i] == false) {
+					groupB.push_back(i);
+				}
+			}
+			visitA[groupA[0]] = true;
+			visitB[groupB[0]] = true;
+			
+			aSearch(groupA[0]);
+			bSearch(groupB[0]);
+
+			if (countA == groupA.size() && countB == groupB.size()) {
+				result = min(result, abs(groupASum - (pplSum - groupASum)));
+			}
+			groupB.clear();
+		}
+		
+
+		for (int i = ind + 1; i <= n; i++) {
+			check[i] = true;
+			groupA.push_back(i);
+			dfs(sum+1, groupASum + ppl[i], i);
+			groupA.pop_back();
+			check[i] = false;
+		}
+	}
+}
+int main() {
+	pplSum = 0;
+	result = 9999999;
+
+	scanf("%d", &n);
+	for (int i = 1; i <= n; i++) {
+		scanf("%d", &ppl[i]);
+		pplSum += ppl[i];
+	}
+	for (int i = 1; i <= n; i++) {
+		int temp;
+		scanf("%d", &temp);
+		for (int j = 0; j < temp; j++) {
+			int t;
+			scanf("%d", &t);
+			city[i].push_back(t);
+		}
+		sort(city[i].begin(), city[i].end());
+	}
+	for (int i = 1; i <= n; i++) {
+		check[i] = true;
+		groupA.push_back(i);
+		dfs(1, ppl[i], i);
+		groupA.pop_back();
+		check[i] = false;
+	}
+
+
+	if (result == 9999999) {
+		printf("-1");
+	}
+	else {
+		printf("%d", result);
+	}
+
+	return 0;
+}

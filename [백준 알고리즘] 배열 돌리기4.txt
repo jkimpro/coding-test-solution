@@ -1,0 +1,102 @@
+//배열돌리기
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct logic {
+	int r, c, s;
+}Logic;
+
+int rdir[4] = {0,1,0,-1};
+int cdir[4] = {1,0,-1,0};
+
+int arr[52][52];
+int n, m, k;
+int result;
+bool check[7];
+
+vector<Logic> root;
+vector <Logic> useRoot;
+
+void dfs(int sum) {
+	if (sum == k) {
+		int temp[52][52];
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < m; j++) {
+				temp[i][j] = arr[i][j];
+			}
+		}
+
+		for (int i = 0; i < useRoot.size(); i++) {
+
+			for (int count = 0; count < useRoot[i].s; count++) {
+				int rStart = useRoot[i].r - useRoot[i].s + count;
+				int cStart = useRoot[i].c - useRoot[i].s + count;
+				int inNext = temp[rStart][cStart];
+				//printf("rStart: %d cStart:%d\n", rStart, cStart);
+
+				for (int dir = 0; dir < 4; dir++) {
+					for (int step = 0; step < 2 * useRoot[i].s - 2 * count; step++) {
+						int next = temp[rStart + rdir[dir]][cStart + cdir[dir]];
+						temp[rStart + rdir[dir]][cStart + cdir[dir]] = inNext;
+						inNext = next;
+						rStart += rdir[dir];
+						cStart += cdir[dir];
+					}
+				}
+			}
+		}
+
+		//최소값 찾기
+		for (int i = 0; i < n; i++) {
+			int sum = 0;
+			for (int j = 0; j < m; j++) {
+				sum += temp[i][j];
+			}
+			result = min(sum, result);
+		}
+		return;
+	}
+	else {
+		for (int i = 0; i < root.size(); i++) {
+			if (check[i] == false) {
+				useRoot.push_back(root[i]);
+				check[i] = true;
+				dfs(sum + 1);
+				check[i] = false;
+				useRoot.pop_back();
+			}
+		}
+	}
+}
+int main() {
+	result = 9999999;
+	scanf("%d %d %d", &n, &m, &k);
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			scanf("%d", &arr[i][j]);
+		}
+	}
+	for (int i = 0; i < k; i++) {
+		Logic temp;
+		scanf("%d %d %d", &temp.r, &temp.c, &temp.s);
+		temp.r -= 1;
+		temp.c -= 1;
+		root.push_back(temp);
+	}
+
+	for (int i = 0; i < root.size(); i++) {
+		useRoot.push_back(root[i]);
+		check[i] = true;
+		dfs(1);
+		check[i] = false;
+		useRoot.pop_back();
+	}
+	printf("%d", result);
+
+	return 0;
+}

@@ -1,0 +1,120 @@
+//백조의 호수
+
+#include <stdio.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct loc {
+	int r, c;
+	int count;
+}Loc;
+
+int dr[4] = { -1,0,1,0 };
+int dc[4] = { 0,1,0,-1 };
+
+char arr[1501][1501];
+bool visit[2][1501][1501];
+
+int n, m;
+Loc bird[2];
+
+queue <Loc> water;
+queue <Loc> bd[2];
+
+bool waterGo(int r, int c) {
+	if (r < 0 || r >= n || c < 0 || c >= m) {
+		return false;
+	}
+	else if (arr[r][c] == '.') {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+int main() {
+	int num = 0;
+	int result = 0;
+	scanf("%d %d", &n, &m);
+
+	for (int i = 0; i < n; i++) {
+		scanf("%s", arr[i]);
+		for (int j = 0; j < m; j++) {
+			if (arr[i][j] == '.') {		//X랑 접하는지 확인할 것.
+				water.push({ i,j,0 });	//대체할 방안 모색하기.
+			}
+
+			if (arr[i][j] == 'L') {
+				bd[num].push({ i,j,0 });
+				num++;
+			}
+		}
+	}
+	
+	for (int time = 0; ; time++) {
+		//백조1,2 move;
+		bool outcheck = false;
+		for (int ind = 0; ind < 2; ind++) {
+			queue <Loc> sub;
+			bool subCheck = false;
+
+			while (!bd[ind].empty()) {
+				Loc temp = bd[ind].front();
+				bd[ind].pop();
+
+				if (visit[0][temp.r][temp.c] == true && visit[1][temp.r][temp.c] == true) {
+					result = temp.count;
+					outcheck = true;
+					subCheck = true;
+					break;
+				}
+
+				for (int dir = 0; dir < 4; dir++) {
+					if (temp.r + dr[dir] < 0 || temp.r + dr[dir] >= n ||
+						temp.c + dc[dir] < 0 || temp.c + dc[dir] >= m ||
+						visit[ind][temp.r + dr[dir]][temp.c + dc[dir]] == true) {
+						continue;
+					}
+					else if (arr[temp.r + dr[dir]][temp.c + dc[dir]] == 'X') {
+						visit[ind][temp.r + dr[dir]][temp.c + dc[dir]] = true;
+						sub.push({ temp.r + dr[dir], temp.c + dc[dir], time+1});
+						//sub에 저장하고 한번에 queue 전달 예정
+					}
+					else {
+						visit[ind][temp.r + dr[dir]][temp.c + dc[dir]] = true;
+						bd[ind].push({ temp.r + dr[dir], temp.c + dc[dir], temp.count });
+						//바로 저장
+					}
+				}
+			}
+			if (subCheck == true) {
+				break;
+			}
+			bd[ind] = sub;
+			while (!sub.empty()) { sub.pop(); }
+		}
+		if (outcheck == true) {
+			break;
+		}
+
+		//물이 녹는 것.
+		while (!water.empty() && water.front().count == time) {
+			Loc temp = water.front();
+			water.pop();
+
+			for (int dir = 0; dir < 4; dir++) {
+				if (waterGo(temp.r + dr[dir], temp.c + dc[dir])) {
+					arr[temp.r + dr[dir]][temp.c + dc[dir]] = '.';
+					water.push({ temp.r + dr[dir], temp.c + dc[dir], temp.count + 1 });
+				}
+			}
+		}
+
+	}
+	
+	printf("%d", result);
+
+	return 0;
+}

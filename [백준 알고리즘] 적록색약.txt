@@ -1,0 +1,103 @@
+#include <stdio.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct loc {
+	int r, c;
+}Loc;
+
+int dr[4] = { 1,0,-1,0 };
+int dc[4] = { 0,1,0,-1 };
+
+int n;
+int result[2] = { 0,0 };
+
+char arr[102][102];
+bool visit[102][102];
+bool visit2[102][102];
+
+bool unormalCanGo(int r, int c, char state) {
+	if (r < 0 || r >= n || c < 0 || c >= n) {
+		return false;
+	}
+	else if (visit2[r][c] == true) {
+		return false;
+	}
+	else if (state == arr[r][c]) {
+		return true;
+	}
+	else if (state != arr[r][c]) {
+		if (state == 'R' && arr[r][c] == 'G') { return true; }
+		else if (state == 'G' && arr[r][c] == 'R') { return true; }
+		else { return false; }
+	}
+}
+bool normalCanGo(int r, int c, char state) {
+	if (r < 0 || r >= n || c < 0 || c >= n) {
+		return false;
+	}
+	else if (visit[r][c] == true) {
+		return false;
+	}
+	else if (state != arr[r][c]) {
+		return false;
+	}
+	else {
+		return true;
+	}
+
+}
+int main() {
+	scanf("%d", &n);
+	for (int i = 0; i < n; i++) {
+		scanf("%s", arr[i]);
+	}
+
+	//적록색약이 아닌 경우
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			if (visit[i][j] == false) {
+				queue <Loc> root;
+				root.push({ i,j });
+				visit[i][j] = true;
+
+				while (!root.empty()) {
+					Loc temp = root.front();
+					root.pop();
+
+					for (int dir = 0; dir < 4; dir++) {
+						if (normalCanGo(temp.r+dr[dir], temp.c +dc[dir], arr[i][j])) {
+							visit[temp.r + dr[dir]][temp.c + dc[dir]] = true;
+							root.push({temp.r + dr[dir], temp.c + dc[dir]});
+						}
+					}
+				}
+				result[0]++;
+			}
+
+			if (visit2[i][j] == false) {
+				queue <Loc> root;
+				root.push({ i,j });
+				visit2[i][j] = true;
+				while (!root.empty()) {
+					Loc temp = root.front();
+					root.pop();
+
+					for (int dir = 0; dir < 4; dir++) {
+						if (unormalCanGo(temp.r + dr[dir], temp.c + dc[dir], arr[i][j])) {
+							visit2[temp.r + dr[dir]][temp.c + dc[dir]] = true;
+							root.push({ temp.r + dr[dir], temp.c + dc[dir] });
+						}
+					}
+				}
+				result[1]++;
+			}
+			
+		}
+	}
+	printf("%d %d", result[0], result[1]);
+	//적록색약인 경우
+
+	return 0;
+}

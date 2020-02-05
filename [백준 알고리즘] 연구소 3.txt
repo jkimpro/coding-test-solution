@@ -1,0 +1,132 @@
+//¿¬±¸¼Ò 3
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct virus {
+	int r, c;
+	int time;
+	bool on;
+}Virus;
+int rdir[4] = { -1,0,1,0 };
+int cdir[4] = { 0,1,0,-1 };
+
+int arr[51][51];
+bool visit[51][51];
+bool tmpVisit[52][52];
+
+int result = 9999;
+int n, m;
+int blank = 0;
+
+vector <Virus> root;
+vector <Virus> active;
+
+bool canGo(int r, int c) {
+	if (r < 0 || r >= n || c < 0 || c >= n) {
+		return false;
+	}
+	else if (arr[r][c] == 1) {
+		return false;
+	}
+	else if (tmpVisit[r][c] == true) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+void dfs(int ind) { 
+	if (active.size() == m) {
+		int time = 0;
+		int none = blank;
+		
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				tmpVisit[i][j] = visit[i][j];
+			}
+		}
+		queue <Virus> simActive;
+
+		for (int i = 0; i < active.size(); i++) {
+			simActive.push(active[i]);
+		}
+
+		while (!simActive.empty()) {
+			Virus temp = simActive.front();
+			simActive.pop();
+			//printf("timechange:%d \n", temp.time);
+			if (temp.on == false) {
+				time = max(time, temp.time);
+			}
+			
+			for (int dir = 0; dir < 4; dir++) {
+				if (canGo(temp.r + rdir[dir], temp.c + cdir[dir])) {
+
+					tmpVisit[temp.r + rdir[dir]][temp.c + cdir[dir]] = true;
+
+					if (arr[temp.r + rdir[dir]][temp.c + cdir[dir]] == 2) {
+						simActive.push({ temp.r + rdir[dir] ,temp.c + cdir[dir] , temp.time+1, true});
+					}
+					if (arr[temp.r + rdir[dir]][temp.c + cdir[dir]] != 2) {
+						simActive.push({ temp.r + rdir[dir] ,temp.c + cdir[dir] , temp.time + 1 });
+						none -= 1;
+					}
+				}
+			}
+		}
+		if (none == 0) {
+			result = min(result, time);
+		}
+		//printf("result:%d \n", result);
+		return;
+	}
+	else {
+		for (int i = ind+1; i < root.size(); i++) {
+			active.push_back(root[i]);
+			visit[root[i].r][root[i].c] = true;
+			
+			dfs(i);
+
+			visit[root[i].r][root[i].c] = false;
+			active.pop_back();
+		}
+	}
+
+}
+
+int main() {
+	scanf("%d %d", &n, &m);
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			scanf("%d", &arr[i][j]);
+			if (arr[i][j] == 0) {
+				blank +=1;
+			}
+			if (arr[i][j] == 2) {
+				root.push_back({i,j,0, false});
+			}
+		}
+	}
+
+	for (int i = 0; i < root.size(); i++) {
+		active.push_back(root[i]);
+		visit[root[i].r][root[i].c] = true;
+		dfs(i);
+		visit[root[i].r][root[i].c] = false;
+		active.pop_back();
+	}
+		
+	if (result == 9999) {
+		printf("-1");
+	}
+	else {
+		printf("%d", result);
+	}
+	return 0;
+}

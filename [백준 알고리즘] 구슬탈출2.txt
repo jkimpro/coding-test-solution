@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct ball {
+	int r, c;
+}Ball;
+
+int rMove[4] = { -1,0,1,0 };
+int cMove[4] = { 0,1,0,-1 };
+
+char arr[100][100];
+
+int n, m;
+int result;
+
+bool canGo(int r, int c) {
+	if (arr[r][c] == '#') {return false;}
+	else {return true;}
+}
+void dfs(int count, int dir, Ball R, Ball B) {			//B기준으로 움직이는 것도 고려
+
+	if (count > 10) { return; }
+	if (result != 0 && count >= result) {return;}
+	
+	/*
+	printf("count:%d\n", count);
+	printf("R.r:%d R.c:%d\n", R.r, R.c);
+	printf("B.r:%d B.c:%d\n", B.r, B.c);
+	*/
+	//방향으로이동
+	int flag1 = 0;
+	int flag2 = 0;
+	
+	Ball tempR = { R.r, R.c };
+	Ball tempB = { B.r, B.c };
+
+	while (canGo(R.r + rMove[dir], R.c + cMove[dir])) {
+		R.r += rMove[dir];
+		R.c += cMove[dir];
+		if (arr[R.r][R.c] == 'O') {
+			flag1 = 1;
+			break;
+		}
+	}
+	while (canGo(B.r + rMove[dir], B.c + cMove[dir])) {
+		B.r += rMove[dir];
+		B.c += cMove[dir];
+		if (arr[B.r][B.c] == 'O') {
+			flag2 = 1;
+			break;
+		}
+	}
+
+	if (flag2 == 1) { return; }
+	if (flag1 == 1) { result = count; return; }
+	if (R.r == B.r && R.c == B.c) {
+		switch (dir) {
+		case 0: {
+			if (tempR.r < tempB.r) {B.r += rMove[(dir+2)%4];}
+			else { R.r += rMove[(dir + 2) % 4]; }
+			break; 
+		}		//북
+		case 1: { 
+			if (tempR.c < tempB.c) { R.c += cMove[(dir + 2) % 4]; }
+			else { B.c += cMove[(dir + 2) % 4]; }
+			break; 
+		}		//동
+		case 2: { 
+			if (tempR.r < tempB.r) { R.r += rMove[(dir + 2) % 4]; }
+			else { B.r += rMove[(dir + 2) % 4]; }
+			break;
+		}		//남
+		case 3: { 
+			if (tempR.c < tempB.c) { B.c += cMove[(dir + 2) % 4]; }
+			else { R.c += cMove[(dir + 2) % 4]; }
+			break; 
+			}		//서
+		}
+	}
+
+	for (int i = 0; i < 4; i++) {
+		if ((dir + 2) % 4 == i) { continue; }
+		if (canGo(R.r + rMove[i], R.c + cMove[i]) || canGo(B.r + rMove[i], B.c + cMove[i])) {
+			dfs(count + 1, i, R, B);
+		}
+	}
+}
+int main() {
+	Ball R, B;
+	result = 0;
+	scanf("%d %d", &n, &m);
+	m += 1;
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			scanf("%c", &arr[i][j]);
+			if (arr[i][j] == 'R') {
+				R.r = i;
+				R.c = j;
+				arr[i][j] = '.';
+			}
+			if (arr[i][j] == 'B') {
+				B.r = i;
+				B.c = j;
+				arr[i][j] = '.';
+			}
+		}
+	}
+
+	for (int i = 0; i < 4; i++) {
+		if (canGo(R.r + rMove[i], R.c + cMove[i])|| canGo(B.r + rMove[i], B.c + cMove[i])) {
+			dfs(1, i, R, B);
+		}
+	}
+
+	if (result == 0) {printf("-1");}
+	else {printf("%d", result);}
+
+	return 0;
+}

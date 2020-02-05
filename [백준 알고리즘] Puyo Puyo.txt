@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct Loc {
+	int r, c;
+}Loc;
+int dr[4] = {-1,0,1,0};
+int dc[4] = {0,1,0,-1};
+
+queue <Loc> root;
+queue <Loc> del;
+
+char arr[100][100];
+bool visit[100][100];
+bool flag = false;
+bool canGo(int r, int c, int ot, int oc) {
+	if (r < 0 || r >= 12 || c < 0 || c >= 6) {
+		return false;
+	}
+	else if (arr[r][c] == '.' || visit[r][c] == true) {
+		return false;
+	}
+	else if (arr[r][c] != arr[ot][oc]) {
+		return false;
+	}
+	return true;
+}
+
+int main() {
+	int result;
+	for (int i = 0; i < 12; i++) {
+		scanf("%s", arr[i]);
+	}
+
+	for (int time = 0; ; time++) {
+		for (int i = 0; i < 12; i++) {
+			for (int j = 0; j < 6; j++) {
+				if (arr[i][j] == 'R' || arr[i][j] == 'G' || arr[i][j] == 'P' || arr[i][j] == 'Y' || arr[i][j] == 'B') {
+					root.push({ i,j });
+					del.push({ i,j });
+					visit[i][j] = true;
+
+					while (!root.empty()) {
+						Loc temp = root.front();
+						root.pop();
+						
+						for (int dir = 0; dir < 4; dir++) {
+							if (canGo(temp.r + dr[dir], temp.c + dc[dir], temp.r, temp.c)) {
+								root.push({ temp.r + dr[dir], temp.c + dc[dir] });
+								del.push({ temp.r + dr[dir], temp.c + dc[dir] });
+								visit[temp.r + dr[dir]][temp.c + dc[dir]] = true;
+							}
+						}
+					}
+		
+					if (del.size() >= 4) {
+						while (!del.empty()) {
+							Loc temp = del.front(); del.pop();
+							arr[temp.r][temp.c] = '.';
+							visit[temp.r][temp.c] = false;
+						}
+						flag = true;
+					}
+					else {
+						while (!del.empty()) {
+							Loc temp = del.front(); del.pop();
+							visit[temp.r][temp.c] = false;
+						}
+					}
+				}
+			}
+		}
+
+		if (flag == false) {
+			result = time;
+			break;
+		}
+		//³»¸®±â
+		for (int j = 0; j < 6; j++) {
+			bool last = false;
+			int bar;
+			for (int i = 11; i >= 0; i--) {
+				if (arr[i][j] == '.' && last == false) {
+					last = true;
+					bar = i;
+				}
+				else if (arr[i][j] != '.' && last == true) {
+					int count = 0;
+					for (int set = bar; set >= 0; set--) {
+						if (i - count >= 0) {
+							arr[set][j] = arr[i - count][j];
+							count++;
+						}
+						else {
+							arr[set][j] = '.';
+						}
+					}
+					i = bar;
+					last = false;
+				}
+				else {
+					continue;
+				}
+			}
+		}
+		flag = false;
+	}
+	printf("%d", result);
+	return 0;
+}

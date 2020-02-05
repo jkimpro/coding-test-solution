@@ -1,0 +1,116 @@
+//시간초과
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+typedef struct loc {
+	int r, c;
+	int count;
+	int subCount;
+	int dir;
+}Loc;
+
+int dr[4] = {1,1,-1,-1};
+int dc[4] = {-1,1,1,-1};
+
+int arr[752][752];
+char map[752][752];
+
+int mainR, mainC;
+int result = 0;
+int n, m;
+
+bool canGo(int r, int c, int dir) {
+	if (r < 0 || r >= n || c < 0 || c >= m) { return false; }
+	else if (dir >= 4) { return false; }
+	else if (arr[r][c] == 0) { return false; }
+	else {
+		return true;
+	}
+}
+/*
+void dfs(int r, int c, int count,int subCount, int dir) {
+	//printf("option r:%d c:%d count;%d dir:%d \n", r, c, count, dir);
+
+	if (r == mainR && c == mainC && (dir == 3 || dir==1) ) {
+		result = max(result, count);
+	}
+
+	if (subCount > count) { return; }
+
+	if (canGo(r+dr[dir], c + dc[dir], dir)) {
+		if (dir == 0) {
+			dfs(r + dr[dir], c + dc[dir], count + 1, subCount+1, dir);
+		}
+		else {
+			dfs(r + dr[dir], c + dc[dir], count, subCount + 1, dir);
+		}
+	}
+	if (count == subCount && dir+1<=3 && canGo(r+dr[dir + 1], c+dc[dir + 1], dir+1)) {	//방향틀기
+		dfs(r + dr[dir+1], c + dc[dir + 1], count, 2, dir + 1);
+	}
+}
+*/
+int main() {
+	
+	scanf("%d %d", &n, &m);
+
+	for (int i = 0; i < n; i++) {
+		scanf("%s", &map[i]);
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			arr[i][j] = map[i][j] - '0';
+		}
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			if (arr[i][j] == 1) {
+				mainR = i; mainC = j;
+				result = max(result, arr[i][j]);
+
+				int tempR =i;
+				int tempC =j;
+				int count = 2;
+
+				stack <Loc> root;
+				while (canGo(tempR + dr[0], tempC + dc[0], 0)) {
+					root.push({ tempR + dr[0], tempC + dc[0],count,1,1});	//꺽인방향으로 넣기
+					count++;
+				}
+
+				if (count < result) { continue; }
+
+				while (!root.empty()) {
+					Loc temp = root.top();
+					root.pop();
+					bool out = false;
+					while (1) {
+						if (temp.r == mainR && temp.c == mainC && temp.dir == 3) {
+							result = max(result, temp.count);
+							out = true;
+							break;
+						}
+						//다음과정
+
+
+					}
+					if (out == true) {
+						break;
+					}
+				}
+				
+				while (!root.empty()) {
+					root.pop();
+				}
+			
+			}
+		}
+	}
+	
+	printf("%d", result);
+	return 0;
+}

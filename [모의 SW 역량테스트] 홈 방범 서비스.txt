@@ -1,0 +1,74 @@
+// 내답안
+
+////====홈 방범 서비스
+#include <stdio.h>
+#include <stdlib.h>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct home
+{
+	int w;
+	int h;
+}Home;
+Home home[1000];
+
+int main()
+{
+	int num;
+	scanf("%d", &num);
+
+	for (int testcase = 1; testcase <= num; testcase++)
+	{
+		int city;
+		int result = 0; //제공 받는 집의수
+		int n, m; // 도시의 크기 , 하나의 집 비용
+		int houseCount = 0;
+		scanf("%d %d", &n, &m);
+
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				scanf("%d", &city);
+				if (city == 1)
+				{
+					home[houseCount].w = i;
+					home[houseCount].h = j;
+					houseCount++;
+				}
+			}
+		}
+
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				//수익 house = m*집개수 -> 집들만 확인하는 절차
+				//운영 비용 k = k*k + (k-1)*(k-1)
+				for (int k = 1; k <= n*n; k++)
+				{
+					int price;
+					int count = 0;
+					//범위 측정
+					for (int set = 0; set < houseCount; set++)
+					{
+						int temp = abs(home[set].w - i) + abs(home[set].h - j);
+						if (temp < k) { count++; }
+					}
+					//계산
+					price = (count*m) - (k*k + (k - 1)*(k - 1));
+
+					if (price >=0 && result<count) {
+						result = count;
+					}
+				}
+			}
+		}
+		printf("#%d %d\n", testcase, result);
+	}
+	return 0;
+}
+

@@ -1,0 +1,139 @@
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+#define UP 0
+#define RIGHT 1
+#define DOWN 2
+#define LEFT 3
+
+using namespace std;
+
+int dr[4] = { -1,0,1,0 };
+int dc[4] = { 0,1,0,-1 };
+
+int n;
+int result;
+int test;
+int arr[102][102];
+bool visit[102][102];
+int noneDir[12][3] = {
+	{DOWN,RIGHT,DOWN},
+	{LEFT,DOWN,LEFT},
+	{UP,LEFT,UP},
+	{RIGHT,UP,RIGHT},
+
+	{ LEFT , UP,UP },{DOWN,DOWN,RIGHT},
+	{UP,RIGHT,RIGHT },{LEFT,LEFT,DOWN},
+	{RIGHT,DOWN,DOWN },{UP,UP,LEFT},
+	{DOWN,LEFT,LEFT},{RIGHT,RIGHT,UP}
+};
+vector <int> rootDir;
+vector <int> results;
+
+bool canGo(int r, int c) {
+	if (r < 0 || r >= n || c < 0 || c >= n) { return false; }
+	else if (visit[r][c] == true) { return false; }
+	else {
+		return true;
+	}
+}
+//0 북 1 동 2 남 3 서 
+void dfs(int r, int c,int count, int sum) {
+	if (count == 4 && rootDir.size() == 3) {
+		/*for (int i = 0; i < 3; i++) {
+			printf("%d ", rootDir[i]);
+		}*/
+		for (int i = 0; i < 12; i++) {
+			int count = 0;
+			for (int j = 0; j < rootDir.size(); j++) {
+				if (rootDir[j] == noneDir[i][j]) {
+					count++;
+				}
+			}
+			if (count == rootDir.size()) {  return; }
+		}
+		//printf("\n");
+
+		result = max(result, sum);
+		return;
+	}
+	else {
+		for (int dir = 0; dir < 4; dir++) {
+			if (canGo(r + dr[dir], c + dc[dir])) {
+				visit[r + dr[dir]][c + dc[dir]] = true;
+				rootDir.push_back(dir);
+				dfs(r + dr[dir], c + dc[dir], count + 1, sum + arr[r + dr[dir]][c + dc[dir]]);
+				rootDir.pop_back();
+				visit[r + dr[dir]][c + dc[dir]] = false;
+			}
+		}
+	}
+	return;
+}
+
+int main() {
+	test = 1;
+
+	while (1) {
+		result = -(10e8);
+		
+		scanf("%d", &n);
+		if (n == 0) { break; }
+
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				scanf("%d", &arr[i][j]);
+			}
+		}
+
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				
+				visit[i][j] = true;
+
+//				printf("i:%d ,j:%d \n", i, j);
+				for (int dir = 0; dir < 4; dir++) {
+					if (canGo(i + dr[dir], j + dc[dir])) {
+						visit[i + dr[dir]][j + dc[dir]] = true;
+						rootDir.push_back(dir);
+						dfs(i + dr[dir], j + dc[dir], 2, arr[i][j] + arr[i + dr[dir]][j + dc[dir]]);
+						rootDir.pop_back();
+						visit[i + dr[dir]][j + dc[dir]] = false;
+					}
+				}
+				visit[i][j] = false;
+
+				//뻐큐 모양 확인 절차
+				for (int dir = 0; dir < 4; dir++) {
+					bool out = false;
+					int sum = arr[i][j];
+					for (int k = 0; k < 4; k++) {
+						if (dir == k) { continue; }
+						else {
+							if (canGo(i + dr[k], j + dc[k])) {
+								sum += arr[i + dr[k]][j + dc[k]];
+							}
+							else {
+								out = true;
+								break;
+							}
+						}
+					}
+					if (out == false) {
+						result = max(result, sum);
+					}
+				}
+
+
+			}
+		}
+		results.push_back(result);
+		test++;
+	}
+
+	for (int i = 0; i < results.size(); i++) {
+		printf("%d. %d\n", i + 1, results[i]);
+	}
+
+	return 0;
+}

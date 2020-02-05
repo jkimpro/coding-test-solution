@@ -1,0 +1,96 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+typedef struct chicken{
+   int r,c;
+   int distance;
+}Chicken;
+
+typedef struct home{
+   int r,c;
+   int chick[20];
+}Home;
+
+vector <Chicken> chicken;
+vector <Home> home;
+
+vector <int> minDist;
+vector <int> backup;
+
+vector <int> ableChick;
+
+int n, m;
+int arr[100][100];
+int result = 0;
+
+int main() {
+   result = 9999;
+   
+   scanf("%d %d", &n, &m);
+
+   for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+         scanf("%d", &arr[i][j]);
+         if (arr[i][j] == 1) {
+            Home temp;
+            temp.r = i;
+            temp.c = j;
+            home.push_back(temp);
+            
+            minDist.push_back(999);
+            backup.push_back(999);
+         }
+         else if (arr[i][j] == 2) {
+            Chicken temp;
+            temp.r = i;
+            temp.c = j;
+            chicken.push_back(temp);
+         }
+      }
+   }
+
+   for(int i =0; i<home.size(); i++){
+      for(int j =0; j<chicken.size(); j++){
+         int distance = abs(home[i].r - chicken[j].r)+abs(home[i].c - chicken[j].c);
+         home[i].chick[j] = distance;
+      }
+   } 
+   //거리계산 인덱스별 저장 
+
+   //조합 문제
+   for(int i =0; i<pow(2.0, chicken.size()); i++){
+      int count =0;
+      for(int j =0; j<chicken.size(); j++){   
+         if(i&(1 << j)){
+            ableChick.push_back(j);
+         }  
+     }
+      if(ableChick.size()>m){
+         ableChick.clear();
+         continue;
+      }
+      for(int j =0; j<ableChick.size(); j++){
+         for(int k =0; k<home.size(); k++){
+            minDist[k]= min(home[k].chick[ableChick[j]],minDist[k]);
+         }
+      }
+      for(int j =0; j<minDist.size(); j++){
+         count += minDist[j];
+      }
+      
+      result = min(result,count);
+      
+      minDist = backup;
+      ableChick.clear();
+      
+   }
+
+   /*비트연산 코드 확인해보기 */
+   printf("%d", result);
+   return 0;
+}

@@ -1,0 +1,52 @@
+#include <stdio.h>
+
+using namespace std;
+
+int sums[100001][4];
+int result[100001][4];
+int main() {
+	int test;
+	int n, q;
+
+	scanf("%d", &test);
+
+	for (int testcase = 1; testcase <= test; testcase++) {
+		scanf("%d %d", &n, &q);
+
+		for (int i = 0; i < 100001; i++) {
+			for (int j = 0; j < 4; j++) {
+				sums[i][j] = 0;
+				result[i][j] = 0;
+			}
+		}
+
+		for (int i = 1; i <= n; i++) {
+			int temp;
+			scanf("%d", &temp);
+			
+			for (int j = 1; j <= 3; j++) {
+				if (temp == j) {
+					sums[i][j] = sums[i-1][j] + 1;
+				}
+				else {
+					sums[i][j] = sums[i - 1][j];
+				}
+			}
+		}
+		
+		//번호별 계산을 미리해두기
+
+		for (int i = 0; i < q; i++) {
+			int st, ed;
+			scanf("%d %d", &st, &ed);
+			for (int j = 1; j <= 3; j++) {
+				result[i][j] = sums[ed][j] - sums[st - 1][j];
+			}
+		}
+		printf("#%d\n", testcase);
+		for (int i = 0; i < q; i++) {
+			printf("%d %d %d\n", result[i][1], result[i][2], result[i][3]);
+		}
+	}
+	return 0;
+}

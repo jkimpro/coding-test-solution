@@ -1,0 +1,66 @@
+//testcase 500개 중 226개 맞음
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
+#include <functional>
+
+using namespace std;
+
+int main() {
+
+	int test;
+	vector <int> root;
+
+	scanf("%d", &test);
+	
+	for (int testcase = 1; testcase <= test; testcase++) {
+		int result = 0;
+		int count;
+		int sum = 0;
+
+		scanf("%d", &count);
+
+		for (int i = 0; i < count; i++) {
+			int temp;
+			scanf("%d", &temp);
+			root.push_back(temp);
+		}
+
+		sort(root.begin(), root.end(), greater<int>());
+
+		for (int i = 0; i < root.size(); i++) {
+			if (root.size() == 0) { break; }
+			if (root[i] >= 50) {	//한개일 경우에는 재치는 경우
+				result += 1;
+				root.erase(root.begin()+0);
+				i -= 1;
+			}
+			else {					//한개가 아닌 경우
+				int num = 50 / root[i];
+				int left = 50 % root[i];
+										//박스수가 모자란 경우
+				if (num > root.size()) { break; } // 합산으로 치지 않음
+				
+				
+				if (left == 0) {		//나머지가 없는 경우 (딱떨어지게 실을수 있음)
+					num -= 1;
+					for (int j = 0; j < num; j++) {
+						root.erase(root.begin() + root.size()-1);
+					}
+					result += 1;
+				}
+				else {					//나머지가 있는 경우
+
+					for (int j = 0; j < num; j++) {
+						root.erase(root.begin() + root.size() - 1);
+					}
+					result += 1;
+				}
+			}
+		}
+		root.clear();
+		printf("#%d %d\n", testcase, result);
+	}
+
+	return 0;
+}

@@ -1,0 +1,96 @@
+////수영장 내답안 (정답 참고)
+// 수영장 문제
+
+#include <stdio.h>
+#include <math.h>
+
+using namespace std;
+
+int plan[13];
+int price[13];
+int result = 0;
+int day;
+int month;
+int thMonth;
+int year;
+
+void dfs(int num, int sum)
+{
+	if (num > 11)
+	{
+		if (sum < result) result = sum;
+		return;
+	}
+
+	dfs(num + 1, sum + plan[num]);
+	dfs(num + 3, sum + thMonth);
+}
+
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++){
+
+		int sum=0;
+		scanf("%d %d %d %d", &day, &month, &thMonth, &year);
+		
+		for (int i = 0; i < 12; i++)
+		{
+			int temp;
+			scanf("%d", &plan[i]);
+			temp = plan[i] * day;
+			if (temp > month) plan[i] = month;
+			else plan[i] = temp;
+		}
+
+		result = year;
+		dfs(0, sum);
+		
+		
+		printf("#%d %d\n", testcase, result);		
+	}
+	return 0;
+}
+
+
+/////정답
+#include <iostream>
+#include <algorithm>
+using namespace std;
+ 
+int d, m, tm, y;
+int ans;
+int val[14];
+ 
+void dfs(int index, int sum) {
+    if (index > 11) {
+        if (ans > sum) ans = sum;
+        return;
+    }
+ 
+    dfs(index + 1, sum + val[index]);
+    dfs(index + 3, sum + tm);
+}
+ 
+int main(int argc, char *argv[]) {
+    int T;
+    cin >> T;
+    for (int t = 0; t < T; t++) {
+        int input;
+        val[14] = { 0, };
+ 
+        cin >> d >> m >> tm >> y;
+        for (int i = 0; i < 12; i++) {
+            cin >> input;
+            val[i] = min(input * d, m);
+        }
+ 
+        ans = y;
+        dfs(0, 0);
+ 
+        cout << "#" << t + 1 << " " << ans << endl;
+    }
+    return 0;
+}

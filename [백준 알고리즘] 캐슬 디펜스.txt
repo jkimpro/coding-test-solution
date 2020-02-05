@@ -1,0 +1,313 @@
+/////정답본
+#include <stdio.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct loc {
+	int r, c;
+	int count;
+}Loc;
+
+int dr[3] = {0,-1,0 };
+int dc[3] = {-1,0,1};
+
+int n, m, k;
+int arr[20][20];
+int back[20][20];
+int attack[3];
+
+int result;
+int re ;
+
+bool isEmpty() {
+	for (int i = 0; i < n; i++){
+		for (int j = 0; j < m; j++) {
+			if (arr[i][j] == 1) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+void simulation() {
+	queue <Loc> root;
+	bool visit[20][20];
+	vector <Loc> kill;
+
+	for (int turn = 0; turn < 3; turn++) {
+	
+		root.push({ n, attack[turn], 0 });
+		visit[n][attack[turn]] = true;
+
+		while (!root.empty()) { //k//거리
+			Loc temp = root.front();
+			root.pop();
+
+			if (temp.count > k) { break; }
+			if (arr[temp.r][temp.c] == 1) {
+				kill.push_back(temp);
+				break;
+			}
+
+			for (int dir = 0; dir < 3; dir++) {
+				if (temp.r + dr[dir] < 0 || temp.r + dr[dir] > n || temp.c + dc[dir] < 0 || temp.c + dc[dir] >= m) {
+					continue;
+				}
+				else if (visit[temp.r + dr[dir]][temp.c + dc[dir]] == true) { continue; }
+				else {
+					visit[temp.r + dr[dir]][temp.c + dc[dir]] = true;
+					root.push({ temp.r + dr[dir], temp.c + dc[dir], temp.count + 1 });
+				}
+			}
+		}
+
+		for (int i = 0; i <= n; i++) {
+			for (int j = 0; j <= m; j++) {
+				visit[i][j] = false;
+			}
+		}
+		while (!root.empty()) { root.pop(); }
+
+	}
+	for (int i = 0; i < kill.size(); i++) {
+		if (arr[kill[i].r][kill[i].c] == 1) {
+			arr[kill[i].r][kill[i].c] = 0;
+			re += 1;
+		}
+	}
+}
+
+int main() {
+	result = 0;
+	re = 0;
+	scanf("%d %d %d", &n, &m, &k);
+
+	for (int i = 0; i <=n; i++) {
+		if (i < n) {
+			for (int j = 0; j < m; j++) {
+				scanf("%d", &arr[i][j]);
+				back[i][j] = arr[i][j];
+			}
+		}
+		else {
+			for (int j = 0; j < m; j++) {
+				arr[i][j] = 0;
+			}
+		}
+	}
+
+	for (int l = 0; l < m; l++) {
+		for (int q = 0; q < m; q++){
+			for (int s = 0; s < m; s++) {
+				if (l == q || q == s || l == s) { continue; }
+				attack[0] = l;
+				attack[1] = q;
+				attack[2] = s;
+
+				while (!isEmpty()) {
+					simulation();
+					for (int j = m - 1; j >= 0; j--) {
+						for (int i = n - 1; i >= 0; i--) {
+							if (i == n - 1) {
+								arr[i][j] = 0;
+							}
+							else {
+								arr[i + 1][j] = arr[i][j];
+								arr[i][j] = 0;
+							}
+						}
+					}
+				}
+
+				result = max(re, result);
+				re = 0;
+
+				for (int i = 0; i < n; i++) {	//백업
+					for (int j = 0; j < m; j++) {
+						arr[i][j] = back[i][j];
+					}
+				}
+
+			}
+		}
+	}
+
+	printf("%d", result);
+	return 0;
+}
+
+
+
+////궁수 동시 공격 조건 추가시
+#include <stdio.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct loc {
+	int r, c;
+	int count;
+}Loc;
+
+int dr[3] = {0,-1,0 };
+int dc[3] = {-1,0,1};
+
+int n, m, k;
+int arr[20][20];
+int back[20][20];
+int attack[3];
+
+int result = 0;
+int re = 0;
+
+bool isEmpty() {
+	for (int i = 0; i < n; i++){
+		for (int j = 0; j < m; j++) {
+			if (arr[i][j] == 1) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+void simulation() {
+	vector<Loc> kill;
+	queue <Loc> root;
+	vector <Loc> wait;
+
+	for (int turn = 0; turn < 3; turn++) {
+		int limit = k;
+		Loc ex;
+
+		bool check = false;
+		bool visit[20][20];
+
+		root.push({ n, attack[turn], 0 });
+		visit[n][attack[turn]] = true;
+
+		while (!root.empty() && root.front().count<=limit) { //k//거리
+
+			Loc temp = root.front();
+			root.pop();
+
+			if (temp.count > k) { break; }
+
+			if (arr[temp.r][temp.c] == 1) {
+				check = true;
+				limit = temp.count;
+				wait.push_back(temp);
+			}
+			for (int dir = 0; dir < 3; dir++) {
+					
+				if (temp.r + dr[dir] < 0 || temp.r + dr[dir] > n || temp.c + dc[dir] < 0 || temp.c + dc[dir] >= m) {
+					continue;
+				}
+				else if (visit[temp.r + dr[dir]][temp.c + dc[dir]] == true) { continue; }
+				else {
+					visit[temp.r + dr[dir]][temp.c + dc[dir]] = true;
+					root.push({ temp.r + dr[dir], temp.c + dc[dir], temp.count + 1 });
+				//	printf("temp.r:%d temp.c:%d temp.count:%d\n", temp.r + dr[dir], temp.c + dc[dir], temp.count + 1);
+
+				}
+			}
+		}
+		//printf("\nturn:%d waitsize: %d\n", turn, wait.size());
+		if (check == true) {
+			ex = wait[0];
+			for (int i = 0; i < wait.size(); i++) {
+				if (wait[i].count < ex.count) {
+					ex = wait[i];
+				}
+				else if (wait[i].count == ex.count && wait[i].c < ex.c) {
+					ex = wait[i];
+				}
+				else {
+					continue;
+				}
+			}
+			kill.push_back(ex);
+		}
+		for (int i = 0; i <= n; i++) {
+			for (int j = 0; j <= m; j++) {
+				visit[i][j] = false;
+			}
+		}
+		wait.clear();
+		while (!root.empty()) { root.pop(); }
+	}
+
+	for (int i = 0; i < kill.size(); i++) {
+		if (arr[kill[i].r][kill[i].c] == 0) {
+			continue;
+		}
+		else {
+			arr[kill[i].r][kill[i].c] = 0;
+			re += 1;
+		//	printf("killed");
+		}
+	}
+	return;
+}
+
+int main() {
+	scanf("%d %d %d", &n, &m, &k);
+
+	for (int i = 0; i <=n; i++) {
+		if (i < n) {
+			for (int j = 0; j < m; j++) {
+				scanf("%d", &arr[i][j]);
+				back[i][j] = arr[i][j];
+			}
+		}
+		else {
+			for (int j = 0; j < m; j++) {
+				arr[i][j] = 0;
+			}
+		}
+	}
+
+	for (int l = 0; l < m; l++) {
+		for (int q = 0; q < m; q++){
+			for (int s = 0; s < m; s++) {
+
+				if (l == q || q == s || l == s) { continue; }
+
+				attack[0] = l;
+				attack[1] = q;
+				attack[2] = s;
+
+				while (!isEmpty()) {
+					//시뮬레이션
+					simulation();
+					for (int j = m - 1; j >= 0; j--) {
+						for (int i = n - 1; i >= 0; i--) {
+							if (i == n - 1) {
+								arr[i][j] = 0;
+							}
+							else {
+								arr[i + 1][j] = arr[i][j];
+								arr[i][j] = 0;
+							}
+						}
+					}
+				}
+
+				result = max(re, result);
+				re = 0;
+			//	printf("\n\n");
+				for (int i = 0; i < n; i++) {	//백업
+					for (int j = 0; j < m; j++) {
+						arr[i][j] = back[i][j];
+					}
+				}
+
+			}
+		}
+	}
+
+	printf("%d", result);
+	return 0;
+}

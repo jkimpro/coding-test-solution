@@ -1,0 +1,157 @@
+////아기 상어 문제
+////BFS 에 익숙해지기
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct shark {
+	int r, c;
+	int eat;
+	int size;
+}Fish;
+
+typedef struct map {
+	int r, c;
+	int count;
+}Map;
+
+Fish shark;
+queue <Map> map;
+vector <Map> gotFish;
+
+int n;
+int result;
+int arr[100][100];
+bool visit[100][100];
+bool backup[100][100];
+
+bool canGo(int r, int c)
+{
+	if (r < 0 || r >= n || c < 0 || c >= n) { return false; }
+	else if (visit[r][c] == true) { return false; }
+	else if (arr[r][c] > shark.size) { return false; }
+	else
+	{
+		return true;
+	}
+}
+int main() {
+
+	result = 0;
+
+	scanf("%d", &n);
+
+	shark.size = 2;
+	shark.eat = 0;
+	for (int i = 0; i<n; i++) {
+		for (int j = 0; j<n; j++) {
+			scanf("%d", &arr[i][j]);
+
+			if (arr[i][j] == 9) {
+				shark.r = i;
+				shark.c = j;
+				arr[i][j] = 0;
+			}
+			visit[i][j] = false;
+		}
+	}
+
+	while (1)
+	{
+		int outFlag = 0;
+		map.push({ shark.r, shark.c, 0 });
+		visit[shark.r][shark.c] = true;
+
+		while (!map.empty())
+		{
+			Map temp = map.front();
+			map.pop();
+
+			if (arr[temp.r][temp.c]>0 && arr[temp.r][temp.c] < shark.size) {
+				
+				gotFish.push_back({ temp.r, temp.c, temp.count});
+			}
+
+			//동서남북
+			int time = temp.count + 1;
+
+			if (canGo(temp.r - 1, temp.c)) {
+				visit[temp.r - 1][temp.c] = true;
+				map.push({ temp.r - 1, temp.c, time });
+			}
+			if (canGo(temp.r, temp.c - 1)) {
+				visit[temp.r][temp.c - 1] = true;
+				map.push({ temp.r, temp.c - 1, time });
+			}
+			if (canGo(temp.r, temp.c + 1)) {
+				visit[temp.r][temp.c + 1] = true;
+				map.push({ temp.r, temp.c + 1, time });
+			}
+			if (canGo(temp.r + 1, temp.c)) {
+				visit[temp.r + 1][temp.c] = true;
+				map.push({ temp.r + 1, temp.c, time });
+			}
+		}
+		if (gotFish.size() == 0) { break; }
+		else {
+			Map target = {gotFish[0].r,gotFish[0].c,gotFish[0].count };
+
+			for (int i = 1; i < gotFish.size(); i++) {
+				if (target.count == gotFish[i].count) {
+					if (target.r == gotFish[i].r) {
+						if (gotFish[i].c < target.c) {
+							target.count = gotFish[i].count;
+							target.r = gotFish[i].r;
+							target.c = gotFish[i].c;
+						}
+						else {
+							continue;
+						}
+					}
+					else if (gotFish[i].r < target.r){
+						target.count = gotFish[i].count;
+						target.r = gotFish[i].r;
+						target.c = gotFish[i].c;
+					}
+					else {
+						continue;
+					}
+				}
+				else if (gotFish[i].count < target.count) {
+					target.count = gotFish[i].count;
+					target.r = gotFish[i].r;
+					target.c = gotFish[i].c;
+				}
+				else {
+					continue;
+				}
+			}
+			
+			arr[target.r][target.c] = 0;
+			shark.eat += 1;
+			shark.r = target.r;
+			shark.c = target.c;
+			result += target.count;
+
+			if (shark.eat == shark.size) {
+				shark.size += 1;
+				shark.eat = 0;
+			}
+			gotFish.clear();
+		}
+
+		//visit 기록 초기화
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				visit[i][j] = false;
+			}
+		}
+	}
+	printf("%d", result);
+	return 0;
+}

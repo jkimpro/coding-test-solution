@@ -1,0 +1,158 @@
+//나의 답안
+#include <stdio.h>
+#include <vector>
+
+using namespace std;
+int arr[100][100];
+
+int main(){
+	int num = 0;
+	scanf("%d", &num);
+	
+	for (int testcase = 1; testcase <= num; testcase++)
+	{
+		int d = 0;
+		int w = 0;
+		int k;				//강도
+
+		int medicine = 0;
+		bool pass[100];
+
+		scanf("%d %d %d", &d, &w, &k);
+
+		for (int i = 0; i < d; i++){
+			for (int j = 0; j < w; j++){
+				scanf("%d", &arr[i][j]);
+			}
+		}
+
+		for (int insert = 0; insert < k; insert++)
+		{
+			bool outPass = true;
+			//약을 넣는 과정
+
+			// 구현 실패.
+
+			//검사 프로세스
+			for (int j = 0; j < w; j++)
+			{
+				int temp;
+				int count = 0;
+				for (int i = 0; i < d; i++)
+				{
+					if (i + k >= d){
+						break;
+					}
+					temp = arr[i][j];
+					
+					//세개 검사
+					for (int t = 0; t < k; t++){
+						if (temp == arr[i + t][j]){
+							count++;
+						}
+					}
+					if (count == k){
+						pass[j] = true;
+						break;
+					}
+				}
+			}
+			
+			for (int check=0; check<w; check++){
+				if (pass[check] == false){
+					outPass = false;
+				}
+			}
+			//탈출
+			if (outPass == true){
+				medicine = insert;
+				break;
+			}
+		}
+		printf("#%d %d", testcase, medicine);
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+////////// 모범 답안
+#include<iostream>
+#include<cstring>
+#include<stdio.h>
+#include<algorithm>
+ 
+using namespace std;
+ 
+int T;
+int D, W, K; //3<=D<=13, 1<=W<=20, 1<=K<=D
+int map[14][21];
+int backup[14][21];
+int answer;
+ 
+void input() {
+    cin >> D >> W >> K;
+    for (int i = 1; i <= D; i++) {
+        for (int j = 1; j <= W; j++) {
+            cin >> map[i][j];
+            backup[i][j] = map[i][j];
+        }
+    }
+    answer = 999;
+}
+ 
+bool test() {
+    bool pass = false;
+    int temp_k;
+    for (int col = 1; col <= W; col++) {
+        temp_k = 1; pass = false;
+        for (int row = 2; row <= D; row++) {
+            if (map[row][col] == map[row - 1][col])temp_k++;
+            else temp_k = 1;
+            if (temp_k >= K) {pass = true;break;}
+        }
+        if (!pass)return false;
+    }
+    return true;
+}
+ 
+void solution(int rowline, int idx, int cnt) {
+    for (int i = 1; i <= W; i++) {
+        map[rowline][i] = idx;
+    }
+ 
+    for (int i = rowline + 1; i <= D; i++) {
+        solution(i, idx, cnt + 1);
+    }
+ 
+    if (test()) answer = min(cnt, answer);
+ 
+    for (int i = 1; i <= W; i++)
+        map[rowline][i] = backup[rowline][i];
+ 
+}
+ 
+ 
+ 
+int main() {
+ 
+    cin >> T;
+    for (int testcase = 1; testcase <= T; testcase++) {
+        input();
+ 
+        if (test()) answer = 0;
+        else {
+            solution(0, 0, 0);
+            solution(0, 1, 0);
+        }
+ 
+        cout << "#" << testcase << " " << answer << endl;
+ 
+    }
+ 
+    return 0;
+}

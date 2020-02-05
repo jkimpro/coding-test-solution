@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+	int n;
+	int sum;
+	int result;
+	
+	scanf("%d", &n);
+	
+	for (int i = 0; i < n; i++) {
+		int num;
+		scanf("%d", &num);
+	
+		if (i == 0) {
+			sum = num;
+			result = num;
+		}
+		else {	//처음이 아닌 경우
+			if (sum + num < num) {
+				sum = num;
+				result = max(result, num);
+			}
+			else {
+				sum += num;
+				result = max(result, sum);
+			}
+		}
+	}
+	
+	printf("%d", result);
+	return 0;
+}

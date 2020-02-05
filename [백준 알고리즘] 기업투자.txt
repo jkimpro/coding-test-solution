@@ -1,0 +1,71 @@
+//기업투자
+
+
+
+//기업투자 시간초과 본
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int n, m;
+//가능한 기업의 개수 m개
+
+int price[21][301]; // [기업의 개수] (투자 금액 별 개수)
+int rprice[20];
+int resultPrice[20];
+
+int result;
+
+void dfs(int next, int sum, int got) {
+	if (sum >= n) {
+		if (next < m) {
+			return;
+		}
+		if (got > result) {
+			result = got;
+			for (int i = 0; i < m; i++) {
+				resultPrice[i] = rprice[i];
+			}
+		}
+		return;
+	}
+	else {
+		for (int i = 0; i <= n; i++) {
+			if (sum + i <= n) {
+				rprice[next] = i;
+				dfs(next + 1, sum + i, got + price[next][i]);
+				rprice[next] = 0;
+			}
+		}
+	}
+}
+int main() {
+
+	result = 0;
+
+	scanf("%d %d", &n, &m);
+	for (int i = 0; i < m; i++) { //투자 가능한 기업들의 수
+		rprice[i] = 0;
+		price[i][0] = 0;
+	}
+
+	for (int i = 0; i < n; i++) {
+		int temp;
+		scanf("%d", &temp);
+
+		for (int j = 0; j < m; j++) {
+			scanf("%d", &price[j][temp]);
+		}
+	}
+
+	dfs(0, 0, 0);
+
+	// 전체를 다돌아보는 수 밖에
+	printf("%d\n", result);
+	for (int i = 0; i < m; i++) {
+		printf("%d ", resultPrice[i]);
+	}
+	return 0;
+}

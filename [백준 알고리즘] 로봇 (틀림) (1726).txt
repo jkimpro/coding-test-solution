@@ -1,0 +1,118 @@
+
+//visit을 통한 분류 필요.
+
+#include <stdio.h>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+typedef struct robot {
+	int r, c;
+	int dir;
+	int count;			//명령 횟수 저장
+	int goCount;
+}Robot;
+
+int dr[5] = { 0,0,0,1,-1 }; //동서 남북
+int dc[5] = { 0,1,-1,0,0 };
+
+int n, m;
+int result;
+int arr[101][101];
+bool visit[5][101][101];
+
+queue <Robot> root;
+
+bool canGo(int r, int c, int dir) {
+	if (r < 0 || r >= n || c < 0 || c >= m) { return false; }
+	if (arr[r][c] == 1) { return false; }
+	if (visit[dir][r][c] == true) { return false; }
+	return true;
+}
+
+int rightRotate(int num) { //시계방향
+	if (num == 1) { return 3; } //동 -> 남
+	if (num == 2) { return 4; } //서-> 북
+	if (num == 3) { return 2; } //남 -> 서
+	if (num == 4) { return 1; }
+}
+int leftRotate(int num) { //반시계방향
+	if (num == 1) { return 4; } //동 -> 북
+	if (num == 2) { return 3; } //서 -> 남
+	if (num == 3) { return 1; } //남 -> 동
+	if (num == 4) { return 2; }
+}
+int main() {
+
+	result = 9999999;
+	Robot start;
+	Robot end;
+
+	scanf("%d %d", &n, &m);
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			scanf("%d", &arr[i][j]);
+		}
+	}
+
+	scanf("%d %d %d", &start.r, &start.c, &start.dir);
+	scanf("%d %d %d", &end.r, &end.c, &end.dir);
+
+	start.r -= 1; end.r -= 1;
+	start.c -= 1; end.c -= 1;
+	start.count = 0;
+	start.goCount = 3;
+
+	visit[start.dir][start.r][start.c] = true;
+	root.push(start);
+
+	while (!root.empty()) {
+		Robot temp = root.front();
+		root.pop();
+		int oneLeft = leftRotate(temp.dir);
+		int twoLeft = leftRotate(oneLeft);
+		int oneRight = rightRotate(temp.dir);
+
+
+		if (temp.r == end.r && temp.c == end.c) {
+			int count = temp.count;
+			if (temp.dir == end.dir) { result = min(result, count); }
+			else {
+				//반복하기
+				if (oneLeft == end.dir) { count += 1; result = min(result, count); }
+				else if (twoLeft == end.dir) { count += 2;  result = min(result, count); }
+				else if (oneRight == end.dir) { count += 1;  result = min(result, count); }
+			}
+		}
+
+		//일반적으로 가는 것 하나
+		if (canGo(temp.r + dr[temp.dir], temp.c + dc[temp.dir], temp.dir)) {
+			visit[temp.dir][temp.r + dr[temp.dir]][temp.c + dc[temp.dir]] = true;
+			if (temp.goCount == 3) {
+				root.push({ temp.r + dr[temp.dir], temp.c + dc[temp.dir] ,temp.dir, temp.count + 1, 1 });
+			}
+			else {
+				root.push({ temp.r + dr[temp.dir], temp.c + dc[temp.dir] ,temp.dir, temp.count, temp.goCount + 1 });
+			}
+		}
+
+
+		if (canGo(temp.r + dr[oneLeft], temp.c + dc[oneLeft], oneLeft)) {
+			visit[oneLeft][temp.r + dr[oneLeft]][temp.c + dc[oneLeft]] = true;
+			root.push({ temp.r + dr[oneLeft], temp.c + dc[oneLeft] ,oneLeft, temp.count + 2, 1 });
+		}
+
+		if (canGo(temp.r + dr[twoLeft], temp.c + dc[twoLeft], twoLeft)) {
+			visit[twoLeft][temp.r + dr[twoLeft]][temp.c + dc[twoLeft]] = true;
+			root.push({ temp.r + dr[twoLeft], temp.c + dc[twoLeft] ,twoLeft, temp.count + 3, 1 });
+		}
+
+		if (canGo(temp.r + dr[oneRight], temp.c + dc[oneRight], oneRight)) {
+			visit[oneRight][temp.r + dr[oneRight]][temp.c + dc[oneRight]] = true;
+			root.push({ temp.r + dr[oneRight], temp.c + dc[oneRight], oneRight, temp.count + 2, 1 });
+		}
+	}
+	printf("%d", result);
+	return 0;
+}

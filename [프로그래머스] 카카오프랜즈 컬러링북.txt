@@ -1,0 +1,67 @@
+//카카오 프랜즈 컬러링 북
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+typedef struct loc {
+	int r, c;
+}Loc;
+
+// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
+vector<int> solution(int m, int n, vector<vector<int>> picture) {
+
+	int dr[4] = { -1,0,1,0 };
+	int dc[4] = { 0,1,0,-1 };
+	
+	int arr[102][102] = { { 0, }, };
+	bool visit[102][102] = { { false, } , };
+
+	int count =0;
+	int result =0;
+
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < n; j++) {
+			arr[i][j] = picture[i][j];
+		}
+	}
+
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < n; j++) {
+
+			if (visit[i][j] == false && arr[i][j]!=0) {
+				int area = 1;
+				queue <Loc> root;
+				root.push({ i,j });
+				visit[i][j] = true;
+
+				while (!root.empty()) {
+					Loc temp = root.front();
+					root.pop();
+					
+					for (int dir = 0; dir < 4; dir++) {
+						if (temp.r + dr[dir] < 0 || temp.r + dr[dir] >= m || temp.c + dc[dir] < 0 || temp.c + dc[dir] >= n) { continue; }
+						else if (arr[temp.r + dr[dir]][temp.c + dc[dir]] != arr[i][j]) { continue; }
+						else if (visit[temp.r + dr[dir]][temp.c + dc[dir]] == true) { continue; }
+						else {
+							area += 1;
+							visit[temp.r + dr[dir]][temp.c + dc[dir]] = true;
+							root.push({ temp.r + dr[dir],temp.c + dc[dir]});
+						}
+					}
+				}
+
+				count += 1;
+				result = max(area, result);
+			}
+		}
+	}
+
+	vector<int> answer(2);
+	answer[0] = count;
+	answer[1] = result;
+	return answer;
+}

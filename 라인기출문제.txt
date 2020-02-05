@@ -1,0 +1,181 @@
+문제1
+#include <stdio.h>
+#include <math.h>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+	int result = 10e13;
+
+	long long n;
+	long long w;
+	long long h;
+
+	scanf("%lld", &n);
+
+	for (int i = n; i >= 1; i--) {
+		for (int j = 1; j <= n; j++) {
+			if (i*j == n) {
+				result = min(abs(i - j), result);
+			}
+		}
+	}
+	printf("%d", result);
+	return 0;
+}
+
+문제2
+#include <stdio.h>
+#include <vector>
+
+using namespace std;
+
+typedef struct atom {
+	char name[2];
+	int num;
+}Atom;
+vector <Atom> atoms;
+char arr[1000];
+
+int main(){
+
+	int bar;
+	int vecBar = 0;
+	bool go = false;
+	scanf("%s", arr);
+
+	for (int i = 0; ; i++) {
+		if (arr[i] == '\0') { break; }
+		else {
+			Atom temp;
+			if (arr[i] >= 'A' && arr[i] <= 'Z') {
+				temp.name[0] = arr[i];
+				
+				if (arr[i + 1] >= 'a' && arr[i + 1] <= 'z') {
+					temp.name[1] = arr[i + 1];
+					i += 1;
+				}
+				else {
+					temp.name[1] = '\0';
+				}
+
+				temp.num = -1;
+				atoms.push_back(temp);
+			}
+			else { bar = i; break; }
+		}
+	}
+	
+
+	for(int i = bar; ; i++) {
+		if (arr[i] == '\0') { break; }
+		else if (vecBar >= atoms.size()){
+			printf("error");
+			return 0;
+		}
+		else {
+			//printf("\narr[i] = %c, vecBar=%d\n", arr[i],vecBar);
+			if (arr[i] >= '1' && arr[i] <= '9') {
+				atoms[vecBar].num = arr[i] - '0';
+				if (arr[i] == '1' && arr[i + 1] == '0') {
+					atoms[vecBar].num *= 10;
+					i += 1;
+				}
+				vecBar++;
+			}
+		}
+	}
+	//확인
+	for (int i = 0; i < atoms.size(); i++) {
+		if (atoms[i].num == -1) {
+			printf("error");
+			return 0;
+		}
+	}
+	
+	for (int i = 0; i < atoms.size(); i++) {
+		printf("%c", atoms[i].name[0]);
+		if (atoms[i].name[1] != '\0') {
+			printf("%c", atoms[i].name[1]);
+		}
+		if (atoms[i].num == 1) {
+			continue;
+		}
+		else {
+			printf("%d", atoms[i].num);
+		}
+	
+	}
+	return 0;
+}
+문제3
+
+문제4
+#include <stdio.h>
+#include <vector>
+#include <string.h>
+
+using namespace std;
+
+typedef struct row {
+	int id;
+	char original[1000];
+}Row;
+
+vector <Row> table;
+
+int n,m;
+int main() {
+	
+	scanf("%d", &n);
+	for (int i = 0; i < n; i++) {
+		Row temp;
+		if (i == 0) {
+			scanf("%s", temp.original);
+		}
+		else {
+			scanf("%d %s", &temp.id, temp.original);
+		}
+		table.push_back(temp);
+	}
+
+	scanf("%d", &m);
+	for (int i = 0; i < m; i++) {
+		
+		for (int j = 1; j < n; j++) {
+			 
+		}
+	}
+	return 0;
+}
+
+문제5
+#include <stdio.h>
+#include <math.h>
+#include <algorithm>
+
+using namespace std;
+
+int main(){
+
+	int n, m;
+	int plus = 1;
+	int result = 0;
+	scanf("%d %d", &n, &m); //코니위치 브라운위치
+
+	for (int time = 0; ; time++) {
+		
+		if (n > 200000) { result = -1; break; }
+		if (m == n) { result = time; break; }
+
+		n += plus;
+		plus++;
+
+
+	}
+
+	printf("result");
+
+	return 0;
+}

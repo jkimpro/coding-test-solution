@@ -1,0 +1,56 @@
+//메모리 초과본
+#include <stdio.h>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+int dr[4] = { -1,0,1,0 };
+int dc[4] = { 0,1,0,-1 };
+
+int n;
+int arr[502][502];
+int visit[502][502];
+
+int result;
+
+int dfs(int r, int c) {
+	if (visit[r][c] != -1) {
+		return visit[r][c];
+	}
+	else {
+		visit[r][c] = 1;
+		for (int dir = 0; dir < 4; dir++) {
+			int tempr = r + dr[dir];
+			int tempc = c + dc[dir];
+			if (tempr < n && tempr >= 0 && tempc < n && tempc >= 0) {
+				if (arr[tempr][tempc] > arr[r][c]) {
+					visit[r][c] = max(visit[r][c], dfs(tempr, tempc) + 1);
+				}
+
+			}
+		}
+	}
+	return visit[r][c];
+}
+int main() {
+	result = 0;
+	scanf("%d", &n);
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			scanf("%d", &arr[i][j]);
+			visit[i][j] = -1;
+		}
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			if (visit[i][j] == -1) {
+				result = max(result, dfs(i, j));
+			}
+		}
+	}
+	printf("%d", result);
+	return 0;
+}

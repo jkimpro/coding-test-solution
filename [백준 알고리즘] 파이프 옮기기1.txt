@@ -1,0 +1,95 @@
+//파이프 옮기기
+#include <iostream>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+int rdir[3] = { 1,0,1 };
+int cdir[3] = { 1,1,0 };
+
+int n;
+
+int arr[20][20];
+bool visit[20][20];
+int result = 0;
+bool canGo(int r, int c, int dir) {
+	if (r < 0 || r >= n || c < 0 || c >= n) {
+		return false;
+	}
+	else if (visit[r][c] == true) {
+		return false;
+	}
+	else if (arr[r][c] == 1) {
+		return false;
+	}
+	else if (dir == 0) {
+		if (arr[r - 1][c] == 0 && arr[r][c - 1] == 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	else {
+		return true;
+	}
+}
+void dfs(int r, int c, int dir) {
+	if (r == n - 1 && c == n - 1) {
+		result += 1;
+		return;
+	}
+	else {
+		for (int i = 0; i < 3; i++) {
+			if (i != 0) {		//대각선 가기가 아닐때
+				if (dir == 0 && canGo(r + rdir[i], c + cdir[i], i)) {
+					visit[r + rdir[i]][c + cdir[i]] = true;
+					dfs(r + rdir[i], c + cdir[i], i);
+					visit[r + rdir[i]][c + cdir[i]] = false;
+
+				}
+				else if (dir != 0 && dir ==i &&canGo(r + rdir[i], c + cdir[i], i)) {
+					visit[r + rdir[i]][c + cdir[i]] = true;
+					dfs(r + rdir[i], c + cdir[i], i);
+					visit[r + rdir[i]][c + cdir[i]] = false;
+
+				}
+			}
+			else {			//대각선 가기
+				if (canGo(r + rdir[i], c + cdir[i], i)) {
+					visit[r + rdir[i]][c + cdir[i]] = true;
+					dfs(r + rdir[i], c + cdir[i], i);
+					visit[r + rdir[i]][c + cdir[i]] = false;
+				}
+			}
+		}
+	}
+}
+int main() {
+	scanf("%d", &n);
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			scanf("%d", &arr[i][j]);
+			if (arr[i][j] == 1) {
+				visit[i][j] = true;
+			}
+		}
+	}
+
+	if (canGo(0 + rdir[1], 0 + cdir[1], 1)) {
+		visit[0][0] = true;
+		visit[rdir[1]][cdir[1]] = true;
+			
+		dfs(0 + rdir[1], 0 + cdir[1], 1);
+
+		visit[rdir[1]][cdir[1]] = false;
+		visit[0][0] = false;
+	}
+
+	
+	printf("%d", result);
+
+	return 0;
+}

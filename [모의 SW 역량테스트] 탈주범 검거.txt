@@ -1,0 +1,165 @@
+//////나의 답안
+
+////탈주범검거 문제
+
+//구성 파이프
+/*#define MULTI       1
+#define upDOWN      2
+#define LFTRIGHT   3
+#define upright     4
+#define DOWNRIGHT  5
+#define DOWNLEFT    6
+#define UPLEFT      7
+*/
+#include <stdio.h>
+#include <queue>
+
+using namespace std;
+
+typedef struct tunnul
+{
+	int element;
+	bool visited;
+}Tunnul;
+typedef struct root
+{
+	int w, h;
+}Root;
+Tunnul arr[51][51];
+queue <Root> backup;
+
+int n, m;        // 터널 크기
+int r, c;        //맨홀뚜껑
+int l;			//    
+
+int result;
+
+bool isWay(int y, int x, int dir)
+{
+	if (y >= 0 && y < n && x >= 0 && x < m && arr[y][x].element >0)
+	{
+		if (dir == -1)
+		{
+			if (arr[y][x].element == 1 || arr[y][x].element == 2 || arr[y][x].element == 5 || arr[y][x].element == 6) return true;
+			else return false;
+		}
+		else if (dir == -2)
+		{
+			if (arr[y][x].element == 1 || arr[y][x].element == 2 || arr[y][x].element == 4 || arr[y][x].element == 7) return true;
+			else return false;
+		}
+		else if (dir == -3)
+		{
+			if (arr[y][x].element == 1 || arr[y][x].element == 3 || arr[y][x].element == 4 || arr[y][x].element == 5) return true;
+			else return false;
+		}
+		else if (dir == -4)
+		{
+			if (arr[y][x].element == 1 || arr[y][x].element == 3 || arr[y][x].element == 7 || arr[y][x].element == 6) return true;
+			else return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+void dfs(int num, int w, int h, queue<Root> root)
+{
+	bool flag = false;
+	backup = root;
+	while (!root.empty())
+	{
+		Root temp = root.front();
+		root.pop();
+		if (temp.w == w && temp.h == h)
+		{
+			flag = true;
+			break;
+		}
+	}
+
+	Root t;
+	t.w = w;
+	t.h = h;
+	root = backup;
+	root.push(t);
+	
+	num += 1; //시간 증가
+
+	if (arr[w][h].visited == false)
+	{
+		result += 1;
+		arr[w][h].visited = true;
+	}
+
+	if (num < l && flag== false)						//충분히 끝에 도달했다면 끝내라는 뜻
+	{
+		if (arr[w][h].element == 1)
+		{
+			if (isWay(w - 1, h,-1) == true) {  dfs(num, w - 1, h,root); }
+			if (isWay(w + 1, h, -2) == true) { dfs(num, w + 1, h, root); }
+			if (isWay(w, h - 1, -3) == true) { dfs(num, w, h - 1, root); }
+			if (isWay(w, h + 1, -4) == true) { dfs(num, w, h + 1, root); }
+		}
+		else if (arr[w][h].element == 2)
+		{
+			if (isWay(w - 1, h, -1)) { dfs(num, w - 1, h, root); }
+			if (isWay(w + 1, h, -2)) { dfs(num, w + 1, h, root); }
+		}
+		else if (arr[w][h].element == 3)
+		{
+			if (isWay(w, h - 1, -3)) { dfs(num, w, h - 1, root); }
+			if (isWay(w, h + 1, -4)) { dfs(num, w, h + 1, root); }
+		}
+		else if (arr[w][h].element == 4)
+		{
+			if (isWay(w - 1, h, -1)) { dfs(num, w - 1, h, root); }
+			if (isWay(w, h + 1, -4)) {  dfs(num, w, h + 1, root); }
+		}
+		else if (arr[w][h].element == 5)
+		{
+			if (isWay(w + 1, h, -2)) {  dfs(num, w + 1, h, root); }
+			if (isWay(w, h + 1, -4)) {  dfs(num, w, h + 1, root); }
+		}
+		else if (arr[w][h].element == 6)
+		{
+			if (isWay(w + 1, h, -2)) { dfs(num, w + 1, h, root); }
+			if (isWay(w, h - 1, -3)) { dfs(num, w, h - 1, root); }
+		}
+		else if (arr[w][h].element == 7)
+		{
+			if (isWay(w - 1, h, -1)) {  dfs(num, w - 1, h, root); }
+			if (isWay(w, h - 1, -3)) { dfs(num, w, h - 1, root); }
+		}
+	}
+
+}
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+		result = 0;
+
+		scanf("%d %d %d %d %d", &n, &m, &r, &c, &l);
+
+		for (int i = 0; i<n; i++)
+		{
+			for (int j = 0; j<m; j++)
+			{
+				scanf("%d", &arr[i][j].element);
+				arr[i][j].visited = false;
+			}
+		}
+
+		queue <Root> root;
+		dfs(0, r, c, root);
+
+		printf("#%d %d\n", testcase, result);
+		
+	}
+	return 0;
+}

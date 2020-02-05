@@ -1,0 +1,151 @@
+//큐빙
+
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+#define U 0
+#define F 1
+#define L 2
+#define B 3
+#define R 4
+#define D 5
+
+
+using namespace std;
+typedef struct dir {
+	char c;
+	char dir;
+
+}Dir;
+vector <Dir> dir;
+
+char side[6][3][3] = {
+	//U
+	{{'w','w','w'},	//위
+	{ 'w','w','w' },	//위
+	{ 'w','w','w' }},	//위
+	//F
+	{{'r','r','r'},	//앞
+	{ 'r','r','r' },	//앞			기준
+	{ 'r','r','r' }},	//앞
+	//L
+	{{'g','g','g'},	//왼
+	{ 'g','g','g' },	//왼
+	{ 'g','g','g' }},	//왼
+	//B
+	{{'o','o','o'},	//뒤
+	{ 'o','o','o' },	//뒤
+	{ 'o','o','o' }},	//뒤
+	//R
+	{{'b','b','b'},	//오
+	{ 'b','b','b' },	//오
+	{ 'b','b','b' }},	//오
+	//D
+	{{'y','y','y'},	//아래
+	{'y','y','y'},	//아래
+	{'y','y','y'}}	//아래
+};
+
+int n;
+void solve(char lab, char degree) {
+	if (lab == 'U') {
+		if (degree == '+') {	//시계방향
+			//o -> g
+			//g -> r
+			//r->b
+			//b-> o
+			int temp[3] = { side[R][0][1] ,side[R][0][2], side[R][0][3] };
+
+			for (int i = 0; i < 3; i++) {
+				side[R][0][i] = side[F][0][i];
+				side[F][0][i] = side[L][0][i];
+				side[L][0][i] = side[B][0][i];
+			}
+		}
+		else {					//반시계방향
+			int temp[3] = { side[R][0][1] ,side[R][0][2], side[R][0][3] };
+
+			for (int i = 0; i < 3; i++) {
+				side[R][0][i] = side[F][0][i];
+				side[F][0][i] = side[L][0][i];
+				side[L][0][i] = side[B][0][i];
+			}
+			side[B][0][0] = temp[0];
+			side[B][0][1] = temp[1];
+			side[B][0][2] = temp[2];
+	}
+	else if (lab == 'F') {
+		if (degree == '+') {
+
+		}
+		else {
+
+		}
+	}
+	else if (lab == 'L') {
+		if (degree == '+') {
+
+		}
+		else {
+
+		}
+	}
+	else if (lab == 'B') {
+		if (degree == '+') {
+
+		}
+		else {
+
+		}
+	}
+	else if (lab == 'R') {
+		if (degree == '+') {
+
+		}
+		else {
+
+		}
+	}
+	else{
+		if (degree == '+') {
+
+		}
+		else {
+
+		}
+	}
+}
+int main()
+{
+	//+ 해당 면 기준 시계방향
+	//- 해당면 기준 반시계 방향
+
+	int test;
+	scanf("%d", &test);
+	for (int testcase = 0; testcase < test; testcase++) {
+		scanf("%d", n);
+		
+		for (int i = 0; i < n; i++) {
+			char a, b;
+			scanf("%c %c", &a, &b);
+			dir.push_back({ a,b });
+			getchar();
+		}
+
+		for (int i = 0; i < n; i++) {
+			solve(dir[i].c, dir[i].dir);
+		}
+
+
+		//결과 출력
+		for (int i = 0; i< 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				printf("%c", side[U][i][j]);
+			}
+			printf("\n");
+		}
+		dir.clear();
+	}
+	
+	return 0;
+}

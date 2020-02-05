@@ -1,0 +1,294 @@
+//내 답안========================================
+
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+#include <queue>
+
+using namespace std;
+typedef struct customer {
+	int ind;
+	int arriveTime;
+	bool isA;
+}Customer;
+
+typedef struct booth {
+	int countTime;
+	int time;
+	bool isAnyone;
+	Customer temp;
+}Booth;
+
+Booth boothA[30];
+Booth boothB[30];
+Customer customer[1000];
+
+queue <Customer> waiting;
+int main()
+{
+	int num;
+	scanf("%d", &num);
+	for (int testcase = 1; testcase <= num; testcase++)
+	{
+		int result = 0;
+		int n, m, k, a, b;
+		int customerPoint = 0;
+		int customerResultPoint = 0;
+		scanf("%d %d %d %d %d", &n, &m, &k, &a, &b);
+
+		for (int i = 0; i<n; i++)                             //부스A
+		{
+			scanf("%d", &boothA[i].time);
+			boothA[i].countTime = 0;
+			boothA[i].isAnyone = false;
+		}
+		for (int i = 0; i<m; i++)                             //부스B
+		{
+			scanf("%d", &boothB[i].time);
+			boothB[i].countTime = 0;
+			boothB[i].isAnyone = false;
+		}
+		for (int i = 0; i<k; i++)                             //손님
+		{
+			scanf("%d", &customer[i].arriveTime);
+			customer[i].isA = false;
+			customer[i].ind = i;
+		}
+		/////////////////////////원래도 해야하는 작업들...
+
+
+		for (int nowTime = 0; ; nowTime++)
+		{
+			//내보내기 먼저
+			for (int i = 0; i<n; i++)
+			{
+				if (boothA[i].countTime == boothA[i].time && boothA[i].isAnyone == true)
+				{
+					if ((i + 1) == a) { boothA[i].temp.isA = true; }
+
+					waiting.push(boothA[i].temp);
+					boothA[i].isAnyone = false;
+				}
+				boothA[i].countTime++;
+			}
+
+			//들여보내기
+			for (int i = 0; i<n; i++)
+			{
+				if (boothA[i].isAnyone == false)
+				{
+					if (customer[customerPoint].arriveTime <= nowTime && customerPoint <k)
+					{
+						boothA[i].temp = customer[customerPoint];
+				//		printf("BoothA들여보내기 부스num: %d %d %d\n\n", i, boothA[i].temp.ind, boothA[i].temp.arriveTime);
+						boothA[i].countTime = 1;
+						boothA[i].isAnyone = true;
+						customerPoint++;
+					}
+					else
+					{
+						break;                  //어차피 고객은 없으니 continue;
+					}
+				}
+			}
+
+			////////BoothB 보내기
+			for (int i = 0; i < m; i++)
+			{
+				if (boothB[i].countTime == boothB[i].time && boothB[i].isAnyone == true)
+				{
+					if (boothB[i].temp.isA == true && (i + 1) == b) { result += boothB[i].temp.ind + 1; }
+					customerResultPoint++;
+					boothB[i].isAnyone = false;
+					
+				}
+				boothB[i].countTime++;
+			}
+
+			//BoothB 들이기
+			for (int i = 0; i< m; i++)
+			{
+				if (boothB[i].isAnyone ==false)
+				{
+					if (!waiting.empty())
+					{
+						boothB[i].temp = waiting.front();
+						waiting.pop();
+						boothB[i].countTime = 1;
+						boothB[i].isAnyone = true;
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+			//printf("%d %d %d\n", customerPoint, customerResultPoint, result);
+			if (customerPoint == k && customerResultPoint == k)  break;//종료조건 -> 탈출
+		}
+
+		if (result == 0)
+		{
+			printf("#%d %d\n", testcase, -1);
+		}
+		else
+		{
+			printf("#%d %d\n", testcase, result);
+		}
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+//타 답안===============================================
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_DEPRECATE
+#include<cstdio>
+#include <iostream>
+#include<queue>
+using namespace std;
+int T;
+int N;
+int M;
+int K;
+int A;
+int B;
+int ai[10];
+int bj[10];
+int tk[1001];
+typedef struct client {
+    int time;
+    int client_num;
+};
+typedef struct rep_struct
+{
+    int rep_client_num;
+    int rep_remain_time;
+    int rec_desk_num;
+    rep_struct()
+    {
+        int rep_client_num;
+        int rep_remain_time;
+        int rec_desk_num;
+    };
+    rep_struct(int a, int b, int c)
+    {
+        rep_client_num = a;
+        rep_remain_time = b;
+        rec_desk_num = c;
+    }
+};
+typedef struct rec_struct
+{
+    int rec_client_num;
+    int rep_remain_time;
+};
+//queue
+//접수 대기열 
+//queue rec_queue;
+//접수 창구 
+rec_struct rec[10];
+//정비 대기열 
+queue<rep_struct> rep_queue;
+//정비 창수 
+rep_struct rep[10];
+//process
+int process(queue<client> proc_input)
+{
+    //한시간 단위로 업데이트, 
+    int clc = 0, result = 0;
+    for (int proc_client_num = 1, time = proc_input.front().time; proc_client_num <= K; time++)
+    {
+        //이미 접수한 사람 처리 
+        for (int i = 1; i <= N; i++)
+        {
+            if (rec[i].rep_remain_time > 0)//시간이 남았다= 사람이 있다. 
+            {
+                if (--rec[i].rep_remain_time == 0)
+                {//수납 처리를 했더니 남은 시간이 0이다 -> 정비 queue로 이동한다. 
+                 /*                int rep_client_num;
+                 int rep_remain_time;
+                 int rec_desk_num;*/
+                    rep_queue.push(rep_struct(rec[i].rec_client_num, 0, i));
+                }
+            }
+        }
+        //접수대기 큐
+        for (int i = 1; i <= N; i++)
+        {
+            //비는 자리인 경우 
+            //대기열에 온 사람이 들어올수 있는 시간인지 확인 
+            if (proc_input.size()>0 && rec[i].rep_remain_time == 0 && clc <= K&&proc_input.front().time <= time)
+            {
+                //int time;
+                //int client_num;
+                clc++;
+                rec[i].rec_client_num = proc_input.front().client_num;
+                rec[i].rep_remain_time = ai[i];
+                proc_input.pop();
+            }
+        }
+        //이미 정비열에 있는 사람 처리
+        for (int j = 1; j <= M; j++)
+        {
+            if (rep[j].rep_remain_time > 0)
+            {
+                if (--rep[j].rep_remain_time == 0)
+                {
+                    proc_client_num++;
+                }
+            }
+        }
+        //정비대기 큐
+        for (int j = 1; j <= M; j++)
+        {
+            if (rep[j].rep_remain_time == 0 && rep_queue.size()>0)
+            {
+                rep[j] = rep_struct(rep_queue.front().rep_client_num, bj[j], rep_queue.front().rec_desk_num);
+                rep_queue.pop();
+                if (rep[j].rec_desk_num == A&&j == B)result += rep[j].rep_client_num;
+ 
+            }
+        }
+        //정비 시행
+    }
+    if (result == 0)result = -1; 
+    return result;
+}
+
+int main(){
+    scanf("%d", &T);
+    for (int tc = 1; tc <= T; tc++)
+    {
+        int print_result = -1;
+        client input;
+        queue<client> proc_input;
+        scanf("%d %d %d %d %d", &N, &M, &K, &A, &B);
+        for (int i = 1; i <= N; i++)
+        {
+            scanf("%d", &ai[i]);
+        }
+        for (int i = 1; i <= M; i++)
+        {
+            scanf("%d", &bj[i]);
+        }
+        for (int i = 0; i < K; i++)
+        {
+            int temp = 0;
+            scanf("%d", &temp);
+            input.time = temp;
+            input.client_num = i + 1;
+            proc_input.push(input);
+        }
+ 
+        //process
+        print_result = process(proc_input);
+        //result
+        printf("#%d %d\n", tc, print_result);
+    }
+}

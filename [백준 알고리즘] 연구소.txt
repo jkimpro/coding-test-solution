@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <queue>
+#include <math.h>
+#include <vector>
+
+using namespace std;
+
+typedef struct wall {
+   int r, c;
+}Wall;
+
+vector <Wall> wall;
+vector <Wall> vi;
+
+int n, m;
+int arr[9][9];
+int backup[9][9];
+
+int result;
+
+bool canGo(int r, int c) {
+   if (r < n && r >= 0 && c < m && c >= 0) { 
+      if (arr[r][c] == 0) { return true; }
+   }
+   return false;
+}
+int main()
+{
+   result = 0;
+   scanf("%d %d", &n, &m);
+   
+   for (int i = 0; i < n; i++) {
+      for (int j = 0; j < m; j++) {
+         scanf("%d", &arr[i][j]);
+         if (arr[i][j] == 0) {
+            wall.push_back({ i,j });
+         }
+         else if (arr[i][j] == 2) {
+            vi.push_back({ i,j });
+         }
+         backup[i][j] = arr[i][j];
+      }
+   }
+   
+   for(int i =0; i<wall.size(); i++){
+      for(int j =i+1; j<wall.size(); j++){
+         for(int k = j+1; k<wall.size(); k++){
+            int count = 0;
+     
+         arr[wall[i].r][wall[i].c] = 1;
+          arr[wall[j].r][wall[j].c] = 1;
+          arr[wall[k].r][wall[k].c] = 1;
+         
+         //바이러스 시뮬레이션 시간 줄이기 
+         for (int d = 0; d<vi.size(); d++) {
+             queue <Wall> more;
+             more.push({ vi[d].r,vi[d].c });
+      
+              while (!more.empty()) {
+                 Wall temp = more.front();
+                 more.pop();
+                 arr[temp.r][temp.c] = 2;
+      
+                 if (canGo(temp.r - 1, temp.c)) { more.push({ temp.r - 1, temp.c }); }
+                 if (canGo(temp.r+1, temp.c)) { more.push({ temp.r+ 1, temp.c }); }
+                 if (canGo(temp.r, temp.c-1)) { more.push({ temp.r, temp.c-1 }); }
+                 if (canGo(temp.r, temp.c+1)) { more.push({ temp.r, temp.c+1 }); }
+              }
+         }
+          for (int l = 0; l < n; l++) {
+              for (int c = 0; c < m; c++) {
+                 if(arr[l][c] ==0){count++;}
+                 arr[l][c] = backup[l][c];
+              }
+          }
+         
+              result = max(result, count);
+      }
+   }
+   }
+   printf("%d", result);
+   return 0;
+}

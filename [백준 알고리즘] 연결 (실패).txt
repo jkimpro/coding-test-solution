@@ -1,0 +1,167 @@
+//연결 문제 -> visit 처리하기
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct loc {
+	int r, c;
+	int count;
+}Loc;
+
+Loc a[2];
+Loc b[2];
+int dr[4] = { -1,0,1,0 };
+int dc[4] = { 0,1,0,-1 };
+
+bool visit[103][103];
+
+int aminDis = 0;
+int bminDis = 0;
+int maxR, minR;
+int maxC, minC;
+
+int n, m;
+queue <Loc> root;
+
+bool canGo(int r, int c) {
+	if (r<0 || r> n || c<0 || c>m) {
+		return false;
+	}
+	else if (visit[r][c] == true) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+int main() {
+	bool suc1 = false;
+	bool suc2 = false;
+	
+	scanf("%d %d", &m, &n);
+
+	for (int i = 0; i < 2; i++) {
+		scanf("%d %d", &a[i].c, &a[i].r);
+	}
+	for (int i = 0; i < 2; i++) {
+		scanf("%d %d", &b[i].c, &b[i].r);
+	}
+
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < 2; j++) {
+			if (a[i].r == b[j].r && a[i].c == b[j].c) {
+				printf("IMPOSSIBLE");
+				return 0;
+			}
+		}
+	}
+	aminDis = abs(a[0].r - a[1].r) + abs(a[0].c - a[1].c);
+	bminDis = abs(b[0].r - b[1].r) + abs(b[0].c - b[1].c);
+
+
+
+	maxR = max(a[0].r, a[1].r);
+	minR = min(a[0].r, a[1].r);
+	maxC = max(a[0].c, a[1].c);
+	minC = min(a[0].c, a[1].c);
+
+	for (int i = 0; i <= n; i++) {
+		for (int j = 0; j <= m; j++) {
+			if ((minR <= i && maxR >= i) && (minC <= j && maxC >= j)) {
+				visit[i][j] = true;
+			}
+			else {
+				visit[i][j] = false;
+			}
+		}
+	}
+
+	//	printf("%d %d %d %d\n", maxR, minR, maxC, minC);
+	//amin일때 가정
+
+	root.push({ b[0].r, b[0].c, 0 });
+	visit[b[0].r][b[0].c] = true;
+	
+	while (!root.empty()) {
+		Loc temp = root.front();
+		root.pop();
+		if (temp.r == b[1].r && temp.c == b[1].c) {
+			suc1 = true;
+			aminDis += temp.count;
+			break;
+		}
+		else {
+			for (int dir = 0; dir < 4; dir++) {
+				if (canGo(temp.r + dr[dir], temp.c + dc[dir])) {
+					visit[temp.r + dr[dir]][temp.c + dc[dir]] = true;
+					root.push({ temp.r + dr[dir], temp.c + dc[dir] , temp.count + 1 });
+				}
+			}
+		}
+	}
+	while (!root.empty()) { root.pop(); }
+	
+	maxR = max(b[0].r, b[1].r);
+	minR = min(b[0].r, b[1].r);
+
+	maxC = max(b[0].c, b[1].c);
+	minC = min(b[0].c, b[1].c);
+
+	for (int i = 0; i <= n; i++) {
+		for (int j = 0; j <= m; j++) {
+			if ((minR <= i && maxR >= i) && (minC <= j && maxC >= j)) {
+				visit[i][j] = true;
+			}
+			else {
+				visit[i][j] = false;
+			}
+		}
+	}
+
+	//printf("%d %d %d %d\n", maxR, minR, maxC, minC);
+	root.push({ a[0].r, a[0].c, 0 });
+	visit[a[0].r][a[0].c] = true;
+	
+	while (!root.empty()) {
+		Loc temp = root.front();
+		root.pop();
+
+		if (temp.r == a[1].r && temp.c == a[1].c) {
+			suc2 = true;
+			bminDis += temp.count;
+			break;
+		}
+		else {
+			for (int dir = 0; dir < 4; dir++) {
+				if (canGo(temp.r + dr[dir], temp.c + dc[dir])) {
+					visit[temp.r + dr[dir]][temp.c + dc[dir]] = true;
+					root.push({ temp.r + dr[dir], temp.c + dc[dir] , temp.count + 1 });
+				}
+			}
+		}
+	}
+
+	if (suc1 == false && suc2 == false) {
+		printf("IMPOSSIBLE");
+	}
+	else {
+		if (suc1 == true && suc2 == false) {	//b가 움직인 경우
+		//	printf("suc1\n");
+			printf("%d", aminDis);
+		}
+		else if (suc1 == false && suc2 == true) {	//a가 움직인 경우
+		//	printf("suc2\n");
+			printf("%d", bminDis);
+		}
+		else {	//모두 true 인경우
+		//	printf("all\n");
+			printf("%d", min(aminDis, bminDis));
+		}
+	}
+
+	return 0;
+}

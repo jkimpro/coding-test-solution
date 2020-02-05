@@ -1,0 +1,144 @@
+////////이상한 피라미드 탐험 내답안
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+using namespace std;
+
+typedef struct guide {
+	int dir;
+	int moveind;
+}Guide;
+
+int arr[1000];	//각 줄별 첫번째수 저장
+int result;
+int a;
+int b;
+int main()
+{
+	int real;
+	scanf("%d", &real);
+
+	for (int testcase = 1; testcase <= real; testcase++)
+	{
+		int count =0;
+		int flag1 = 0, flag2 = 0;
+		int indStart, indEnd;
+		if (testcase == 1)
+		{
+			arr[1] = 1;
+			for (int i = 2; i < 1000; i++)
+			{
+				arr[i] = (i - 1) + arr[i - 1];
+			}
+		}
+		scanf("%d %d", &a, &b); //a 민지 b 보물
+
+		if (a < b)
+		{
+			int temp = a;
+			a = b;
+			b = temp;
+		}
+		for (int i = 1; i < 1000; i++)
+		{
+			if (flag1 == 1 && flag2 == 1) { break; }
+
+			if (arr[i] <=a && arr[i + 1]>a) {
+				flag1 = 1;
+				indStart = i;
+			}
+
+			if (arr[i] <=b &&arr[i + 1]>b) {
+				flag2= 1;
+				indEnd = i;
+			}
+		}
+		
+		if (indStart == indEnd) {
+			result = abs(a - b);
+			printf("#%d %d\n", testcase, result);
+			continue;
+		}	//같지 않은 경우
+		else
+		{	
+			//시작점이 큰경우
+			int	temp = indStart - indEnd;						//높이에 관련된 경우
+			int middleStart = (arr[indStart] + arr[indStart + 1]) / 2;
+			int middleEnd = (arr[indEnd] + arr[indEnd + 1]) / 2;
+			int lastStartInd = a - middleStart;
+			int lastEndInd = b - middleEnd;
+				
+			int widthComp;
+			//indStart indEnd 짝 홀여부 -> 접근법을 조금 달리할것.
+
+			if (lastStartInd == lastEndInd) {			//중간 지점 기준 위치가 같을 경우
+				result = temp;
+			//	printf("위치 같음 widthComp: %d temp:%d \n", widthComp, temp);
+			//	printf("indStart: %d indEnd: %d\n", indStart, indEnd);
+
+				printf("#%d %d\n", testcase, result);
+				continue;
+			}
+			else if ((indStart % 2 == 0 && indEnd % 2 == 0) || (indStart % 2 == 1 && indEnd % 2 == 1)) {
+				if(lastStartInd >lastEndInd){
+					widthComp = lastStartInd - lastEndInd;
+				}
+				else{
+					widthComp = lastEndInd-lastStartInd;
+				}
+			//	printf("짝짝 홀홀widthComp: %d temp:%d \n", widthComp, temp);
+			//	printf("indStart: %d indEnd: %d\n", indStart, indEnd);
+				if (widthComp - (temp / 2) >= 0)
+				{
+					result = temp + (widthComp - (temp / 2));
+				}
+				else { result = temp; }
+
+				printf("#%d %d\n", testcase, result);
+				continue;
+			}
+			else if (indStart % 2 == 1 && indEnd % 2 == 0)
+			{
+				if (lastStartInd >lastEndInd) {
+					widthComp = lastStartInd - lastEndInd-1;
+				}
+				else {
+					widthComp = lastEndInd - lastStartInd;
+				}
+			//	printf("홀짝widthComp: %d temp:%d \n", widthComp, temp);
+			//	printf("indStart: %d indEnd: %d\n", indStart, indEnd);
+				if (widthComp - (temp / 2) >= 0)
+				{
+					result = temp + (widthComp - (temp / 2));
+				}
+				else { result = temp; }
+
+				printf("#%d %d\n", testcase, result);
+				continue;
+			}
+			else if(indStart % 2 == 0 && indEnd % 2 == 1) 
+			{
+				if (lastStartInd >lastEndInd) {
+					widthComp = lastStartInd - lastEndInd;
+				}
+				else {
+					widthComp = lastEndInd - lastStartInd-1;
+				}
+			//	printf("짝홀widthComp: %d temp:%d \n", widthComp, temp);
+			//	printf("indStart: %d indEnd: %d\n", indStart, indEnd);
+				
+				if (widthComp - (temp / 2) >= 0)
+				{
+					result = temp + (widthComp - (temp / 2));
+				}
+				else { result = temp; }
+				
+				printf("#%d %d\n", testcase, result);
+				continue;
+			}
+		}
+	}
+
+	return 0;
+}
