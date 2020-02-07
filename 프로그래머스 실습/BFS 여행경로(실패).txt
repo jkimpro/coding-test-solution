@@ -1,0 +1,72 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int whole =0;
+bool used[10001];
+vector <string> finalAns;
+vector <string> ans;
+vector <vector<string>> gTickets;
+
+void dfs(int num, string now){
+    if(num==whole){
+        if(finalAns.empty()){
+          finalAns = ans;
+        }
+        else{
+            for (int i =0; i<finalAns.size(); i++){
+                if(finalAns == ans){
+                    continue;
+                }
+                else if(finalAns < ans){
+                    break;
+                }
+                else{
+                    finalAns = ans;
+                }
+            }
+        }
+    }
+    else{
+        for(int i =0; i<gTickets.size(); i++){
+            if(used[i] == false && gTickets[i][0]==now){
+                used[i] = false;
+                
+                vector <string> temp;
+                temp.push_back(gTickets[i][0]);
+                temp.push_back(gTickets[i][1]);
+                ans.push_back(temp);
+
+                dfs(num+1, gTickets[i][1]);
+                ans.pop_back();
+                used[i] = true;
+            }
+        
+        }
+        
+    }
+}
+vector<string> solution(vector<vector<string>> tickets) {
+    vector<string> answer;
+    gTickets = tickets;
+    whole = tickets.size();
+    
+    for(int i =0; i<tickets.size(); i++){       //시작점 정하기
+        if(tickets[i][0] == "ICN"){
+            used[i] = true;
+            vector <string> temp;
+            temp.push_back(tickets[i][0]);
+            temp.push_back(tickets[i][1]);
+            ans.push_back(temp);
+            
+            dfs(1, tickets[i][1]);
+            ans.pop_back();
+                 
+            used[i] = false;
+        }
+    }
+    answer = finalAns;
+    
+    return answer;
+}

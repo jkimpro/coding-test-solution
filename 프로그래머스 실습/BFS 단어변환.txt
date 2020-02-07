@@ -1,0 +1,69 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+
+///단어 하나만 틀렸을때를 고려할것!
+vector<string> gWords;
+
+int minNum = 99999;
+string t;
+bool used[100];
+
+vector <char> useAlpha[11];
+
+bool correction(string one, string two){
+    int count =0;
+    for(int i =0; i<one.size(); i++){
+        if(one[i] == two[i]){ count++;}
+    }
+    if(count != one.size()-1){
+        return false;
+    }
+    return true;
+}
+
+void dfs(string now, int level){
+    if(now == t){
+        minNum = min(level, minNum);
+    }
+    else{
+         for(int i =0; i< now.size(); i++){
+            for(int j =0; j<gWords.size(); j++){
+                if(used[j] == true){
+                    continue;
+                }
+                if(correction(gWords[j], now)&& now[i] != gWords[j][i]){ //만약 한글자만 같다면
+                    used[j] = true;
+                    dfs(gWords[j], level+1);
+                    used[j] = false;
+                }
+            }
+        }   
+    }
+}
+
+int solution(string begin, string target, vector<string> words) {
+    int answer = 0;
+    
+    t= target;
+    gWords = words;
+    
+    for(int i =0; i< begin.size(); i++){
+        for(int j =0; j<words.size(); j++){
+            if(correction(words[j], begin) && begin[i] != words[j][i]){
+                used[j] = true;
+                dfs(words[j], 1);
+                used[j] = false;
+            }
+        }
+    }
+    
+    if(minNum!=99999){
+        answer = minNum;
+    }
+    
+    return answer;
+}
