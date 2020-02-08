@@ -1,4 +1,166 @@
+//낚시왕 정답본 (mine)
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstdio>
 
+using namespace std;
+
+int rdir[5] = {0,-1,1,0,0};
+int cdir[5] = {0, 0,0,1,-1};
+//움직이는 방향
+
+
+typedef struct shark {
+	int r, c;
+	int s;
+	int d;
+	int z;
+
+}Shark;
+
+int r, c;
+int m;
+bool isExist[101][101];
+bool tmpExist[101][101];
+
+Shark arr[101][101];
+Shark tmpArr[101][101];
+
+int main() {
+	
+	int result = 0;
+	int rMove, cMove;
+
+	scanf("%d %d %d", &r, &c, &m);
+
+	rMove = r - 1;
+	cMove = c - 1;
+
+	for (int i = 0; i < m; i++) {
+		Shark temp;
+		scanf("%d %d %d %d %d",
+			&temp.r, &temp.c, &temp.s, &temp.d, &temp.z);
+		temp.r -= 1;
+		temp.c -= 1;
+
+		arr[temp.r][temp.c] = temp;
+		isExist[temp.r][temp.c] = true;
+	}
+
+	for (int j = 0; j < c; j++) {
+/*
+		printf("result:%d\n", result);
+		printf("now J: %d\n", j);
+		for (int k = 0; k < r; k++) {
+			for (int h = 0; h < c; h++) {
+				if (isExist[k][h] == true) {
+					printf("1	");
+				}
+				else {
+					printf("0	");
+				}
+			}
+			printf("\n");
+		}
+		printf("\n");
+		printf("\n");
+		*/
+		//상어잡기
+		for (int i = 0; i < r; i++) {
+			if (isExist[i][j] == true) {
+				result += arr[i][j].z;
+				isExist[i][j] = false;
+				arr[i][j].z = 0;
+				break;
+			}
+		}
+
+		//상어 움직이기
+		for (int k = 0; k < r; k++) {
+			for (int h = 0; h < c; h++) {
+				if (isExist[k][h] == true) {
+					Shark temp = arr[k][h];
+
+					if (arr[k][h].d == 1 || arr[k][h].d == 2) {	//위아래 움직임
+						int rest = temp.s%(rMove*2);		//남은 만큼 더가기 (방향은 그대로 일때를 가정
+						int gone = temp.r + rest*rdir[temp.d];
+						
+						//방향 바꾸고
+						while (gone >= r || gone < 0) {
+							if (gone >= r) {	//범위 아래로 벗어남
+							//	printf("범위 아래로 %d\n", gone);
+								int jump = gone - (r-1);
+								temp.d = 1; //방향 바꾸고
+								gone = r-1 - jump;
+
+							}
+							else {
+						//		printf("범위 위로 %d\n", gone);
+
+								int jump = (-1)*gone;
+								temp.d = 2;
+								gone = 0 + jump;
+							}
+						}
+						temp.r = gone;
+					}
+					else {
+
+						int rest = temp.s % (cMove * 2);		//남은 만큼 더가기 (방향은 그대로 일때를 가정
+						int gone = temp.c + rest*cdir[temp.d];
+						
+						//방향 바꾸고
+						while (gone >= c || gone < 0) {
+							if (gone >= c) {
+								//printf("범위 오른로 %d\n", gone);
+
+								int jump = gone - (c-1);
+								temp.d = 4; //방향 바꾸고
+								gone = c - 1 - jump;
+							}
+							else {
+
+							//	printf("범위 왼로 %d\n", gone);
+
+								int jump = (-1)*gone;
+								temp.d = 3;
+								gone = 0 + jump;
+							}
+						}
+						temp.c = gone;
+					}
+
+
+					if (tmpExist[temp.r][temp.c] == false) {
+						tmpExist[temp.r][temp.c] = true;
+						tmpArr[temp.r][temp.c] = temp;
+					}
+					else {	//누군가 이미 있는 경우
+						if (temp.z > tmpArr[temp.r][temp.c].z) {
+							tmpArr[temp.r][temp.c] = temp;
+						}
+					}
+				}
+				isExist[k][h] = false;
+
+			}
+		}
+		
+		for (int k = 0; k < r; k++) {
+			for (int h = 0; h < c; h++) {
+				isExist[k][h] = tmpExist[k][h];
+				arr[k][h] = tmpArr[k][h];
+
+				tmpExist[k][h] = false;
+				tmpArr[k][h].z = 0;
+			}
+		}
+	}
+	printf("%d", result);
+
+	return 0;
+}
 
 
 
