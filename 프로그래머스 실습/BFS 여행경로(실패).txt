@@ -70,3 +70,50 @@ vector<string> solution(vector<vector<string>> tickets) {
     
     return answer;
 }
+
+
+틀린이유: 기본적으로 앞에 sort 를 한것 / 문제풀이를 제대로 읽을 것. 
+항공권을 모두 사용하라는 조건!
+
+
+다른 모범 답안
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+bool dfs(string from , vector<vector<string>>& tickets, vector<bool>& visit, vector<string>&temp, vector<string>& answer, int cnt){
+
+    temp.push_back(from);
+    
+    if(cnt==tickets.size()){
+        answer=temp;
+        return true;
+    }
+    
+    for(int i =0; i<tickets.size(); i++){
+        if(tickets[i][0] == from && visit[i] == false){
+            visit[i] = true;
+        
+            bool success = dfs(tickets[i][1], tickets, visit, temp, answer, cnt+1);
+            if(success) return true;
+            
+            visit[i] = false;
+        }
+    }
+    
+    temp.pop_back();
+    return false;
+}
+    
+    
+    
+vector<string> solution(vector<vector<string>> tickets) {
+    vector<string> answer, temp;
+    vector<bool> visit(tickets.size(), false);
+    
+    sort(tickets.begin(), tickets.end());
+    dfs("ICN", tickets, visit, temp, answer, 0);
+    
+    return answer;
+}

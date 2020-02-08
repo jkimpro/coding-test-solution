@@ -1,0 +1,44 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int t;
+bool cal[1000];
+
+void dfs(int cnt, vector<int>& numbers, int& answer){
+    if(cnt == numbers.size()){
+        int result =0;
+        for(int i =0; i<numbers.size(); i++){
+            if(cal[i] == true){
+                result += numbers[i];
+            }
+            else{
+                result += (-1)*numbers[i];
+            }
+        }
+        if(result == t){
+            answer+=1;
+        }
+        return;
+    }
+    else{
+        cal[cnt] = true;
+        dfs(cnt+1, numbers, answer);
+        cal[cnt] = false;
+        dfs(cnt+1, numbers, answer);
+    }
+    
+    
+}
+int solution(vector<int> numbers, int target) {
+    int answer = 0;
+    t = target;
+    cal[0] = true;
+    dfs(1,numbers, answer);
+    cal[0] = false;
+    dfs(1,numbers, answer);
+    
+    
+    return answer;
+}

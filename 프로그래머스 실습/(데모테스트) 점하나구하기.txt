@@ -1,0 +1,45 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+typedef struct cell{
+    int num;
+    int loc;
+}Cell;
+
+vector<Cell> inside;
+
+bool find(int temp, int tmpLoc){
+    for(int i = 0; i<inside.size(); i++){
+        if(temp == inside[i].num && tmpLoc == inside[i].loc){
+            inside.erase(inside.begin() + i);
+            return true;
+        }
+    }
+    return false;
+}
+vector<int> solution(vector<vector<int> > v) {
+    vector<int> ans;
+
+    for(int i =0; i<v.size(); i++){
+        for(int j =0; j<v[i].size(); j++){
+            if(find(v[i][j], j)){
+                continue;
+            }
+            else{
+                inside.push_back({v[i][j], j});
+                //없을 경우 추가하기
+            }
+        }
+    }
+    
+    if(inside[0].loc == 0){
+        ans.push_back(inside[0].num);
+        ans.push_back(inside[1].num);
+    }
+    else{
+        ans.push_back(inside[1].num);
+        ans.push_back(inside[0].num);     
+    }
+    return ans;
+}
