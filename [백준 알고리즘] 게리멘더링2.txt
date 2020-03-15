@@ -1,0 +1,159 @@
+//게리멘더링2 (삼성 기출문제)
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int r,c;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+bool visit[101][101];
+int arr[101][101];
+int n,k;
+
+vector <int> sums;
+vector <Cell> limit[5];
+
+//1번 선거구: 1 ≤ r < x+d1, 1 ≤ c ≤ y
+//2번 선거구: 1 ≤ r ≤ x+d2, y < c ≤ N
+//3번 선거구: x+d1 ≤ r ≤ N, 1 ≤ c < y-d1+d2
+//4번 선거구: x+d2 < r ≤ N, y-d1+d2 ≤ c ≤ N
+
+bool checkLimit(int option,int r, int c){
+    for(int i =0; i<limit[option].size(); i++){
+        if(limit[option][i].r == r && limit[option][i].c == c){
+            return false;
+        }
+    }
+    return true;
+}
+bool canGo(int option, int r, int c,int x, int y, int d1, int d2){
+    
+    if(r<1 || r>n || c<1 || c>n){
+        return false;
+    }
+    else  if(visit[r][c] == true){
+        return false;
+    }
+    else if(option == 1 && 1<=r && r<x+d1 && 1<=c && c<=y && checkLimit(option,r,c)){
+        return true;
+    }
+    else if(option == 2 && 1<=r && r<=x+d2 && y<c && c<=n && checkLimit(option,r,c)){
+        return true;
+    }
+    else if(option == 3 && x+d1<=r && r<=n && 1<=c && c<y-d1+d2 && checkLimit(option,r,c)){
+        return true;
+    }
+    else if(option == 4 && x+d2<r && r<=n && y-d1+d2 <=c && c<=n && checkLimit(option,r,c)){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+int main(){
+    int result =9999999;
+    int sum =0;
+    scanf("%d", &n);
+    
+    for(int i =1; i<=n; i++){
+        for(int j =1; j<=n; j++){
+            scanf("%d", &arr[i][j]);
+            sum+=arr[i][j];
+        }
+    }
+
+    for(int x = 1; x<=n; x++){
+        for(int y =1; y<=n; y++){
+            for(int d1 =1; d1<=n; d1++){
+                for(int d2=1; d2<=n; d2++){
+                    if(x<x+d1+d2 && x+d1+d2<=n && 1<=y-d1 && y-d1 < y && y < y+d2 && y+d2<=n){
+                        int tempSum = sum;
+                        
+                        visit[1][1] = true; visit[1][n] = true; visit[n][1]= true; visit[n][n] = true;
+                        
+                        for(int option =1; option<=4; option++){
+                            int num =0;
+                            queue <Cell> root;
+                            
+                            if(option==1){
+                                for(int i =0; i<=d1; i++){
+                                    limit[option].push_back({x+i,y-i});
+                                }
+                                root.push({1,1});
+                            }
+                            else if(option==2){
+                                for(int i =0; i<=d2; i++){
+                                    limit[option].push_back({x+i,y+i});
+                                }
+                                root.push({1,n});
+                            }
+                            else if(option==3){
+                                for(int i =0; i<=d2; i++){
+                                    limit[option].push_back({x+d1+i,y-d1+i});
+                                }
+                                root.push({n,1});
+                                
+                            }
+                            else if(option==4){
+                                for(int i =0; i<=d1; i++){
+                                    limit[option].push_back({x+d2+i,y+d2-i});
+                                }
+                                root.push({n,n});
+                                
+                            }
+                            
+                            while(!root.empty()){
+                                Cell temp = root.front();
+                                root.pop();
+                                
+                                num+=arr[temp.r][temp.c];
+                                
+                                for(int i =0; i<4; i++){
+                                    if(canGo(option,temp.r+rdir[i],temp.c+cdir[i],x,y,d1,d2)){
+                                        int r =temp.r +rdir[i];
+                                        int c =temp.c +cdir[i];
+                                        
+                                        visit[r][c] = true;
+                                        root.push({r,c});
+                                    }
+                                }
+                            }
+                           
+                            sums.push_back(num);
+                            tempSum-=num;
+                        }
+                        
+                        sums.push_back(tempSum);
+                        sort(sums.begin(), sums.end());
+                        
+                        for(int i =1; i<=n; i++){
+                            for(int j =1; j<=n; j++){
+                                visit[i][j] = false;
+                            }
+                        }
+                        
+                        int now = sums[sums.size()-1]-sums[0];
+                        result = min(now,result);
+                        sums.clear();
+                        for(int i =1; i<5;i++){
+                            limit[i].clear();
+                        }
+                        
+                    }
+                }
+            }
+        }
+    }
+    
+    printf("%d\n", result);
+    
+    return 0;
+}
