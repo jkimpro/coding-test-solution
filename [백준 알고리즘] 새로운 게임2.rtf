@@ -1,0 +1,557 @@
+{\rtf1\ansi\ansicpg949\cocoartf2511
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;\f1\fnil\fcharset129 AppleSDGothicNeo-Regular;\f2\fnil\fcharset0 Menlo-Bold;
+}
+{\colortbl;\red255\green255\blue255;\red108\green121\blue134;\red31\green31\blue36;\red255\green255\blue255;
+\red253\green143\blue63;\red252\green106\blue93;\red252\green95\blue163;\red208\green168\blue255;\red93\green216\blue255;
+\red65\green161\blue192;\red208\green191\blue105;\red208\green168\blue255;\red158\green241\blue221;\red103\green183\blue164;
+\red161\green103\blue230;\red103\green183\blue164;}
+{\*\expandedcolortbl;;\csgenericrgb\c42394\c47462\c52518;\csgenericrgb\c12054\c12284\c14131;\csgenericrgb\c100000\c100000\c100000\c85000;
+\csgenericrgb\c99131\c56076\c24611;\csgenericrgb\c98912\c41558\c36568;\csgenericrgb\c98839\c37355\c63833;\csgenericrgb\c81681\c65692\c99927;\csgenericrgb\c36295\c84643\c99897;
+\csgenericrgb\c25490\c63137\c75294;\csgenericrgb\c81498\c74939\c41233;\csgenericrgb\c81569\c65882\c100000;\csgenericrgb\c62145\c94386\c86819;\csgenericrgb\c40538\c71705\c64209;
+\csgenericrgb\c63137\c40392\c90196;\csgenericrgb\c40392\c71765\c64314;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab593
+\pard\tx593\pardeftab593\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf2 \cb3 //
+\f1 \'bf\'f8\'c6\'c7\'b5\'b9\'b8\'ae\'b1\'e2
+\f0  (
+\f1 \'bb\'ef\'bc\'ba
+\f0 sw
+\f1 \'b1\'e2\'c3\'e2
+\f0 )\cf4 \
+\
+\cf5 #include \cf6 <iostream>\cf4 \
+\cf5 #include \cf6 <cstdio>\cf4 \
+\cf5 #include \cf6 <vector>\cf4 \
+\cf5 #include \cf6 <queue>\cf4 \
+\
+\
+
+\f2\b \cf7 using
+\f0\b0 \cf4  
+\f2\b \cf7 namespace
+\f0\b0 \cf4  \cf8 std\cf4 ;\
+\
+
+\f2\b \cf7 typedef
+\f0\b0 \cf4  
+\f2\b \cf7 struct
+\f0\b0 \cf4  \cf9 cell\cf4 \{\
+    
+\f2\b \cf7 int
+\f0\b0 \cf4  \cf10 r\cf4 ,\cf10 c\cf4 ;\
+\}Cell;\
+\
+
+\f2\b \cf7 typedef
+\f0\b0 \cf4  
+\f2\b \cf7 struct
+\f0\b0 \cf4  \cf9 time\cf4 \{\
+    
+\f2\b \cf7 int
+\f0\b0 \cf4  \cf10 x\cf4 ,\cf10 d\cf4 ,\cf10 k\cf4 ; \cf2 //x 
+\f1 \'b9\'e8\'bc\'f6
+\f0 , d 
+\f1 \'b9\'e6\'c7\'e2
+\f0 , k 
+\f1 \'c4\'ad\'c8\'b8\'c0\'fc\'bc\'f6
+\f0 \cf4 \
+\}Time;\
+\
+
+\f2\b \cf7 int
+\f0\b0 \cf4  \cf10 rdir\cf4 [\cf11 4\cf4 ] = \{-\cf11 1\cf4 ,\cf11 0\cf4 ,\cf11 1\cf4 ,\cf11 0\cf4 \};\
+
+\f2\b \cf7 int
+\f0\b0 \cf4  \cf10 cdir\cf4 [\cf11 4\cf4 ] = \{\cf11 0\cf4 ,\cf11 1\cf4 ,\cf11 0\cf4 ,-\cf11 1\cf4 \};\
+\
+
+\f2\b \cf7 int
+\f0\b0 \cf4  \cf10 arr\cf4 [\cf11 101\cf4 ][\cf11 101\cf4 ];\
+
+\f2\b \cf7 int
+\f0\b0 \cf4  \cf10 n\cf4 ,\cf10 m\cf4 ,\cf10 t\cf4 ;\
+
+\f2\b \cf7 int
+\f0\b0 \cf4  \cf10 sum\cf4  =\cf11 0\cf4 ;\
+
+\f2\b \cf7 int
+\f0\b0 \cf4  \cf10 indCount\cf4  =\cf11 0\cf4 ;\
+\cf12 vector\cf4  <\cf13 Time\cf4 > \cf10 times\cf4 ;\
+\
+\cf2 //m 
+\f1 \'bc\'fd\'c0\'da
+\f0  
+\f1 \'b8\'b8\'c5\'ad
+\f0  
+\f1 \'b9\'d0\'be\'ee\'b9\'f6\'b8\'ae\'b1\'e2
+\f0 .\cf4 \
+
+\f2\b \cf7 bool
+\f0\b0 \cf4  \cf10 canGo\cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  r, 
+\f2\b \cf7 int
+\f0\b0 \cf4  c, 
+\f2\b \cf7 int
+\f0\b0 \cf4  val)\{\
+    
+\f2\b \cf7 if
+\f0\b0 \cf4 (r<=\cf11 0\cf4  || r>\cf14 n\cf4  || c<=\cf11 0\cf4  || c>\cf14 m\cf4 )\{\
+        
+\f2\b \cf7 return
+\f0\b0 \cf4  
+\f2\b \cf7 false
+\f0\b0 \cf4 ;\
+    \}\
+    
+\f2\b \cf7 else
+\f0\b0 \cf4  
+\f2\b \cf7 if
+\f0\b0 \cf4 (\cf14 arr\cf4 [r][c] == -\cf11 1\cf4 )\{\
+        
+\f2\b \cf7 return
+\f0\b0 \cf4  
+\f2\b \cf7 false
+\f0\b0 \cf4 ;\
+    \}\
+    
+\f2\b \cf7 else
+\f0\b0 \cf4  
+\f2\b \cf7 if
+\f0\b0 \cf4 (\cf14 arr\cf4 [r][c] == val)\{\
+        
+\f2\b \cf7 return
+\f0\b0 \cf4  
+\f2\b \cf7 true
+\f0\b0 \cf4 ;\
+    \}\
+    
+\f2\b \cf7 else
+\f0\b0 \cf4 \{\
+        
+\f2\b \cf7 return
+\f0\b0 \cf4  
+\f2\b \cf7 false
+\f0\b0 \cf4 ;\
+    \}\
+\}\
+\
+\cf2 //m 
+\f1 \'bb\'f3\'c8\'b2\'bf\'a1
+\f0  
+\f1 \'b8\'c2\'b0\'d4
+\f0  
+\f1 \'b9\'d9\'b2\'d9\'b5\'b5\'b7\'cf
+\f0 \cf4 \
+
+\f2\b \cf7 int
+\f0\b0 \cf4  \cf10 main\cf4 ()\{\
+    \
+    \cf15 scanf\cf4 (\cf6 "%d %d %d"\cf4 , &\cf14 n\cf4 , &\cf14 m\cf4 , &\cf14 t\cf4 );\
+    
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  i =\cf11 1\cf4 ; i<=\cf14 n\cf4 ; i++)\{\
+        
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  j =\cf11 1\cf4 ; j<=\cf14 m\cf4 ; j++)\{\
+            \cf15 scanf\cf4 (\cf6 "%d"\cf4 , &\cf14 arr\cf4 [i][j]);\
+            \cf14 sum\cf4 +=\cf14 arr\cf4 [i][j];\
+            \cf14 indCount\cf4  += \cf11 1\cf4 ;\
+        \}\
+    \}\
+    \
+    
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  i =\cf11 0\cf4 ; i<\cf14 t\cf4 ; i++)\{\
+        \cf13 Time\cf4  temp;\
+        \cf15 scanf\cf4 (\cf6 "%d %d %d"\cf4 , &temp.\cf14 x\cf4 , &temp.\cf14 d\cf4 , &temp.\cf14 k\cf4 );\
+        \cf14 times\cf4 .\cf15 push_back\cf4 (temp);\
+    \}\
+    \
+    
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  time = \cf11 0\cf4 ; time<\cf14 times\cf4 .\cf15 size\cf4 (); time++)\{\
+        
+\f2\b \cf7 bool
+\f0\b0 \cf4  erased = 
+\f2\b \cf7 false
+\f0\b0 \cf4 ;\
+        
+\f2\b \cf7 int
+\f0\b0 \cf4  mainX = \cf14 times\cf4 [time].\cf14 x\cf4 ;\
+        
+\f2\b \cf7 int
+\f0\b0 \cf4  mainD = \cf14 times\cf4 [time].\cf14 d\cf4 ;\
+        
+\f2\b \cf7 int
+\f0\b0 \cf4  mainK = \cf14 times\cf4 [time].\cf14 k\cf4 ;\
+\cf2 //\cf4 \
+\cf2 //        
+\f1 \'b9\'f8\'c8\'a3\'b0\'a1
+\f0  xi
+\f1 \'c0\'c7
+\f0  
+\f1 \'b9\'e8\'bc\'f6\'c0\'ce
+\f0  
+\f1 \'bf\'f8\'c6\'c7\'c0\'bb
+\f0  di
+\f1 \'b9\'e6\'c7\'e2\'c0\'b8\'b7\'ce
+\f0  ki
+\f1 \'c4\'ad
+\f0  
+\f1 \'c8\'b8\'c0\'fc\'bd\'c3\'c5\'b2\'b4\'d9
+\f0 . di
+\f1 \'b0\'a1
+\f0  0
+\f1 \'c0\'ce
+\f0  
+\f1 \'b0\'e6\'bf\'ec\'b4\'c2
+\f0  
+\f1 \'bd\'c3\'b0\'e8
+\f0  
+\f1 \'b9\'e6\'c7\'e2
+\f0 , 1
+\f1 \'c0\'ce
+\f0  
+\f1 \'b0\'e6\'bf\'ec\'b4\'c2
+\f0  
+\f1 \'b9\'dd\'bd\'c3\'b0\'e8
+\f0  
+\f1 \'b9\'e6\'c7\'e2\'c0\'cc\'b4\'d9
+\f0 .\cf4 \
+\cf2 //        
+\f1 \'c0\'ce\'c1\'a2\'c7\'cf\'b8\'e9\'bc\'ad
+\f0  
+\f1 \'bc\'f6\'b0\'a1
+\f0  
+\f1 \'b0\'b0\'c0\'ba
+\f0  
+\f1 \'b0\'cd\'c0\'bb
+\f0  
+\f1 \'b8\'f0\'b5\'ce
+\f0  
+\f1 \'c3\'a3\'b4\'c2\'b4\'d9
+\f0 .\cf4 \
+\cf2 //        
+\f1 \'b1\'d7\'b7\'af\'c7\'d1
+\f0  
+\f1 \'bc\'f6\'b0\'a1
+\f0  
+\f1 \'c0\'d6\'b4\'c2
+\f0  
+\f1 \'b0\'e6\'bf\'ec\'bf\'a1\'b4\'c2
+\f0  
+\f1 \'bf\'f8\'c6\'c7\'bf\'a1\'bc\'ad
+\f0  
+\f1 \'c0\'ce\'c1\'a2\'c7\'cf\'b8\'e9\'bc\'ad
+\f0  
+\f1 \'b0\'b0\'c0\'ba
+\f0  
+\f1 \'bc\'f6\'b8\'a6
+\f0  
+\f1 \'b8\'f0\'b5\'ce
+\f0  
+\f1 \'c1\'f6\'bf\'ee\'b4\'d9
+\f0 .\cf4 \
+\cf2 //        
+\f1 \'be\'f8\'b4\'c2
+\f0  
+\f1 \'b0\'e6\'bf\'ec\'bf\'a1\'b4\'c2
+\f0  
+\f1 \'bf\'f8\'c6\'c7\'bf\'a1
+\f0  
+\f1 \'c0\'fb\'c8\'f9
+\f0  
+\f1 \'bc\'f6\'c0\'c7
+\f0  
+\f1 \'c6\'f2\'b1\'d5\'c0\'bb
+\f0  
+\f1 \'b1\'b8\'c7\'cf\'b0\'ed
+\f0 , 
+\f1 \'c6\'f2\'b1\'d5\'ba\'b8\'b4\'d9
+\f0  
+\f1 \'c5\'ab
+\f0  
+\f1 \'bc\'f6\'bf\'a1\'bc\'ad
+\f0  1
+\f1 \'c0\'bb
+\f0  
+\f1 \'bb\'a9\'b0\'ed
+\f0 , 
+\f1 \'c0\'db\'c0\'ba
+\f0  
+\f1 \'bc\'f6\'bf\'a1\'b4\'c2
+\f0  1
+\f1 \'c0\'bb
+\f0  
+\f1 \'b4\'f5\'c7\'d1\'b4\'d9
+\f0 .\cf4 \
+        \
+        
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  i = \cf11 1\cf4 ; i<=\cf14 n\cf4 ; i++)\{\
+            
+\f2\b \cf7 if
+\f0\b0 \cf4 (i%mainX ==\cf11 0\cf4 )\{\
+                \cf12 vector\cf4  <
+\f2\b \cf7 int
+\f0\b0 \cf4 > temp;\
+                
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  j = \cf11 1\cf4 ; j<=\cf14 m\cf4 ; j++)\{\
+                    temp.\cf15 push_back\cf4 (\cf14 arr\cf4 [i][j]);\
+                \}\
+                \
+                
+\f2\b \cf7 if
+\f0\b0 \cf4 (mainD==\cf11 0\cf4 )\{   \cf2 //
+\f1 \'bd\'c3\'b0\'e8
+\f0  
+\f1 \'b9\'e6\'c7\'e2\'c0\'cf
+\f0  
+\f1 \'b0\'e6\'bf\'ec
+\f0 \cf4 \
+                    
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  j=\cf11 0\cf4 ; j<temp.\cf15 size\cf4 (); j++)\{\
+                        
+\f2\b \cf7 if
+\f0\b0 \cf4 (j+\cf11 1\cf4 +mainK>\cf14 m\cf4 )\{   \cf2 //
+\f1 \'b9\'fc\'c0\'a7\'b8\'a6
+\f0  
+\f1 \'b9\'fe\'be\'ee\'b3\'aa\'b4\'c2
+\f0  
+\f1 \'b0\'e6\'bf\'ec
+\f0 \cf4 \
+                            \cf14 arr\cf4 [i][j+\cf11 1\cf4 +mainK-\cf14 m\cf4 ] = temp[j];\
+                        \}\
+                        
+\f2\b \cf7 else
+\f0\b0 \cf4 \{   \cf2 //
+\f1 \'be\'c6\'b4\'d1\'b0\'e6\'bf\'ec
+\f0 \cf4 \
+                            \cf14 arr\cf4 [i][j+\cf11 1\cf4 +mainK] = temp[j];\
+                        \}\
+                    \}\
+                \}\
+                
+\f2\b \cf7 else
+\f0\b0 \cf4 \{   \cf2 //
+\f1 \'b9\'dd\'bd\'c3\'b0\'e8
+\f0  
+\f1 \'b9\'e6\'c7\'e2\'c0\'cf
+\f0  
+\f1 \'b0\'e6\'bf\'ec
+\f0 \cf4 \
+                    
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  j=\cf11 0\cf4 ; j<temp.\cf15 size\cf4 (); j++)\{\
+                        
+\f2\b \cf7 if
+\f0\b0 \cf4 (j+\cf11 1\cf4 -mainK<\cf11 1\cf4 )\{   \cf2 //
+\f1 \'b9\'fc\'c0\'a7\'b8\'a6
+\f0  
+\f1 \'b9\'fe\'be\'ee\'b3\'aa\'b4\'c2
+\f0  
+\f1 \'b0\'e6\'bf\'ec
+\f0 \cf4 \
+                            \cf14 arr\cf4 [i][j+\cf11 1\cf4 -mainK+\cf14 m\cf4 ] = temp[j];\
+                        \}\
+                        
+\f2\b \cf7 else
+\f0\b0 \cf4 \{   \cf2 //
+\f1 \'be\'c6\'b4\'d1\'b0\'e6\'bf\'ec
+\f0 \cf4 \
+                            \cf14 arr\cf4 [i][j+\cf11 1\cf4 -mainK] = temp[j];\
+                        \}\
+                    \}\
+                \}\
+            \}\
+        \}\
+        \
+        
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  i =\cf11 1\cf4 ; i<=\cf14 n\cf4 ; i++)\{\
+            
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  j=\cf11 1\cf4 ; j<=\cf14 m\cf4 ; j++)\{\
+                
+\f2\b \cf7 if
+\f0\b0 \cf4 (\cf14 arr\cf4 [i][j] == -\cf11 1\cf4 )\{\
+                    
+\f2\b \cf7 continue
+\f0\b0 \cf4 ;\
+                \}\
+                \
+                
+\f2\b \cf7 int
+\f0\b0 \cf4  hereSum = \cf14 arr\cf4 [i][j];\
+                
+\f2\b \cf7 int
+\f0\b0 \cf4  hereCount =\cf11 1\cf4 ;\
+                
+\f2\b \cf7 int
+\f0\b0 \cf4  toolVal = \cf14 arr\cf4 [i][j];\
+                
+\f2\b \cf7 bool
+\f0\b0 \cf4  hereEra = 
+\f2\b \cf7 false
+\f0\b0 \cf4 ;\
+                \cf12 queue\cf4 <\cf13 Cell\cf4 > root;\
+                root.\cf15 push\cf4 (\{i,j\});\
+                \cf14 arr\cf4 [i][j] = -\cf11 1\cf4 ;\
+                \
+                
+\f2\b \cf7 while
+\f0\b0 \cf4 (!root.\cf15 empty\cf4 ())\{\
+                    \cf13 Cell\cf4  now = root.\cf15 front\cf4 ();\
+                    root.\cf15 pop\cf4 ();\
+                    \
+                    
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  dir = \cf11 0\cf4 ; dir<\cf11 4\cf4 ; dir++)\{\
+                        
+\f2\b \cf7 int
+\f0\b0 \cf4  nowR = now.\cf14 r\cf4  + \cf14 rdir\cf4 [dir];\
+                        
+\f2\b \cf7 int
+\f0\b0 \cf4  nowC = now.\cf14 c\cf4  + \cf14 cdir\cf4 [dir];\
+                        \
+                        
+\f2\b \cf7 if
+\f0\b0 \cf4 (nowC >\cf14 m\cf4  )\{nowC = \cf11 1\cf4 ;\}\
+                        
+\f2\b \cf7 else
+\f0\b0 \cf4  
+\f2\b \cf7 if
+\f0\b0 \cf4 (nowC <\cf11 1\cf4 )\{nowC = \cf14 m\cf4 ;\}\
+                        \
+                        
+\f2\b \cf7 if
+\f0\b0 \cf4 (\cf16 canGo\cf4 (nowR, nowC, toolVal))\{\
+                            \cf14 arr\cf4 [nowR][nowC] = -\cf11 1\cf4 ;\
+                            root.\cf15 push\cf4 (\{nowR, nowC\});\
+                            hereSum += toolVal;\
+                            hereCount +=\cf11 1\cf4 ;\
+                            erased = 
+\f2\b \cf7 true
+\f0\b0 \cf4 ;\
+                            hereEra = 
+\f2\b \cf7 true
+\f0\b0 \cf4 ;\
+                        \}\
+                    \}\
+                \}\
+                
+\f2\b \cf7 if
+\f0\b0 \cf4 (hereEra== 
+\f2\b \cf7 false
+\f0\b0 \cf4 )\{\
+                    \cf14 arr\cf4 [i][j] = toolVal;\
+                \}\
+                
+\f2\b \cf7 else
+\f0\b0 \cf4 \{\
+                    \cf14 sum\cf4 -=hereSum;\
+                    \cf14 indCount\cf4 -=hereCount;\
+                \}\
+            \}\
+        \}\
+        \
+        
+\f2\b \cf7 if
+\f0\b0 \cf4 (erased == 
+\f2\b \cf7 false
+\f0\b0 \cf4 )\{\
+            
+\f2\b \cf7 double
+\f0\b0 \cf4  avg =(
+\f2\b \cf7 double
+\f0\b0 \cf4 )\cf14 sum\cf4 /(
+\f2\b \cf7 double
+\f0\b0 \cf4 )\cf14 indCount\cf4 ;\
+            
+\f2\b \cf7 int
+\f0\b0 \cf4  tempSum =\cf11 0\cf4 ;\
+            
+\f2\b \cf7 int
+\f0\b0 \cf4  tempIndCount =\cf11 0\cf4 ;\
+            \
+            
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  i=\cf11 1\cf4 ; i<=\cf14 n\cf4 ; i++)\{\
+                
+\f2\b \cf7 for
+\f0\b0 \cf4 (
+\f2\b \cf7 int
+\f0\b0 \cf4  j =\cf11 1\cf4 ; j<=\cf14 m\cf4 ; j++)\{\
+                    
+\f2\b \cf7 if
+\f0\b0 \cf4 (\cf14 arr\cf4 [i][j] == -\cf11 1\cf4 )\{
+\f2\b \cf7 continue
+\f0\b0 \cf4 ;\}\
+                    
+\f2\b \cf7 else
+\f0\b0 \cf4  
+\f2\b \cf7 if
+\f0\b0 \cf4 (\cf14 arr\cf4 [i][j] > avg)\{\
+                        \cf14 arr\cf4 [i][j] -=\cf11 1\cf4 ;\
+                        tempSum+= \cf14 arr\cf4 [i][j];\
+                        tempIndCount+=\cf11 1\cf4 ;\
+                    \}\
+                    
+\f2\b \cf7 else
+\f0\b0 \cf4  
+\f2\b \cf7 if
+\f0\b0 \cf4 (\cf14 arr\cf4 [i][j] < avg)\{\
+                        \cf14 arr\cf4 [i][j] +=\cf11 1\cf4 ;\
+                        tempSum+= \cf14 arr\cf4 [i][j];\
+                        tempIndCount+=\cf11 1\cf4 ;\
+                    \}\
+                    
+\f2\b \cf7 else
+\f0\b0 \cf4 \{\
+                        tempSum+= \cf14 arr\cf4 [i][j];\
+                        tempIndCount+=\cf11 1\cf4 ;\
+                    \}\
+                \}\
+            \}\
+            \
+            \cf14 sum\cf4  = tempSum;\
+            \cf14 indCount\cf4  = tempIndCount;\
+        \}\
+    \}\
+    \
+    \
+    \cf15 printf\cf4 (\cf6 "%d"\cf4 , \cf14 sum\cf4 );\
+    
+\f2\b \cf7 return
+\f0\b0 \cf4  \cf11 0\cf4 ;\
+\}\
+}
