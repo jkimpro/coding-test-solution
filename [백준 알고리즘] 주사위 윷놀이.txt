@@ -1,0 +1,201 @@
+//주사위 윷놀이 (삼성 sw 기출문제)
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <cstdio>
+
+using namespace std;
+
+typedef struct mal{
+    int now;
+    int blueInd;
+    bool activate;
+}Mal;
+
+int blue[4][20] ={
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {10,13,16,19,25,30,35,40,0,0,0,0,0,0},
+    {20,22,24,25,30,35,40,0,0,0,0,0,0},
+    {30,28,27,26,25,30,35,40,0,0,0,0,0,0}
+};
+
+vector <int> seq;
+vector <Mal> root;
+
+int result =0;
+
+bool canGo(int blueInd, int ind, int strict){
+    if(blueInd ==0){
+        for(int i=0; i<root.size(); i++){
+            if(i==strict || root[i].activate == false){
+                continue;
+            }
+            
+            if(ind*2 ==10 && root[i].blueInd ==1 && root[i].now == 0){
+                return false;
+            }
+            if(ind*2 ==20 && root[i].blueInd ==2 && root[i].now == 0){
+                return false;
+            }
+            if(ind*2 ==30 && root[i].blueInd ==3 && root[i].now == 0){
+                return false;
+            }
+            if(ind*2 == 40){
+                if(root[i].blueInd !=0){
+                    if(blue[root[i].blueInd][root[i].now] == 40){
+                        return false;
+                    }
+                }
+                else{
+                    if(root[i].now*2 == 40){
+                        return false;
+                    }
+                }
+            }
+            if(root[i].blueInd==0){
+                if(root[i].now*2 == ind*2){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    else{   //blueInd ==1 || blueInd ==2 || blueInd ==3
+        for(int i=0; i<root.size(); i++){
+            if(i==strict || root[i].activate == false){ //비활성화된거는 일단 제외하기
+                continue;
+            }
+            if(blue[blueInd][ind] ==30 && root[i].blueInd ==3 && root[i].now == 0){         //이부분이 진짜 핵심 이었음!!!!!!!!!!!!!!!! (간과한 조건)
+                continue;
+            }
+            
+            
+            //자기꺼 같은거 거르기
+            if(root[i].blueInd==blueInd && root[i].now == ind){
+                return false;
+            }
+            //공통되는 부분 거르기
+            if(root[i].blueInd !=0){
+                if(blue[blueInd][ind] == blue[root[i].blueInd][root[i].now]){
+                    return false;
+                }
+            }
+            //blueInd에서 40일떄 거르기
+            if(blue[blueInd][ind] ==40){
+                //root[i].blueInd 가 0 일때
+                if(root[i].blueInd ==0 && root[i].now*2 ==40){
+                    return false;
+                }
+                else if(root[i].blueInd !=0){   //아닐때
+                    if(blue[root[i].blueInd][root[i].now]==40){
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+}
+
+void dfs(int ind, int sum){
+   // printf("get inside sum: %d ind:%d\n",sum, ind);
+
+    int step = seq[ind];
+    if(ind >=10){
+        result = max(result, sum);
+        return;
+    }
+    else{
+        for(int i =0; i<root.size(); i++){
+            if(root[i].activate == true){
+                if(root[i].blueInd != 0){
+                    if(blue[root[i].blueInd][root[i].now+step] ==0){    //도착칸 전제
+                        int temp = root[i].now;
+                        root[i].now = -1;
+                        root[i].activate = false;
+                        dfs(ind+1,sum);
+                        root[i].activate = true;
+                        root[i].now = temp;
+                    }
+                    else if(canGo(root[i].blueInd,root[i].now+step,i)){ // 해당칸을 갈수 있다면
+                        root[i].now += step;
+                        dfs(ind+1,sum+blue[root[i].blueInd][root[i].now]);
+                        root[i].now -= step;
+                    }
+                }
+                else{
+                    if(canGo(0,root[i].now+step,i)){
+                        if((root[i].now+step)*2 >40){
+                            int temp = root[i].now;
+                            root[i].now = -1;
+                            root[i].activate = false;
+                            dfs(ind+1, sum);
+                            root[i].activate = true;
+                            root[i].now = temp;
+                        }
+                        else if((root[i].now+step)*2 ==10){
+                            int temp = root[i].now;
+                            root[i].now =0;root[i].blueInd =1;
+                            dfs(ind+1, sum+10);
+                            root[i].now = temp; root[i].blueInd = 0;
+                        }
+                        else if((root[i].now+step)*2 ==20){
+                            int temp = root[i].now;
+                            root[i].now =0;root[i].blueInd =2;
+                            dfs(ind+1, sum+20);
+                            root[i].now = temp; root[i].blueInd = 0;
+                        }
+                        else if((root[i].now+step)*2 ==30){
+                            int temp = root[i].now;
+                            root[i].now =0; root[i].blueInd =3;
+                            dfs(ind+1, sum+30);
+                            root[i].now = temp; root[i].blueInd = 0;
+                        }
+                        else{ //아닐때
+                            root[i].now += step;
+                            dfs(ind+1,sum+(root[i].now)*2);
+                            root[i].now -= step;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if(root.size()<4){ //새로 투입하는 경우의 수.
+            if(canGo(0,step,root.size())){
+                Mal temp;
+                if(2*step ==10){
+                    temp.now=0;
+                    temp.blueInd = 1;
+                    temp.activate = true;
+                    
+                    root.push_back(temp);
+                    dfs(ind+1,sum+10);
+                    root.pop_back();
+                }
+                else{
+                    temp.now= step;
+                    temp.blueInd = 0;
+                    temp.activate = true;
+                    
+                    root.push_back(temp);
+                    dfs(ind+1,sum+(2*step));
+                    root.pop_back();
+                }
+            }
+        }
+    }
+}
+int main(){
+    for(int i =0; i<10; i++){
+        int temp;
+        scanf("%d", &temp);
+        seq.push_back(temp);
+    }
+    
+    dfs(0,0);
+    printf("%d", result);
+    return 0;
+}
