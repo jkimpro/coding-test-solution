@@ -1,0 +1,128 @@
+//주사위 굴리기 문제
+#include <iostream>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+int n,m;
+int x,y;
+int k;
+
+int nowR, nowC;
+
+vector <int> way;
+int arr[21][21];
+
+int dice[7] ={0,0,0,0,0,0,0};
+
+
+void setDice(int dir){
+    int temp[7] = {0};
+    for(int i =0; i<7; i++){
+        temp[i] = dice[i];
+    }
+    
+    if(dir ==1){    //동쪽이동
+        dice[1] = temp[3]; dice[2] = temp[2]; dice[3] = temp[6];
+        dice[4] = temp[1]; dice[5] = temp[5]; dice[6] = temp[4];
+    }
+    else if(dir ==2){    //서쪽이동
+        dice[1] = temp[4]; dice[2] = temp[2]; dice[3] = temp[1];
+        dice[4] = temp[6]; dice[5] = temp[5]; dice[6] = temp[3];
+    }
+    else if(dir ==3){    //북
+        dice[1] = temp[2]; dice[2] = temp[6]; dice[3] = temp[3];
+        dice[4] = temp[4]; dice[5] = temp[1]; dice[6] = temp[5];
+    }
+    else if(dir ==4){    //남
+        dice[1] = temp[5]; dice[2] = temp[1]; dice[3] = temp[3];
+        dice[4] = temp[4]; dice[5] = temp[6]; dice[6] = temp[2];
+    }
+}
+
+bool canGo(int r, int c){
+    if(r<0 || r>=n || c<0 || c>=m){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+int main(){
+    scanf("%d %d %d %d %d", &n, &m, &x, &y, &k);
+    for(int i =0; i<n; i++){
+        for(int j =0; j<m; j++){
+            scanf("%d", &arr[i][j]);
+        }
+    }
+    
+    nowR = x; nowC = y;
+    for(int i =0; i<k; i++){
+        int temp;
+        scanf("%d", &temp);
+        way.push_back(temp);
+    }
+    
+    for(int i =0; i<way.size(); i++){
+        bool go = false;
+        
+        if(way[i] == 1 && canGo(nowR, nowC+1)){    //동
+            nowC+=1;
+            setDice(1);
+            go = true;
+            if(arr[nowR][nowC] == 0){
+                arr[nowR][nowC] = dice[1];
+            }
+            else{
+                dice[1] = arr[nowR][nowC];
+                arr[nowR][nowC] =0;
+            }
+        }
+        else if(way[i] ==2 && canGo(nowR, nowC-1)){    //서
+            nowC-=1;
+            setDice(2);
+            go = true;
+                      
+            if(arr[nowR][nowC] == 0){
+                arr[nowR][nowC] = dice[1];
+            }
+            else{
+                dice[1] = arr[nowR][nowC];
+                arr[nowR][nowC] =0;
+            }
+        }
+        else if(way[i] ==3 && canGo(nowR-1, nowC)){    //뷱
+            nowR-=1;
+            setDice(3);
+            go = true;
+                      
+            if(arr[nowR][nowC] == 0){
+                arr[nowR][nowC] = dice[1];
+            }
+            else{
+                dice[1] = arr[nowR][nowC];
+                arr[nowR][nowC] =0;
+            }
+        }
+        else if(way[i] ==4 && canGo(nowR+1, nowC)){    //남
+            nowR+=1;
+            setDice(4);
+            go = true;
+                      
+            if(arr[nowR][nowC] == 0){
+                arr[nowR][nowC] = dice[1];
+            }
+            else{
+                dice[1] = arr[nowR][nowC];
+                arr[nowR][nowC] =0;
+            }
+        }
+        
+        if(go == true){
+            printf("%d\n", dice[6]);
+        }
+    }
+    
+    return 0;
+}
