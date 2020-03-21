@@ -1,0 +1,206 @@
+//다리 만들기
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+
+
+typedef struct cell{
+    int r,c;
+    int dir;
+    int length;
+    int endPoint;
+    int startPoint;
+    bool used;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+vector <int> includeLand;
+vector <Cell> islandStart[7];
+vector <Cell> islands[7];
+
+int result;
+int n,m;
+int arr[101][101];
+bool visit[101][101];
+int landCount;
+
+
+bool canGo(int r, int c){
+    if(r<0 || r>=n || c<0 || c>=m){
+        return false;
+    }
+    else if(arr[r][c] == 0){
+        return false;
+    }
+    else if(visit[r][c] == true){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+bool makeReach(int r, int c, int dir){
+    
+    if(r<0 || r>=n || c<0 || c>=m || r+rdir[dir]<0 ||r+rdir[dir]>=n ||
+       c+cdir[dir]<0 ||c+cdir[dir]>=m){
+        return false;
+    }
+    
+    if(arr[r][c] == 0 && arr[r+rdir[dir]][c+cdir[dir]] == 0){
+        return true;
+    }
+    
+    return false;
+}
+
+bool check(vector<int> includeLand){
+    bool all[7];
+    for(int i =0; i<7; i++){
+        all[i] = false;
+    }
+    for(int i =0; i<includeLand.size(); i++){
+        all[includeLand[i]] = true;
+    }
+    for(int i =1; i<=landCount; i++){
+        if(all[i] == false){
+            return false;
+        }
+    }
+    return true;
+}
+
+void dfs(int sum, int brCount, vector<int> includeLand){
+    if(check(includeLand) && brCount == landCount-1){
+        result = min(result, sum);
+        return;
+    }
+    else{
+        for(int now =1;now<=landCount; now++){
+            for(int i =0; i<islandStart[now].size(); i++){
+                if(islandStart[now][i].used == true){continue;}
+                bool isStartpointExist = false;
+                bool isEndpointExist = false;
+                for(int j =0; j<includeLand.size(); j++){
+                    if(includeLand[j] ==islandStart[now][i].startPoint){
+                        isStartpointExist = true;
+                    }
+                    if(includeLand[j] ==islandStart[now][i].endPoint){
+                        isEndpointExist = true;
+                    }
+                }
+                
+                if(isStartpointExist == true && isEndpointExist == true){
+                    continue;
+                }
+                else{
+                    vector <int> temp = includeLand;
+                    if(isStartpointExist == false){
+                       temp.push_back(now);
+                    }
+                    if(isEndpointExist == false){
+                       temp.push_back(islandStart[now][i].endPoint);
+                    }
+                    dfs(sum+islandStart[now][i].length,brCount+1 ,temp);
+                }
+            }
+        }
+    }
+}
+
+int main(){
+    landCount = 1;
+    result = 9999999;
+    scanf("%d %d",&n, &m);
+    
+    for(int i =0; i<n; i++){
+        for(int j =0; j<m; j++){
+            scanf("%d", &arr[i][j]);
+        }
+    }
+    
+    for(int i =0; i<n; i++){
+        for(int j =0; j<m; j++){
+            if(arr[i][j] == 1 && visit[i][j] == false){
+                vector <Cell> land;
+                queue <Cell> root;
+                root.push({i,j});
+                land.push_back({i,j});
+                visit[i][j] = true;
+                arr[i][j] = landCount;
+                
+                while(!root.empty()){
+                    Cell temp = root.front();
+                    root.pop();
+                    
+                    for(int dir =0; dir<4; dir++){
+                        if(canGo(temp.r+rdir[dir], temp.c+cdir[dir])){
+                            root.push({temp.r+rdir[dir], temp.c+cdir[dir]});
+                            land.push_back({temp.r+rdir[dir], temp.c+cdir[dir]});
+                            
+                            arr[temp.r+rdir[dir]][temp.c+cdir[dir]] = landCount;
+                            visit[temp.r+rdir[dir]][temp.c+cdir[dir]] = true;
+                        }
+                    }
+                }
+                islands[landCount] = land;
+                landCount++;
+            }
+        }
+    }
+    landCount -=1;
+    
+    //start 지점 거르기
+    for(int now =1; now<=landCount; now++){
+        for(int i =0; i<islands[now].size(); i++){
+            Cell temp = islands[now][i];
+            for(int dir =0; dir<4; dir++){
+                int nowR = temp.r + rdir[dir];
+                int nowC = temp.c + cdir[dir];
+                
+                if(makeReach(nowR, nowC, dir)){
+                    int length = 0;
+                    int endPoint =-1;
+                    bool reach = false;
+                    
+                    while(1){
+                        if(nowR < 0 || nowR>=n || nowC<0 || nowC>=m){
+                            break;
+                        }
+                        if(arr[nowR][nowC] == now){
+                            break;
+                        }
+                        
+                        if(arr[nowR][nowC]!=now && arr[nowR][nowC] != 0){ //반대편에 도착했다면
+                            reach = true;
+                            endPoint = arr[nowR][nowC];
+                            break;
+                        }
+                        length+=1;
+                        nowR+=rdir[dir]; nowC +=cdir[dir];
+                    }
+                    
+                    if(reach == true){
+                        islandStart[now].push_back({temp.r+rdir[dir], temp.c+cdir[dir],dir, length, endPoint, now, false});
+                    }
+                }
+            }
+        }
+    }
+    //이제 전적으로 dfs 문제임
+    vector<int> includeLand;
+    dfs(0, 0, includeLand);
+    
+    if(result == 9999999){
+        printf("-1");
+    }
+    else{
+        printf("%d", result);
+    }
+    return 0;
+}
