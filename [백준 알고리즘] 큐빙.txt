@@ -1,0 +1,299 @@
+//큐빙 (삼성 sw 기출문제)
+#include <iostream>
+#include <string>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+char backUp[6][3][3];
+char arr[6][3][3] ={
+    {
+        {'w','w','w'},  //U
+        {'w','w','w'},
+        {'w','w','w'},
+    },
+    {
+        {'y','y','y'},  //D
+        {'y','y','y'},
+        {'y','y','y'},
+    },
+    {
+        {'r','r','r'},  //F
+        {'r','r','r'},
+        {'r','r','r'},
+    },
+    {
+        {'o','o','o'},  //B
+        {'o','o','o'},
+        {'o','o','o'},
+    },
+    {
+        {'g','g','g'},  //L
+        {'g','g','g'},  //L
+        {'g','g','g'},  //L
+    },
+    {
+        {'b','b','b'},  //R
+        {'b','b','b'},  //R
+        {'b','b','b'},  //R
+    }
+};
+
+int n;
+void changeRes(char res, char dir){
+    int num;
+    char temp[3][3];
+    if(res =='U') {num =0;}
+    if(res =='D') {num =1;}
+    if(res =='F') {num=2;}
+    if(res =='B') {num =3;}
+    if(res =='L') {num =4;}
+    if(res =='R') {num=5;}
+    for(int i =0; i<3; i++){
+        for(int j =0; j<3; j++){
+            temp[i][j] = arr[num][i][j];
+        }
+    }
+    
+    if(dir =='+'){
+        arr[num][0][2] = temp[0][0]; arr[num][1][2] = temp[0][1]; arr[num][2][2] = temp[0][2];
+        arr[num][2][1] = temp[1][2]; arr[num][2][0] = temp[2][2]; arr[num][1][0] = temp[2][1];
+        arr[num][0][0] = temp[2][0]; arr[num][0][1] = temp[1][0];
+    }
+    else{
+        arr[num][2][0] = temp[0][0]; arr[num][2][1] = temp[1][0]; arr[num][2][2] = temp[2][0];
+        arr[num][1][2] = temp[2][1]; arr[num][0][2] = temp[2][2]; arr[num][0][1] = temp[1][2];
+        arr[num][0][0] = temp[0][2]; arr[num][1][0] = temp[0][1];
+    }
+}
+void simulation(char res, char dir){
+
+    if(res == 'U'){
+        char tempL[3]; char tempR[3];
+        char tempF[3]; char tempB[3];
+        for(int i =0; i<3; i++){
+            tempF[i] = arr[2][0][i];
+            tempB[i] = arr[3][0][i];
+            tempL[i] = arr[4][0][i];
+            tempR[i] = arr[5][0][i];
+        }
+        if(dir == '+'){ //시계
+            for(int i =0; i<3; i++){
+                arr[2][0][i] = tempR[i]; //F
+                arr[3][0][i] = tempL[i]; //B
+                arr[4][0][i] = tempF[i]; //L
+                arr[5][0][i] = tempB[i]; //R
+            }
+        }
+        else{ //반시계
+            for(int i =0; i<3; i++){
+                arr[2][0][i] = tempL[i];
+                arr[3][0][i] = tempR[i];
+                arr[4][0][i] = tempB[i];
+                arr[5][0][i] = tempF[i];
+            }
+        }
+    }
+    
+    
+    if(res =='D'){
+        char tempL[3]; char tempR[3];
+        char tempF[3]; char tempB[3];
+        
+        for(int i =0; i<3; i++){
+            tempF[i] = arr[2][2][i];
+            tempB[i] = arr[3][2][i];
+            tempL[i] = arr[4][2][i];
+            tempR[i] = arr[5][2][i];
+        }
+        if(dir == '+'){ //시계
+            for(int i =0; i<3; i++){
+                arr[2][2][i] = tempL[i];
+                arr[3][2][i] = tempR[i];
+                arr[4][2][i] = tempB[i];
+                arr[5][2][i] = tempF[i];
+            }
+        }
+        else{ //반시계
+            for(int i =0; i<3; i++){
+                arr[2][2][i] = tempR[i];
+                arr[3][2][i] = tempL[i];
+                arr[4][2][i] = tempF[i];
+                arr[5][2][i] = tempB[i];
+            }
+        }
+    }
+    
+    if(res == 'F'){
+        char tempU[3]; char tempR[3];
+        char tempL[3]; char tempD[3];
+        for(int i =0; i<3; i++){
+            tempU[i] = arr[0][2][i];
+            tempD[i] = arr[1][0][i];
+            tempL[i] = arr[4][i][2];
+            tempR[i] = arr[5][i][0];
+        }
+        if(dir == '+'){ //시계
+            for(int i =0; i<3; i++){
+                arr[5][i][0] = tempU[i];
+            }
+            for(int i =2; i>=0; i--){
+                arr[4][i][2] = tempD[i];
+            }
+            arr[0][2][0] = tempL[2]; arr[0][2][1] = tempL[1]; arr[0][2][2] = tempL[0];
+            arr[1][0][0] = tempR[2]; arr[1][0][1] = tempR[1]; arr[1][0][2] = tempR[0];
+        }
+        else{
+            for(int i=2; i>=0; i--){
+                arr[0][2][i] = tempR[i];
+            }
+            for(int i=0; i<3; i++){
+                arr[1][0][i] = tempL[i];
+            }
+            arr[5][0][0] = tempD[2]; arr[5][1][0] = tempD[1]; arr[5][2][0] = tempD[0];
+            arr[4][0][2] = tempU[2]; arr[4][1][2] = tempU[1]; arr[4][2][2] = tempU[0];
+        }
+    }
+    
+     
+    if(res =='B'){ //뒷면
+        char tempU[3]; char tempR[3];
+        char tempL[3]; char tempD[3];
+        
+        for(int i =0; i<3; i++){
+            tempU[i] = arr[0][0][i];
+            tempD[i] = arr[1][2][i];
+            tempL[i] = arr[4][i][0];
+            tempR[i] = arr[5][i][2];
+        }
+        
+        if(dir == '+'){ //시계
+            for(int i =0; i<3; i++){
+                arr[0][0][i] = tempR[i];
+                arr[1][2][i] = tempL[i];
+            }
+            arr[4][0][0] = tempU[2]; arr[4][1][0] = tempU[1]; arr[4][2][0] = tempU[0];
+            arr[5][0][2] = tempD[2]; arr[5][1][2] = tempD[1]; arr[5][2][2] = tempD[0];
+        }
+        else{ //반시계
+            for(int i =0; i<3; i++){
+                arr[4][i][0] = tempD[i];
+                arr[5][i][2] = tempU[i];
+            }
+            arr[0][0][0] = tempL[2]; arr[0][0][1] = tempL[1]; arr[0][0][2] = tempL[0];
+            arr[1][2][0] = tempR[2]; arr[1][2][1] = tempR[1]; arr[1][2][2] = tempR[0];
+        }
+    }
+    if(res == 'L'){ //왼쪽면
+        char tempU[3]; char tempF[3];
+        char tempB[3]; char tempD[3];
+        
+        for(int i =0; i<3; i++){
+            tempU[i] = arr[0][i][0];
+            tempD[i] = arr[1][i][0];
+            tempF[i] = arr[2][i][0];
+            tempB[i] = arr[3][i][2];
+        }
+        
+        if(dir=='+'){
+            for(int i =0; i<3; i++){
+                arr[2][i][0] = tempU[i];
+                arr[1][i][0] = tempF[i];
+            }
+            
+            arr[0][0][0] = tempB[2]; arr[0][1][0] = tempB[1]; arr[0][2][0] = tempB[0];
+            arr[3][0][2] = tempD[2]; arr[3][1][2] = tempD[1]; arr[3][2][2] = tempD[0];
+        }
+        else{ //반시계
+            for(int i =0; i<3; i++){
+                arr[0][i][0] = tempF[i];
+                arr[2][i][0] = tempD[i];
+            }
+            arr[3][0][2] = tempU[2]; arr[3][1][2] = tempU[1]; arr[3][2][2] = tempU[0];
+            arr[1][0][0] = tempB[2]; arr[1][1][0] = tempB[1]; arr[1][2][0] = tempB[0];
+        }
+    }
+    
+    
+    
+    if(res=='R'){   //오른쪽면
+        char tempU[3]; char tempF[3];
+        char tempB[3]; char tempD[3];
+        
+        for(int i =0; i<3; i++){
+            tempU[i] = arr[0][i][2];
+            tempF[i] = arr[2][i][2];
+            tempD[i] = arr[1][i][2];
+            tempB[i] = arr[3][i][0];
+        }
+        
+        if(dir == '+'){ //시계
+            for(int i =0; i<3; i++){
+                arr[2][i][2] = tempD[i];
+                arr[0][i][2] = tempF[i];
+            }
+            arr[3][0][0] = tempU[2]; arr[3][1][0] = tempU[1]; arr[3][2][0] = tempU[0];
+            arr[1][0][2] = tempB[2]; arr[1][1][2] = tempB[1]; arr[1][2][2] = tempB[0];
+        }
+        else{ //반시계
+            for(int i =0; i<3; i++){
+               arr[2][i][2] = tempU[i];
+               arr[1][i][2] = tempF[i];
+           }
+           arr[3][0][0] = tempD[2]; arr[3][1][0] = tempD[1]; arr[3][2][0] = tempD[0];
+           arr[0][0][2] = tempB[2]; arr[0][1][2] = tempB[1]; arr[0][2][2] = tempB[0];
+      
+        }
+    }
+}
+
+void cubeInit(){
+    for(int i =0; i<6; i++){
+        for(int j =0; j<3; j++){
+            for(int k=0; k<3; k++){
+                arr[i][j][k] = backUp[i][j][k];
+            }
+        }
+    }
+}
+
+int main(){
+    
+    for(int i =0; i<6; i++){
+        for(int j =0; j<3; j++){
+            for(int k=0; k<3; k++){
+                backUp[i][j][k] = arr[i][j][k];
+            }
+        }
+    }
+    scanf("%d", &n);
+    for(int i =0; i<n; i++){
+        int time=0;
+        scanf("%d", &time);
+        
+        for(int j =0; j<time; j++){
+            char name[10];
+            char respect;
+            char dir;
+            
+            scanf("%s", name);
+            
+            respect = name[0];
+            dir = name[1];
+            
+            simulation(respect, dir);
+            changeRes(respect, dir);
+        }
+        
+        for(int j =0; j<3; j++){
+            for(int k =0; k<3; k++){
+                printf("%c", arr[0][j][k]);
+            }
+            printf("\n");
+        }
+        cubeInit();
+        
+    }
+    return 0;
+}
