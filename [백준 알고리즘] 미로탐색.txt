@@ -1,0 +1,78 @@
+//미로 탐색
+#include <iostream>
+#include <cstdio>
+#include <queue>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+
+typedef struct way{
+    int r, c;
+    int step;
+}Way;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int n,m;
+
+int result =999999;
+
+int arr[101][101];
+bool visit[101][101];
+
+bool canGo(int r, int c){
+    
+    if(r<0 || r>=n || c<0 || c>=m){
+        return false;
+    }
+    else if(visit[r][c] == true){
+        return false;
+    }
+    else if(arr[r][c] == 0){
+        return false;
+    }
+    else if(arr[r][c] == 1){
+        return true;
+    }
+    return false;
+}
+
+int main(){
+    scanf("%d %d", &n, &m);
+    
+    for(int i =0; i<n; i++){
+        string temp;
+        
+        cin >> temp;
+        
+        for(int j =0; j<temp.size(); j++){
+            arr[i][j] = temp[j] - '0';
+        }
+    }
+    
+    queue<Way> root;
+    root.push({0,0,1});
+    visit[0][0] = true;
+    
+    while(!root.empty()){
+        Way temp = root.front();
+        root.pop();
+        
+     //   printf("%d %d\n", temp.r, temp.c);
+        if(temp.r == n-1 && temp.c == m-1){
+            result = min(result,temp.step);
+        }
+        else{
+            for(int i =0; i<4; i++){
+                if(canGo(temp.r+rdir[i], temp.c+cdir[i])){
+                    visit[temp.r+rdir[i]][temp.c+cdir[i]] = true;
+                    root.push({temp.r+rdir[i], temp.c+cdir[i], temp.step+1});
+                }
+            }
+        }
+    }
+    
+    printf("%d", result);
+    return 0;
+}
