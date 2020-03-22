@@ -1,0 +1,48 @@
+//바이러스
+#include <iostream>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+int num;
+int network;
+int result =0;
+vector <int> connect[101];
+bool isEffect[101];
+
+void dfs(int ind){
+    for(int i =0; i<connect[ind].size(); i++){
+        if(isEffect[connect[ind][i]] == false){
+            isEffect[connect[ind][i]] = true;
+            dfs(connect[ind][i]);
+        }
+    }
+}
+int main(){
+    scanf("%d", &num);
+    
+    for(int i =0; i<=num; i++){
+        isEffect[i] = false;
+    }
+    
+    scanf("%d", &network);
+    for(int i =0; i<network; i++){
+        int temp1, temp2;
+        scanf("%d %d", &temp1, &temp2);
+        connect[temp1].push_back(temp2);
+        connect[temp2].push_back(temp1);
+    }
+    
+    dfs(1);
+    
+    for(int i =1; i<=num; i++){
+        if(isEffect[i] == true){
+            result+=1;
+        }
+    }
+    result-=1;
+    printf("%d", result);
+    
+    return 0;
+}
