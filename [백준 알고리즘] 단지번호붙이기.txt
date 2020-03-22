@@ -1,0 +1,84 @@
+//단지번호붙이기
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <queue>
+#include <cstring>
+
+using namespace std;
+typedef struct cell{
+    int r,c;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+int arr[30][30];
+bool visit[30][30];
+
+int n;
+vector<int> all;
+
+bool canGo(int r, int c){
+    if(r<0 || r>=n || c<0 || c>=n){
+        return false;
+    }
+    else if(visit[r][c] ==true){
+        return false;
+    }
+    else if(arr[r][c] == 0){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+int main(){
+
+    int count =0;
+    scanf("%d", &n);
+    
+    for(int i =0; i<n; i++){
+        string temp;
+        cin >> temp;
+        for(int j =0; j<temp.size(); j++){
+            arr[i][j] = temp[j] -'0';
+        }
+    }
+    for(int i =0; i<n; i++){
+        for(int j =0; j<n; j++){
+            if(arr[i][j] == 1 && visit[i][j] == false){
+                count+=1;
+                
+                int indCount =0;
+                queue<Cell> root;
+                root.push({i,j});
+                visit[i][j] = true;
+                while(!root.empty()){
+                    Cell temp = root.front();
+                    root.pop();
+                    indCount++;
+                    
+                    for(int dir=0; dir<4; dir++){
+                        int nowR = temp.r+rdir[dir];
+                        int nowC = temp.c+cdir[dir];
+                        
+                        if(canGo(nowR, nowC)){
+                            visit[nowR][nowC] = true;
+                            root.push({nowR, nowC});
+                        }
+                    }
+                }
+                all.push_back(indCount);
+            }
+            
+        }
+    }
+    sort(all.begin(), all.end());
+    printf("%d\n", count);
+    for(int i =0; i<all.size(); i++){
+        printf("%d\n", all[i]);
+    }
+    
+    return 0;
+}
