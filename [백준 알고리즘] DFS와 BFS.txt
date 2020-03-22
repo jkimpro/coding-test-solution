@@ -1,0 +1,82 @@
+//DFS 와 BFS
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct dot{
+    int r, c;
+}Dot;
+
+vector<int> dots[1001];
+vector <int> dfsSeq;
+vector <int> bfsSeq;
+
+bool visit1[1001];
+bool visit2[1001];
+int n,m,v;
+
+void bfs(int num){
+    
+    queue<int> root;
+    root.push(num);
+    
+    while(!root.empty()){
+        int ind = root.front();
+        root.pop();
+        
+        for(int i =0; i<dots[ind].size();i++){
+            if(visit2[dots[ind][i]] == false){
+                visit2[dots[ind][i]] = true;
+                bfsSeq.push_back(dots[ind][i]);
+                root.push(dots[ind][i]);
+            }
+        }
+    }
+    
+}
+
+void dfs(int num){
+    for(int i =0; i<dots[num].size(); i++){
+        if(visit1[dots[num][i]] == false){
+            visit1[dots[num][i]] = true;
+            dfsSeq.push_back(dots[num][i]);
+            dfs(dots[num][i]);
+        }
+    }
+}
+int main(){
+    scanf("%d %d %d", &n, &m, &v);
+    
+    for(int i =0; i<m; i++){
+        int num1, num2;
+        scanf("%d %d", &num1, &num2);
+        dots[num1].push_back(num2);
+        dots[num2].push_back(num1);
+    }
+    for(int i =0; i<=n; i++){
+        sort(dots[i].begin(), dots[i].end());
+    }
+    
+    visit1[v] = true;
+    dfsSeq.push_back(v);
+    dfs(v);
+    
+    visit2[v] = true;
+    bfsSeq.push_back(v);
+    bfs(v);
+    
+    
+    for(int i =0; i<dfsSeq.size(); i++){
+        printf("%d ", dfsSeq[i]);
+    }
+    printf("\n");
+    for(int i =0; i<bfsSeq.size(); i++){
+        printf("%d ", bfsSeq[i]);
+    }
+    
+    return 0;
+}
