@@ -1,0 +1,70 @@
+//촌수 계산
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+int n,m;
+int to, dest;
+int result =-1;
+vector <int> parents[102];
+vector <int> kids[102];
+
+void downDfs(int ind, int count){
+    if(ind == dest){
+        result = count;
+        return;
+    }
+    else{
+        for(int i =0; i<kids[ind].size(); i++){
+            downDfs(kids[ind][i], count+1);
+        }
+    }
+}
+
+void upperDfs(int ind, int count, int noCountInd){
+    if(ind == dest){
+        result = count;
+        return;
+    }
+    else{
+        for(int i =0; i<kids[ind].size(); i++){
+            if(kids[ind][i] == noCountInd){
+                continue;
+            }
+            downDfs(kids[ind][i], count+1);
+        }
+        //한칸 더 올라가기
+        if(parents[ind].size()!=0){
+            upperDfs(parents[ind][0],count+1,ind);
+        }
+    }
+}
+int main(){
+    
+    scanf("%d", &n);
+    scanf("%d %d", &to, &dest);
+    
+    scanf("%d", &m);
+    
+    for(int i =0; i<m; i++){
+        int p, k;
+        scanf("%d %d", &p, &k);
+        
+        kids[p].push_back(k);
+        parents[k].push_back(p);
+    }
+    downDfs(to,0);
+    
+    if(result ==-1){
+        if(parents[to].size() !=0){
+            upperDfs(parents[to][0], 1, to);
+        }
+    }
+    
+    printf("%d\n", result);
+    
+    return 0;
+}
