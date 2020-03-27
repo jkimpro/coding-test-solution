@@ -1,0 +1,87 @@
+//숨바꼭질
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+typedef struct cell{
+    int num;
+    int count;
+}Cell;
+
+bool check[200001];
+
+int n,k;
+int result=999999;
+
+bool mulCanGo(int num){
+    if(num*2 >=200000){
+        return false;
+    }
+    if(check[num*2] == true){
+        return false;
+    }
+    return true;
+}
+bool plusCanGo(int num){
+    if(num+1 >=200000){
+        return false;
+    }
+    if(check[num+1] == true){
+        return false;
+    }
+    return true;
+}
+bool minCanGo(int num){
+    if(num-1 <0){
+        return false;
+    }
+    if(check[num-1] == true){
+        return false;
+    }
+    return true;
+}
+int main(){
+    
+    scanf("%d %d", &n, &k);
+    
+    check[n] = true;
+  
+    queue<Cell> root;
+    root.push({n,0});
+    while(!root.empty()){
+        Cell temp = root.front();
+        root.pop();
+        
+        bool mulCheck = false;
+        bool plusCheck = false;
+        bool minCheck = false;
+        
+        if(temp.num == k){
+            result = min(result,temp.count);
+        }
+        if(mulCanGo(temp.num)){
+            root.push({temp.num*2,temp.count+1}); mulCheck = true;
+        }
+        if(plusCanGo(temp.num)){
+            root.push({temp.num+1,temp.count+1}); plusCheck = true;
+        }
+        if(minCanGo(temp.num)){
+            root.push({temp.num-1,temp.count+1}); minCheck = true;
+        }
+        
+        if(mulCheck == true){
+            check[temp.num*2] = true;
+        }
+        if(plusCheck){
+            check[temp.num+1] = true;
+        }
+        if(minCheck){
+            check[temp.num-1] = true;
+        }
+    }
+    printf("%d", result);
+    return 0;
+}
