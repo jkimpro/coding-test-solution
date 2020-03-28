@@ -1,0 +1,79 @@
+//스타트링크
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <queue>
+#include <cmath>
+
+using namespace std;
+
+typedef struct cell{
+    int num;
+    int count;
+}Cell;
+
+int f,s,g,u,d;
+int gap;
+int rest;
+int result=99999999;
+bool change = false;
+bool arr[1000001]; //수로 바꿀까?
+
+int main(){
+    
+    scanf("%d %d %d %d %d",&f, &s,&g,&u,&d);
+    
+    arr[s] = true;
+    
+    queue <Cell> root;
+    root.push({s, 0});
+    
+    while(!root.empty()){
+        Cell temp = root.front();
+        root.pop();
+    
+        if(g == temp.num){
+            result = temp.count;
+            change = true;
+            break;
+        }
+        
+        int up = temp.num + u;
+        int down = temp.num - d;
+        
+        if(s<g && up<=f){     //up으로 가는 것.
+            if(arr[up] == false){
+                arr[up] = true;
+                root.push({up,temp.count+1});
+            }
+        }
+        if(s>g && up<=f){    //up으로 가는 것.
+            if(arr[up] == false){
+                arr[up] = true;
+                root.push({up, temp.count+1});
+            }
+        }
+        
+        if(s<g && down>=1){ //down 으로 가는 것.
+           if(arr[down] == false){
+               arr[down] = true;
+               root.push({down, temp.count+1});
+           }
+       }
+       if(s>g && down>=1){    //down으로 가는 것
+           if(arr[down]== false){
+            arr[down] = true;
+            root.push({down, temp.count+1});
+           }
+       }
+    }
+    
+    if(change == false){
+        printf("use the stairs");
+    }
+    else{
+        printf("%d", result);
+    }
+        
+    return 0;
+}
