@@ -1,0 +1,100 @@
+//토마토
+#include <iostream>
+#include <cstdio>
+#include <queue>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int k,r,c;
+    int count =0;
+}Cell;
+int hdir[6] ={1,-1,0,0,0,0};
+int rdir[6] = {0,0,1,0,-1,0};
+int cdir[6] = {0,0,0,-1,0,1};
+
+int n,m,h;
+int result =0;
+int arr[101][101][101];
+bool isEffected = true;
+bool originAllEffected = true;
+//정수 1은 익은 토마토, 정수 0 은 익지 않은 토마토,
+//정수 -1은 토마토가 들어있지 않은 칸을 나타낸다.
+//이러한 N개의 줄이 H번 반복하여 주어진다.
+
+bool canGo(int g, int r, int c){
+    if(g<0 || g>=h || r<0 || r>=n || c<0 ||c>=m){
+        return false;
+    }
+    else if(arr[g][r][c] == -1){
+        return false;
+    }
+    else if(arr[g][r][c]== 1){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+int main(){
+    
+    scanf("%d %d %d", &m, &n, &h);
+    queue<Cell> root;
+    
+    for(int k =0; k<h; k++){
+        for(int i =0; i<n; i++){
+            for(int j =0; j<m; j++){
+                scanf("%d", &arr[k][i][j]);
+                if(arr[k][i][j] == 1){
+                    root.push({k,i,j,0});
+                }
+                if(arr[k][i][j] == 0){
+                    originAllEffected = false;
+                }
+            }
+        }
+    }
+    
+    while(!root.empty()){
+        Cell temp = root.front();
+        root.pop();
+        
+        result = max(result,temp.count);
+        
+        for(int i =0; i<6; i++){
+            int g =temp.k+hdir[i];
+            int r =temp.r +rdir[i];
+            int c = temp.c +cdir[i];
+            if(canGo(g,r,c)){
+                arr[g][r][c] = 1;
+                root.push({g,r,c,temp.count+1});
+            }
+        }
+    }
+    
+    for(int k =0; k<h; k++){
+        for(int i =0; i<n; i++){
+            for(int j =0; j<m; j++){
+                if(arr[k][i][j] == 0){
+                    isEffected = false;
+                }
+            }
+        }
+    }
+    
+    if(originAllEffected){
+        printf("0");
+    }
+    else if(!isEffected){
+        printf("-1");
+    }
+    else{
+        printf("%d", result);
+    }
+    
+    
+
+    return 0;
+}
