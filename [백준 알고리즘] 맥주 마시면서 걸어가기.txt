@@ -1,0 +1,109 @@
+//맥주마시면서 걸어가기
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <cmath>
+
+using namespace std;
+
+typedef struct store{
+    int x,y;
+    int distance;
+    bool check;
+}Store;
+
+vector<Store> stores;
+
+int t;
+int n;
+
+bool cmp(const Store &st1, const Store &st2){
+    if(st1.distance > st2.distance){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+bool canGo(Store now, Store target){
+    int dis = abs(target.x-now.x) + abs(target.y-now.y);
+    if(dis<=1000){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+int main(){
+    scanf("%d", &t);
+    
+    for(int test = 0; test<t; test++){
+        bool canDo = false;
+        scanf("%d",&n);
+        for(int i =0; i<n+2; i++){
+            Store temp;
+            scanf("%d %d", &temp.x, &temp.y);
+            temp.check = false;
+            stores.push_back(temp);
+        }
+        for(int i =0; i<stores.size(); i++){
+            stores[i].check = false;
+            stores[i].distance = abs(stores[stores.size()-1].x - stores[i].x) + abs(stores[stores.size()-1].y - stores[i].y);
+        }
+        
+//        int startInd;
+//        for(int i =1; i<stores.size()-1; i++){
+//            if(start.distance<=stores[i].distance){
+//                stores.erase(stores.begin()+1+i);
+//                i--;
+//            }
+//        }
+//        sort(stores.begin(), stores.end(),cmp);
+//
+//        for(int i =0; i<stores.size(); i++){
+//            printf("i:%d x:%d y:%d dis:%d\n",i, stores[i].x, stores[i].y, stores[i].distance);
+//            if(start.x == stores[i].x && start.y == stores[i].y){
+//                startInd = i;
+//            }
+//        }
+//
+        stores[0].check = true;
+        
+        queue<Store> root;
+        root.push(stores[0]);
+        
+        while(!root.empty()){
+            Store temp = root.front();
+            root.pop();
+            
+            if(temp.x == stores[stores.size()-1].x &&
+               temp.y == stores[stores.size()-1].y){
+                canDo = true;
+                break;
+            }
+        
+            for(int i =1; i<stores.size(); i++){
+                if(stores[i].check == true || (stores[i].x == temp.x && stores[i].y == temp.y)){
+                    continue;
+                }
+                else if(canGo(temp,stores[i])){
+                    stores[i].check = true;
+                    root.push(stores[i]);
+                }
+            }
+        }
+        
+        if(canDo){
+            printf("happy\n");
+        }
+        else{
+            printf("sad\n");
+        }
+        
+        stores.clear();
+    }
+    
+    return 0;
+}
