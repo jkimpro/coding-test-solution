@@ -1,0 +1,145 @@
+//모의 sw 역량 테스트 벽돌 깨기 (재풀이)
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+typedef struct cell{
+    int r,c;
+    int val;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int n,w,h;
+int arr[20][20];
+int result;
+
+int simulation(int num){
+    int output =0;
+    bool canDel = false;
+    queue <Cell> root;
+    //지우기.
+    for(int i =0; i<h; i++){
+        if(arr[i][num] !=0){
+            root.push({i,num, arr[i][num]});
+            arr[i][num] =0;
+            canDel = true;
+            break;
+        }
+    }
+    
+    //연쇄 지우기
+    while((!root.empty()) && canDel == true){
+        Cell temp = root.front();
+        root.pop();
+        
+        if(temp.val ==1){
+            continue;
+        }
+        
+        //이부분 수정해야할것 같은데.....
+        for(int now =1; now<temp.val; now++){
+            for(int dir =0; dir<4; dir++){
+                int nowR = temp.r + rdir[dir]*now;
+                int nowC = temp.c + cdir[dir]*now;
+
+                if(nowR<0 || nowR >=h || nowC<0 || nowC>=w){
+                    continue;
+                }
+                else if(arr[nowR][nowC] ==0){
+                    continue;
+                }
+                else if(arr[nowR][nowC]==1){
+                    arr[nowR][nowC]=0;
+                    continue;
+                }
+                else{
+                    root.push({nowR, nowC, arr[nowR][nowC]});
+                    arr[nowR][nowC]=0;
+                }
+                
+                
+//                else{
+//                    if(arr[nowR][nowC]!=0){
+//                        root.push({nowR, nowC, arr[nowR][nowC]});
+//                    }
+//                    arr[nowR][nowC] =0;
+//                }
+            }
+        }
+    }
+    
+    //아래에서부터 다 땡기기
+    for(int i =0; i<w; i++){
+        vector<int> colBack;
+        int startH = h-1;
+        for(int j=startH; j>=0; j--){
+            if(arr[j][i] != 0){
+                colBack.push_back(arr[j][i]);
+                arr[j][i] = 0;
+                output++;
+            }
+        }
+        for(int j =0; j<colBack.size(); j++){
+            arr[startH][i] = colBack[j];
+            startH--;
+        }
+    }
+    
+    //출력
+    return output;
+}
+
+void dfs(int level, int sum){
+    if(level > n){
+        result = min(result, sum);
+        return;
+    }
+    else{
+        for(int colNum =0;colNum<w; colNum++){
+            int backup[20][20];
+            int returnNum;
+            //백업
+            for(int i =0; i<h; i++){
+                for(int j =0; j<w; j++){
+                    backup[i][j] = arr[i][j];
+                }
+            }
+            //simulation
+            returnNum = simulation(colNum);
+            
+            //dfs
+            dfs(level+1, returnNum);
+            //복원
+            for(int i =0; i<h; i++){
+                for(int j =0; j<w; j++){
+                    arr[i][j] = backup[i][j];
+                }
+            }
+        }
+    }
+    
+}
+int main(){
+    int test;
+    scanf("%d", &test);
+    
+    for(int testcase = 1; testcase<=test; testcase++){
+        result =9999999;
+        scanf("%d %d %d", &n, &w, &h);
+        
+        for(int i =0; i<h; i++){
+            for(int j =0; j<w; j++){
+                scanf("%d", &arr[i][j]);
+            }
+        }
+        
+        dfs(1,0);
+        printf("#%d %d\n", testcase, result);
+    }
+    return 0;
+}
