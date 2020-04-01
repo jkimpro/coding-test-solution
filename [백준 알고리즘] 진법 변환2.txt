@@ -1,0 +1,38 @@
+//진법 변환2 (SK 예상문제)
+//진법 변환 2
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+vector<char> seq;
+
+int n;
+int op;
+
+void overTrans(){
+    int temp = n;
+    while(temp !=0){
+        int rest = temp%op;
+        char input;
+        if(rest<10){
+            input = rest + '0';
+        }
+        else{
+            input = rest - 10 + 'A';
+        }
+        seq.push_back(input);
+        temp/=op;
+    }
+    
+    for(int i = seq.size()-1; i>=0; i--){
+        printf("%c", seq[i]);
+    }
+}
+int main(){
+    scanf("%d %d", &n, &op);
+    overTrans();
+    return 0;
+}
