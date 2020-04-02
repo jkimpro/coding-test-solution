@@ -1,0 +1,36 @@
+//수들의 합2
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+vector<int> root;
+
+int n,m;
+int result =0;
+int sum =0;
+
+int main(){
+    scanf("%d %d", &n, &m);
+    
+    root.push_back(0);
+    for(int i =0; i<n; i++){
+        int temp;
+        scanf("%d", &temp);
+        sum+=temp;
+        root.push_back(sum);
+    }
+    
+    for(int i =0; i<root.size(); i++){
+        for(int j =0; j<i; j++){
+            if((root[i]-root[j]) == m){
+                result++;
+            }
+        }
+    }
+    printf("%d", result);
+    return 0;
+}
