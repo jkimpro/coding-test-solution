@@ -1,0 +1,92 @@
+//킹
+#include <iostream>
+#include <vector>
+#include <cstdio>
+
+using namespace std;
+
+int rdir[8] = {0,0,-1,1,1,1,-1,-1};
+int cdir[8] = {1,-1,0,0,1,-1,1,-1};
+
+char kingR, kingC;
+char stoneR, stoneC;
+char king[2];
+char stone[2];
+int n;
+
+vector <int> root;
+int nowDir(string dir){
+    if(dir == "R"){ return 0;}
+    if(dir == "L"){ return 1;}
+    if(dir == "B"){ return 2;}
+    if(dir == "T"){ return 3;}
+    if(dir == "RT"){ return 4;}
+    if(dir == "LT"){ return 5;}
+    if(dir == "RB"){ return 6;}
+    if(dir == "LB"){ return 7;}
+    
+    return 0;
+}
+bool canGo(int r, int c){
+    if(r<0 || r>=8 || c<0 || c>=8){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+bool isStone(int r, int c, int sR, int sC){
+    if(r == sR && c == sC){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+int main(){
+    
+    scanf("%c%c %c%c %d",&king[0],&king[1],&stone[0],&stone[1],&n);
+    
+    // A1 (열/행) A2
+    kingR = king[1] - '0' -1;
+    kingC = king[0] - 'A';
+    
+    stoneR = stone[1] - '0' -1;
+    stoneC = stone[0] - 'A';
+    
+    for(int i =0; i<n; i++){
+        string temp;
+        cin >> temp;
+        root.push_back(nowDir(temp));
+    }
+    
+    for(int i =0; i<root.size(); i++){
+        if(canGo(kingR+rdir[root[i]], kingC+cdir[root[i]])){
+            if(!isStone(kingR+rdir[root[i]], kingC+cdir[root[i]], stoneR, stoneC)){
+               //돌이 없을경우 그냥 move
+                kingR+=rdir[root[i]];
+                kingC+=cdir[root[i]];
+            }
+            else{
+                if(canGo(stoneR+rdir[root[i]],stoneC+cdir[root[i]])){
+                    kingR+=rdir[root[i]];
+                    kingC+=cdir[root[i]];
+                    stoneR+=rdir[root[i]];
+                    stoneC+=cdir[root[i]];
+                    
+                }
+            }
+
+        }
+    }
+    
+    kingR += ('0'+1);
+    kingC += 'A';
+    
+    stoneR += ('0'+1);
+    stoneC += 'A';
+    
+    printf("%c%c\n%c%c",kingC,kingR,stoneC, stoneR);
+    
+    return 0;
+}
