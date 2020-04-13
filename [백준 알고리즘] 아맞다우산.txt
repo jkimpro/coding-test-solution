@@ -1,0 +1,137 @@
+//아맞다우산 문제
+
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <queue>
+#include <string>
+
+
+using namespace std;
+
+typedef struct tool{
+    int r, c;
+    bool pick;
+    int count;
+}Tool;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int n,m;
+
+char arr[100][100];
+Tool startWay;
+Tool exitWay;
+int result;
+
+vector<Tool> tools;
+
+int simulation(Tool now, Tool target){
+    
+    int returnVal = 999999;
+    bool visit[100][100];
+    for(int i =0; i<m; i++){
+        for(int j =0;j<n; j++){
+            visit[i][j] = false;
+        }
+    }
+    
+    visit[now.r][now.c] = true;
+    
+    queue <Tool> root;
+    root.push(now);
+    
+    while(!root.empty()){
+        Tool temp = root.front();
+        root.pop();
+        
+        if(temp.r == target.r && temp.c == target.c){
+            returnVal = min(returnVal, temp.count);
+        }
+        else{
+            for(int i =0; i<4; i++){
+                int nowR = temp.r + rdir[i];
+                int nowC = temp.c + cdir[i];
+                if(nowR<0 || nowR >= m || nowC<0 || nowC >=n){
+                    continue;
+                }
+                if(arr[nowR][nowC] == '#'){
+                    continue;
+                }
+                if(visit[nowR][nowC] == true){
+                    continue;
+                }
+                
+                if(arr[nowR][nowC]=='.' || arr[nowR][nowC]=='S' || arr[nowR][nowC]=='X' || arr[nowR][nowC] =='E'){
+                    visit[nowR][nowC] = true;
+                    root.push({nowR, nowC, false, temp.count+1});
+                }
+            }
+        }
+    }
+    return returnVal;
+}
+void dfs(int level, int sum, int nowInd){
+   // printf("level:%d\n", level);
+    if(level >= tools.size()){
+        //nowInd에서 end로 가는것을 게산
+        if(tools.size() ==0){
+            sum+=simulation(startWay, exitWay);
+        }
+        else{
+            sum+=simulation(tools[nowInd], exitWay);
+        }
+        result = min(result, sum);
+        return;
+    }
+    else{
+        for(int i =0; i<tools.size(); i++){
+            int tmpSum = sum;
+            
+            if(tools[i].pick == true || i == nowInd){
+                continue;
+            }
+            
+            if(nowInd == -1){
+                tmpSum += simulation(startWay, tools[i]);
+            }
+            else{
+                tmpSum += simulation(tools[nowInd], tools[i]);
+            }
+            
+            tools[i].pick = true;
+            dfs(level+1, tmpSum, i);
+            tools[i].pick = false;
+        }
+    
+    }
+}
+int main(){
+    result =99999999;
+    scanf("%d %d", &n, &m);
+    
+    for(int i =0; i<m; i++){
+        string temp;
+        cin >> temp;
+        
+        for(int j =0; j<temp.size(); j++){
+            arr[i][j] = temp[j];
+            if(arr[i][j] == 'S'){
+                startWay = {i,j, false,0};
+            }
+            if(arr[i][j] == 'E'){
+                exitWay = {i,j, false,0};
+            }
+            if(arr[i][j] == 'X'){
+                tools.push_back({i,j,false,0});
+            }
+        }
+    }
+    
+    dfs(0,0,-1);
+    
+    printf("%d", result);
+    return 0;
+}
