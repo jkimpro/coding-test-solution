@@ -1,0 +1,49 @@
+//보물
+
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+int n;
+int result;
+int arr[51];
+
+vector <int> a;
+vector <int> b;
+bool cmp(const int&i, const int&j){
+    if(i>j){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+int main(){
+    result =0;
+    
+    scanf("%d", &n);
+    for(int i =0;i<n; i++){
+        int num;
+        scanf("%d", &num);
+        a.push_back(num);
+    }
+    
+    sort(a.begin(), a.end());
+    
+    for(int i =0;i<n; i++){
+        int num;
+        scanf("%d", &num);
+        b.push_back(num);
+    }
+    sort(b.begin(), b.end(), cmp);
+    
+    for(int i =0;i<n; i++){
+        result += a[i]*b[i];
+    }
+    cout << result << endl;
+    //
+    return 0;
+}
