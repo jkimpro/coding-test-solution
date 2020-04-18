@@ -1,0 +1,61 @@
+//미로 만들기
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+string step;
+int n;
+char maze[102][102];
+
+int main(){
+    
+    scanf("%d", &n);
+    cin >> step;
+    for(int i=0; i<102; i++){
+        for(int j =0;j<102; j++){
+            maze[i][j] = '#';
+        }
+    }
+    //0 위 1 오른 2 아래 3 왼
+    int dir = 2;
+    int maxR = 50; int minR= 50;
+    int maxC = 50; int minC = 50;
+    int r = 50;int c = 50;
+    maze[r][c] = '.';
+    
+    for(int i =0; i<step.size(); i++){
+        if(step[i] == 'R'){
+            dir = (dir+1)%4;
+        }
+        if(step[i] =='L'){
+            if(dir-1 <0){
+                dir = 3;
+            }
+            else{
+                dir -=1;
+            }
+        }
+        if(step[i] == 'F'){
+            r +=rdir[dir]; c+=cdir[dir];
+            maze[r][c] = '.';
+            maxR = max(maxR, r);
+            minR = min(minR, r);
+            maxC = max(maxC, c);
+            minC = min(minC, c);
+        }
+    }
+    
+    for(int i = minR; i<=maxR; i++){
+        for(int j = minC; j<=maxC; j++){
+            printf("%c", maze[i][j]);
+        }
+        printf("\n");
+    }
+    
+    return 0;
+}
