@@ -1,0 +1,146 @@
+//백준 (1726) 로봇
+//로봇 문제 풀이
+//팁.1 visit 방향별 따로 설정할것
+//팁.2 직진도중 visit이 차지하고 있을 때, 벽이 아니고, 범위 밖이 아닐경우 continue 해서 다믐 명령이 가능토록할것.
+//팁.3 canGo 함수로 확실히 방향전환을 해도 실효성이 있는지를 확인할것.
+
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int r,c;
+    int dir;
+    int count;
+}Cell;
+
+
+//1 동 2서 3남 4북
+int rdir[5] = {0,0,0,1,-1};
+int cdir[5] = {0,1,-1,0,0};
+
+Cell start;
+Cell tgt;
+int n,m;
+int arr[101][101];
+bool visit[5][101][101];
+int result =9999999;
+
+bool canGo(int r, int c, int dir){
+    if(r<0 || r>= n || c<0 || c>=m){
+        return false;
+    }
+    else if(visit[dir][r][c] == true){
+        return false;
+    }
+    else if(arr[r][c]==1){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+int chgDir(int from, int to){
+    if(from ==1){
+        if(to==2){return 2;}
+        else{return 1;}
+    }
+    else if(from ==2){
+        if(to==1){return 2;}
+        else{return 1;}
+    }
+    else if(from ==3){
+        if(to==4){return 2;}
+        else{return 1;}
+    }
+    else{
+        if(to==3){return 2;}
+            else{return 1;}
+    }
+}
+
+int main(){
+    cin >> n >> m;
+    for(int i =0; i< n; i++){
+        for(int j =0;j<m; j++){
+            scanf("%d", &arr[i][j]);
+            if(arr[i][j] == 1){
+                for(int k =1; k<=4; k++){
+                    visit[k][i][j] = true;
+                }
+            }
+            else{
+                for(int k =1; k<=4; k++){
+                    visit[k][i][j] = false;
+                }
+            }
+        }
+    }
+    cin >> start.r >> start.c >> start.dir;
+    start.count = 0;
+    start.r-=1; start.c -=1;
+    
+    cin >> tgt.r >> tgt.c >> tgt.dir;
+    tgt.count = 0;
+    tgt.r-=1; tgt.c -=1;
+    
+    queue <Cell> root;
+    root.push(start);
+    
+    while(!root.empty()){
+        Cell temp = root.front();
+        root.pop();
+        
+        if(temp.r == tgt.r && temp.c == tgt.c){
+            
+            if(temp.dir != tgt.dir){
+                temp.count += chgDir(temp.dir, tgt.dir);
+            }
+            result = min(result, temp.count);
+        }
+        else{
+            // 현재에서 직진 명령
+            for(int i =1; i<4; i++){
+                int nowR = temp.r + rdir[temp.dir]*i;
+                int nowC = temp.c + cdir[temp.dir]*i;
+                
+                if(!canGo(nowR, nowC,temp.dir)){
+                    if(nowR<0 || nowR>=n || nowC <0 || nowC>=m){
+                        break;
+                    }
+                    if(arr[nowR][nowC] == 1){ //1 일경우에는 break;
+                        break;
+                    }
+                    if(visit[temp.dir][nowR][nowC] == true){   //그게 아닐 경우는 걍 패스
+                        continue;
+                    }
+                }
+                visit[temp.dir][nowR][nowC] = true;
+                root.push({nowR, nowC, temp.dir, temp.count+1});
+            }
+            
+            //방향 전환 명령
+            for(int i =1; i<=4; i++){
+                
+                int nowR = temp.r + rdir[i];
+                int nowC = temp.c + cdir[i];
+                if(canGo(nowR, nowC,i)){
+                    if(visit[i][temp.r][temp.c] == false){
+                        int dirCount = chgDir(temp.dir, i);
+                        visit[i][temp.r][temp.c] = true;
+                        root.push({temp.r, temp.c, i, temp.count+dirCount});
+                    }
+                }
+            }
+        }
+    }
+    
+    printf("%d", result);
+    
+    return 0;
+}
