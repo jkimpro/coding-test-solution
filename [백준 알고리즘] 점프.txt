@@ -1,0 +1,50 @@
+//점프
+
+//dp를 사용해야 하는 이유 그리고, -1 로 초기화 하는 이유
+//-1 을 통해서 방문여부를 확인하게 됨.
+//- 방문을 안했을 경우 if문 아래의 절들을 실행하여, dp에서 값을 적재함
+//- 방문을 한적이 있을 경우 똑같은 프로세스 반복을 기피하기 위해, if하위문을 생략하고 dp[r][c]에 저장된 값을
+//그대로 return 함으로서 불필요한 계산을 방지하게 됨.
+
+// 총 계산해야하는 양이 얼마인지를 가늠하고, long long 타입 사용을 고려할 것.
+
+#include <iostream>
+#include <cstdio>
+
+using namespace std;
+
+int n;
+long long arr[101][101];
+long long dp[101][101];
+
+long long result =0;
+
+long long dfs(int r, int c){
+    if(r == n-1 && c == n-1){
+        return 1;
+    }
+    if(dp[r][c] == -1){
+        dp[r][c] =0;
+        if(r+ arr[r][c]<n){    //오른
+            dp[r][c]+=dfs(r+arr[r][c],c);
+        }
+        if(c + arr[r][c]<n){    //왼
+            dp[r][c]+=dfs(r,c+arr[r][c]);
+        }
+    }
+    return dp[r][c];
+}
+int main(){
+    scanf("%d", &n);
+    for(int i =0; i<n; i++){
+        for(int j =0;j<n; j++){
+            scanf("%lld", &arr[i][j]);
+            dp[i][j] = -1;
+        }
+    }
+    result = dfs(0,0);
+    
+    printf("%lld", result);
+    
+    return 0;
+}
