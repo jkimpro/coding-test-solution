@@ -1,0 +1,128 @@
+//버스 갈아타기
+//
+//1. 먼저 DFS가 나을지, BFS가 나을지 확인할것
+//2. sorting을 통한 index 정렬
+//3. 문제 제대로 이해하고 접근하기
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct bus{
+    int ind;
+    int x1, y1;
+    int x2, y2;
+    //bool visit;
+    int step;
+}Bus;
+
+int n, m;
+int num;
+
+vector<Bus> root;
+vector<int> connect[5001];
+int busCount[5001];
+bool visit[5001];
+
+Bus bus;
+int result =99999999;
+
+bool isConnected(int i, int j){
+    if((root[i].x1<= root[j].x1 && root[j].x1 <= root[i].x2
+        ||root[i].x1<= root[j].x2 && root[j].x2 <= root[i].x2
+        ||root[j].x1<= root[i].x1 && root[i].x1 <= root[j].x2
+        ||root[j].x1<= root[i].x2 && root[i].x2 <= root[j].x2
+        ) &&
+       (root[i].y1<= root[j].y1 && root[j].y1 <= root[i].y2
+        ||root[i].y1<= root[j].y2 && root[j].y2 <= root[i].y2
+        ||root[j].y1<= root[i].y1 && root[i].y1 <= root[j].y2
+        ||root[j].y1<= root[i].y2 && root[i].y2 <= root[j].y2
+        )){
+        return true;
+    }
+    return false;
+    
+}
+
+bool cmp(const Bus& tmp1, const Bus& tmp2){
+    if(tmp1.ind < tmp2.ind){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+int main(){
+    
+    queue <Bus> q;
+    
+    scanf("%d %d", &m, &n);
+    scanf("%d", &num);
+    
+    for(int i =0;i<num; i++){
+        Bus temp;
+        int minX, maxX, minY, maxY;
+        scanf("%d %d %d %d %d",&temp.ind, &temp.x1, &temp.y1, &temp.x2, &temp.y2);
+        
+        minX = min(temp.x1, temp.x2); maxX = max(temp.x1, temp.x2);
+        minY = min(temp.y1, temp.y2); maxY = max(temp.y1, temp.y2);
+        temp.x1= minX; temp.x2 = maxX; temp.y1 = minY; temp.y2 = maxY;
+        temp.step = 0;
+        visit[temp.ind] =false;
+        root.push_back(temp);
+    }
+    
+    scanf("%d %d %d %d", &bus.x1, &bus.y1, &bus.x2, &bus.y2);
+    //각자의 연결로 초기화하기
+    
+    for(int i =0; i<root.size(); i++){
+        for(int j =0;j<root.size(); j++){
+            if(root[i].ind==root[j].ind){continue;}
+            if(isConnected(i,j)){
+                connect[root[i].ind].push_back(root[j].ind);
+            }
+        }
+    }
+    
+    sort(root.begin(), root.end(), cmp);
+    
+    
+    for(int i =0; i<root.size(); i++){
+        if(root[i].x1<= bus.x1 &&bus.x1 <=root[i].x2
+           && root[i].y1 <= bus.y1 && bus.y1 <= root[i].y2){
+            root[i].step = 1;
+            q.push(root[i]);
+            visit[root[i].ind] = true;
+        }
+    }
+    
+    while(!q.empty()){
+        Bus temp = q.front();
+        q.pop();
+        
+        if(temp.x1 <= bus.x2 && bus.x2 <= temp.x2
+            && temp.y1 <= bus.y2 && bus.y2 <= temp.y2){
+            result = temp.step;
+            break;
+        }
+        else{
+            for(int i =0; i<connect[temp.ind].size(); i++){
+                int ind = connect[temp.ind][i];
+                if(visit[ind] != true){
+                    root[ind-1].step = temp.step+1;
+                    visit[ind] = true;
+                    
+                    q.push(root[ind-1]);
+                }
+            }
+        }
+    }
+    
+    printf("%d", result);
+    return 0;
+}
+
