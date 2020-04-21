@@ -1,0 +1,99 @@
+//색종이 붙이기
+//
+//1.이중 vector 선언하는 방법 확실히 하기
+//2.dfs호출 단계별 파악
+//3.dfs호출 후 제일 첫 로직 sum>reuslt 기억하기!
+//4.result =0  일때의 예외값 항상 생각하기 -> 해당 문제에서는 if(result ==-1){result =0;} 사용
+
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+int result =99999999;
+int block[6] ={0,0,0,0,0};
+
+void dfs(int sum,int r, int c, int state, vector<vector<int>>arr){
+    
+    if(sum > result){return;}
+    
+    bool check = false;
+    for(int i =0;i<10; i++){
+        for(int j =0;j<10;j++){
+            if(arr[i][j] == 1){
+                check = true;
+                break;
+            }
+        }
+        if(check){
+            break;
+        }
+    }
+    
+    if(check == false){
+        if(result > sum-1) {
+            result = sum-1;
+        }
+        if(result ==-1){
+            result = 0;
+        }
+        return;
+    }
+    
+    for(int i =r; i<r+state; i++){
+        for(int j =c;j<c+state; j++){
+            //하나라도 안될경우에는 return
+            if(i>=10 || j>=10 || arr[i][j] == 0){
+                return;
+            }
+            arr[i][j] = 0;
+        }
+    }
+    
+    int nowR, nowC;
+    bool out = false;
+    for(int i =0; i<10; i++){
+        for(int j =0;j<10;j++){
+            if(arr[i][j] == 1){
+                nowR = i;
+                nowC = j;
+                out = true;
+                break;
+            }
+        }
+        if(out){
+            break;
+        }
+    }
+    
+    for(int i =5; i>=1; i--){
+        if(block[i] == 5){continue;}
+        block[i]+=1;
+        dfs(sum+1, nowR, nowC, i, arr);
+        block[i]-=1;
+    }
+    
+}
+int main(){
+  //  std::vector< std::vector<int> > arr(10, vector<int>(10, 0));
+    vector<vector<int>> arr(10, vector<int>(10,0));
+    for(int i =0; i<10; i++){
+        for(int j =0;j <10; j++){
+            scanf("%d", &arr[i][j]);
+        }
+    }
+    
+    dfs(0, 0,0,0,arr);
+    
+    if(result == 99999999){
+        printf("-1");
+    }
+    else{
+        printf("%d", result);
+    }
+    return 0;
+}
