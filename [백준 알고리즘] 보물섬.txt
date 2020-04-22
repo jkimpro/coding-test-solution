@@ -1,0 +1,83 @@
+// 보물섬
+//
+//bool type 중첩 함수내에 초기화하는 것 안먹히는 경우가 있음, 따라서 전역변수로 bool type을 두고, 별도로
+//하단 이중포문으로 false 재초기화 시켜주는 방법을 어쩔수 없이 써야함
+
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int r,c;
+    int num;
+}Cell;
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+char arr[51][51];
+int n,m;
+int result = 0;
+bool visit[51][51];
+
+int main(){
+    scanf("%d %d", &n, &m);
+    for(int i =0; i<n; i++){
+        string temp;
+        cin >> temp;
+        for(int j =0;j<temp.size(); j++){
+            arr[i][j] = temp[j];
+        }
+    }
+    
+    for(int i =0; i<n; i++){
+        for(int j =0;j<m; j++){
+            
+            if(arr[i][j] == 'L'){
+                
+                //bool visit[51][51];
+                queue <Cell> root;
+                root.push({i,j,0});
+                
+                visit[i][j] = true;
+                
+                while(!root.empty()){
+                    Cell temp = root.front();
+                    root.pop();
+                    
+                    result = max(result, temp.num);
+                    
+                    for(int dir =0;dir<4; dir++){
+                        
+                        int nowR = temp.r + rdir[dir];
+                        int nowC = temp.c + cdir[dir];
+                        
+                        if(nowR<0 || nowR>=n || nowC<0 || nowC>=m){
+                            continue;
+                        }
+                        if(arr[nowR][nowC] == 'W'){
+                            continue;
+                        }
+                        if(visit[nowR][nowC] == true){
+                            continue;
+                        }
+                        visit[nowR][nowC] = true;
+                        root.push({nowR, nowC, temp.num+1});
+                    }
+                }
+                for(int k =0; k<n; k++){
+                    for(int t =0; t<m; t++){
+                        visit[k][t] = false;
+                    }
+                }
+            }
+        }
+    }
+    
+    printf("%d", result);
+    
+    return 0;
+}
