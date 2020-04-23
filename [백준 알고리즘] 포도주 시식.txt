@@ -1,0 +1,36 @@
+//백준 포도주 시식 (대표적인 DP문제)
+
+// 1. arr 별도로 초기화 안해준 부분은 0을 초기화됨.
+// 2. dp 현재까지의 합
+// 3. dp 현재까지의 합 (현재+현재-1 + max(현재-3) 과 현재 + max(현재-2) 의 비교)
+// 4. 현재 dp가 직전 dp와 비교했을떄 최대값인지 비비교했을떄
+// 5. result 초기화
+
+
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+int arr[10003];
+int dp[10003];
+int n;
+int result =0;
+
+int main(){
+    
+    scanf("%d", &n);    
+    for(int i =3; i<n+3; i++){
+        scanf("%d", &arr[i]);
+        
+    }
+    for(int i =3; i<n+3; i++){
+        dp[i] = max(dp[i-3]+arr[i-1]+arr[i], dp[i-2]+arr[i]);
+        dp[i] = max(dp[i], dp[i-1]);
+        result = max(dp[i], result);    
+    }
+    
+    printf("%d", result);
+    return 0;
+}
