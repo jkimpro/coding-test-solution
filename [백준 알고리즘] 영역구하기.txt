@@ -1,0 +1,112 @@
+//영역 구하기
+
+//매우 고생한 문제
+//1. 직사각형을 일반 배열화할때, 주의할것!
+//2. 모든꼭지점의 둘레 직사각형이 색칠된 직사각형으로 도배되었을 때, 내원래 방식으로는 해답이없음
+//3. 따라서 아래와 같이 입력을 받을때 < 로 부등호 처리하여 빈직사각형 <=> 색칠된 직사각형 분리할 필요있음
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct point{
+    int leR, leC;
+    int riR, riC;
+}Point;
+typedef struct loc{
+    int r,c;
+}Loc;
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+
+int n,m,k;
+int arr[102][102];
+int map[102][102];
+
+vector<int> val;
+int sum;
+int main(){
+    sum =0;
+    
+    scanf("%d %d %d", &m, &n, &k);
+    for(int i =0; i<=m; i++){
+        for(int j=0; j<=n; j++){
+            arr[i][j] =0;
+            map[i][j] = 0;
+        }
+    }
+    
+    for(int i =0;i<k; i++){
+        Point temp;
+        scanf("%d %d %d %d",&temp.leC, &temp.leR, &temp.riC, &temp.riR);
+        
+        for(int i =temp.leR; i<temp.riR; i++){
+            for(int j = temp.leC; j<temp.riC; j++){
+                map[i][j] = 1;
+            }
+        }
+    }
+//    for(int i =0;i<m; i++){
+//        for(int j =0;j<n; j++){
+//            if(arr[i][j] ==0 || arr[i+1][j] ==0 || arr[i][j+1] ==0 || arr[i+1][j+1] ==0){
+//                map[i][j] = 0;
+//            }
+//            else{
+//                map[i][j] = 1;
+//            }
+//        }
+//   }
+//    for(int i =0;i<m; i++){
+//        for(int j =0;j<n; j++){
+//            cout << map[i][j];
+//        }
+//        cout <<endl;
+//    }
+//
+//
+    
+    for(int i =0;i<m; i++){
+        for(int j =0;j<n; j++){
+            if(map[i][j] ==0){
+                sum+=1;
+                int temp = 1;
+                map[i][j] = 1;
+                
+                queue <Loc> root;
+                root.push({i,j});
+                while(!root.empty()){
+                    Loc now = root.front();
+                    root.pop();
+                    
+                    for(int dir =0;dir<4; dir++){
+                        int nowR = now.r + rdir[dir];
+                        int nowC = now.c + cdir[dir];
+                        if(nowR<0 || nowR>=m || nowC<0 || nowC>=n){
+                            continue;
+                        }
+                        if(map[nowR][nowC]==1){
+                            continue;
+                        }
+                        if(map[nowR][nowC] ==0){
+                            map[nowR][nowC] = 1;
+                            root.push({nowR, nowC});
+                            temp+=1;
+                        }
+                    }
+                }
+                val.push_back(temp);
+            }
+        }
+    }
+    sort(val.begin(),val.end());
+    
+    printf("%d\n", sum);
+    for(int i =0;i<val.size(); i++){
+        printf("%d ", val[i]);
+    }
+    return 0;
+}
