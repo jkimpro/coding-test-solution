@@ -1,0 +1,134 @@
+//치즈
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+
+using namespace std;
+typedef struct cell{
+    int r, c;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int n,m;
+int arr[101][101];
+int sum =0;
+int t = 0;
+vector <int> sumLog;
+
+
+bool isOutside(int r, int c){
+    for(int i=0; i<4; i++){
+        int nowR = r +rdir[i];
+        int nowC = c +cdir[i];
+        if(nowR<0 || nowR>=n || nowC<0 ||nowC >=m){
+            return true;
+        }
+    }
+    return false;
+}
+int main(){
+    bool outsideCheck = false;
+    scanf("%d %d", &n, &m);
+    
+    for(int i =0;i<n; i++){
+        for(int j=0;j<m; j++){
+            scanf("%d", &arr[i][j]);
+            if(arr[i][j] == 1){
+                sum+=1;
+            }
+        }
+    }
+    for(int i =0;i<n; i++){
+        for(int j =0;j<m; j++){
+            if(arr[i][j]== 0 && isOutside(i,j)){
+                //== -1로 초기화
+                outsideCheck = true;
+                queue <Cell> root;
+                root.push({i,j});
+                arr[i][j] =-1;
+
+                while(!root.empty()){
+                    Cell temp = root.front();
+                    root.pop();
+                    for(int dir = 0;dir<4; dir++){
+                        int nowR = temp.r + rdir[dir];
+                        int nowC = temp.c + cdir[dir];
+                        if(0<=nowR && nowR<n && 0<=nowC && nowC<m && arr[nowR][nowC] ==0){
+                            root.push({nowR, nowC});
+                            arr[nowR][nowC] = -1;
+                        }
+                    }
+                }
+            }
+        }
+        if(outsideCheck){
+            break;
+        }
+    }
+    
+    //시작
+    while(sum!=0){
+        vector <Cell> delLog;
+        
+        for(int i =0;i<n; i++){
+            for(int j =0;j<m; j++){
+                if(arr[i][j] != 1){continue;}
+                
+                for(int dir =0; dir<4; dir++){
+                    int nowR = i+rdir[dir];
+                    int nowC = j+cdir[dir];
+                    if(0<=nowR &&nowR<n && 0<=nowC && nowC<m && arr[nowR][nowC] ==-1){
+                        delLog.push_back({i, j});
+                        break;
+                    }
+                }
+            }
+        }
+        
+        for(int i =0;i<delLog.size(); i++){
+            //구멍과의 접촉 부위 여부확인
+        
+            for(int dir =0; dir<4; dir++){
+                int nowR = delLog[i].r+rdir[dir];
+                int nowC = delLog[i].c+cdir[dir];
+                if(0<=nowR &&nowR<n && 0<=nowC && nowC<m && arr[nowR][nowC] ==0){
+                    
+                    //싹다 지우기
+                    queue<Cell> blank;
+                    blank.push({nowR, nowC});
+                    arr[nowR][nowC] = -1;
+                    
+                    while(!blank.empty()){
+                        Cell temp = blank.front();
+                        blank.pop();
+                        
+                        for(int k =0; k<4; k++){
+                            int thisR = temp.r +rdir[k];
+                            int thisC =temp.c +cdir[k];
+                            if(0<=thisR &&thisR<n && 0<=thisC && thisC<m && arr[thisR][thisC] ==0){
+                                arr[thisR][thisC] = -1;
+                                blank.push({thisR, thisC});
+                            }
+                        }
+                    }
+                    
+                }
+            }
+            arr[delLog[i].r][delLog[i].c] = -1;
+        }
+        
+        sumLog.push_back(sum);
+        sum -= delLog.size();
+        
+        delLog.clear();
+        t++;
+    }
+    
+    //여기서 count 하기
+    printf("%d\n", t);
+    printf("%d", sumLog[sumLog.size()-1]);
+    return 0;
+}
