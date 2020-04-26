@@ -1,0 +1,84 @@
+//알고스팟
+
+//1. DFS와 함수호출 방식 보단, bfs가 훨씬 효율적임
+//2. visit 대신 dp 활용해서 입장을 막게 하는 방법도 생각해보기
+
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int r,c;
+    int count;
+}Cell;
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int n,m;
+int arr[101][101];
+int dp[101][101];
+
+int result;
+
+int main(){
+    result =999999999;
+    scanf("%d %d", &m, &n);
+    for(int i =0;i<n; i++){
+        string temp;
+        cin >> temp;
+        for(int j =0;j<m; j++){
+            arr[i][j] = temp[j] -'0';
+            dp[i][j] = -1;
+        //    visit[i][j] = false;
+        }
+    }
+    queue <Cell> root;
+    root.push({0,0,0});
+    dp[0][0] = 0;
+    
+    while(!root.empty()){
+        Cell temp = root.front();
+        root.pop();
+        
+        if(temp.r == n-1 && temp.c == m-1){
+            result = min(result,temp.count);
+        }
+        else{
+            for(int i =0;i<4; i++){
+                int nowR = temp.r +rdir[i];
+                int nowC = temp.c +cdir[i];
+                if(0<=nowR && nowR<n && 0<=nowC && nowC<m){
+                    if(dp[nowR][nowC] ==-1){
+                        if(arr[nowR][nowC] ==1){
+                            dp[nowR][nowC] = temp.count +1;
+                            root.push({nowR, nowC, temp.count+1});
+                        }
+                        else{
+                            dp[nowR][nowC] = temp.count;
+                            root.push({nowR, nowC, temp.count});
+                        }
+                    }
+                    else{ //-1가 아닌 경우에
+                        int ctmp = temp.count;
+                        if(arr[nowR][nowC] ==1){
+                            ctmp +=1;
+                        }
+                        
+                        if(ctmp < dp[nowR][nowC]){
+                            dp[nowR][nowC] = ctmp;
+                            root.push({nowR, nowC, ctmp});
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    printf("%d", result);
+    return 0;
+}
