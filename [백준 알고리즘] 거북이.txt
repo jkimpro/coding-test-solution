@@ -1,0 +1,59 @@
+//거북이
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+//븍동남서
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int main(){
+    int test =0;
+    scanf("%d", &test);
+    for(int testcase = 1; testcase<=test; testcase++){
+        int result =0;
+        int nowR = 0, nowC =0;
+        int dir = 0; //북쪽
+        
+        int maxR =0, minR =0;
+        int maxC =0, minC =0;
+        
+        string order;
+        cin >> order;
+        
+        for(int i =0;i<order.size(); i++){
+            if(order[i] == 'F'){
+                nowR += rdir[dir];
+                nowC += cdir[dir];
+            }
+            if(order[i] == 'L'){
+                dir -=1;
+                if(dir ==-1){
+                    dir =3;
+                }
+            }
+            if(order[i] == 'R'){
+                dir = (dir+1)%4;
+            }
+            if(order[i] == 'B'){
+                nowR -= rdir[dir];
+                nowC -= cdir[dir];
+            }
+            
+            maxR = max(nowR, maxR); minR = min(nowR, minR);
+            
+            maxC = max(nowC, maxC); minC = min(nowC, minC);
+            
+//            printf("nowR:%d nowC:%d\n",nowR, nowC);
+//            printf("maxR: %d minR:%d maxC:%d minC:%d\n\n", maxR, minR, maxC, minC);
+        }
+        result = (maxR - minR)*(maxC-minC);
+        printf("%d\n", result);
+    }
+    
+    return 0;
+}
