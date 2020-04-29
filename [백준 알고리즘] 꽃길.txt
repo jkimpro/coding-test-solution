@@ -1,0 +1,69 @@
+//꽃길
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+int rdir[5] = {0,-1,0,1,0};
+int cdir[5] = {0,0,1,0,-1};
+
+int n;
+int result =999999999;
+
+int arr[11][11];
+bool visit[11][11];
+
+void dfs(int level, int sum){
+    if(level ==3){
+        result = min(result,sum);
+    }
+    else{
+        for(int i =0;i<n; i++){
+            for(int j =0;j<n; j++){
+            
+                bool out = false;
+                int temp =0;
+                
+                for(int k =0;k<5; k++){
+                    int nowR = i + rdir[k];
+                    int nowC = j + cdir[k];
+                    if(0<=nowR && nowR<n && 0<=nowC && nowC <n && visit[nowR][nowC] == false){
+                        temp+=arr[nowR][nowC];
+                    }
+                    else{
+                        out = true;
+                        break;
+                    }
+                }
+                if(!out){
+                    for(int k =0; k<5; k++){
+                        visit[i+rdir[k]][j+cdir[k]] = true;
+                    }
+                    dfs(level+1, sum+temp);
+                    for(int k =0; k<5; k++){
+                        visit[i+rdir[k]][j+cdir[k]] = false;
+                    }
+                    
+                }
+            }
+        }
+        
+       
+        
+    }
+}
+
+int main(){
+    scanf("%d",&n);
+    for(int i =0;i<n; i++){
+        for(int j =0;j<n; j++){
+            scanf("%d", &arr[i][j]);
+            visit[i][j] = false;
+        }
+    }
+    
+    dfs(0,0);
+    printf("%d", result);
+    return 0;
+}
