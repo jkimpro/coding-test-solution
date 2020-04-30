@@ -1,0 +1,128 @@
+//탈출
+//1. 메모리 초과 고민
+//2. 벽에 모두 막혀있을때 물이 접근못해서 step[i][j] == -2 로 그대로 남아있는 경우있음
+//3. 2번 조건에 대한 처리를 별도로 해야함.
+
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <cstdio>
+#include <cstring>
+
+using namespace std;
+
+typedef struct cell{
+    int r, c;
+    int count;
+    
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+char arr[100][100];
+bool visit[100][100];
+int steps[100][100];
+int result = 9999999999;
+Cell start;
+Cell dest;
+
+queue <Cell> water;
+queue <Cell> root;
+
+int n,m;
+bool change = false;
+int main(){
+    scanf("%d %d", &n ,&m);
+
+    for(int i =0;i<n; i++){
+        string temp;
+        cin >>temp;
+        
+        for(int j =0;j<m; j++){
+            arr[i][j] = temp[j];
+            steps[i][j] = -2;
+            visit[i][j] = false;
+            
+            if(arr[i][j] == 'S'){
+                start = {i,j,0};
+                visit[i][j] = true;
+                root.push(start);
+            }
+            if(arr[i][j] == 'D'){
+                dest = {i,j};
+                steps[i][j] = -1;
+            }
+            if(arr[i][j] == '*'){
+                water.push({i,j,0});
+                steps[i][j] = 0;
+            }
+            if(arr[i][j] =='X'){
+                steps[i][j] =-1;
+            }
+        }
+    }
+    
+    while(!water.empty()){
+        Cell temp = water.front();
+        water.pop();
+        
+        for(int i =0;i<4; i++){
+            int nowR = temp.r + rdir[i];
+            int nowC = temp.c + cdir[i];
+            
+            if(0<=nowR && nowR<n && 0<=nowC && nowC<m && steps[nowR][nowC] ==-2){
+                steps[nowR][nowC] = temp.count+1;
+                water.push({nowR, nowC, temp.count+1});
+            }
+        }
+    }
+//    for(int i =0;i<n; i++){
+//        for(int j =0;j<m; j++){
+//            printf("%d ", steps[i][j]);
+//        }
+//        printf("\n");
+//    }
+//
+//    printf("\n");
+//    printf("\n");
+    while(!root.empty()){
+        Cell temp = root.front();
+        root.pop();
+        
+        if(arr[temp.r][temp.c]=='D'){
+            result = temp.count;
+            change = true;
+            break;
+        }
+        else{
+            for(int i =0;i<4; i++){
+                int nowR = temp.r + rdir[i];
+                int nowC = temp.c + cdir[i];
+                
+                if(0<=nowR && nowR<n && 0<=nowC && nowC<m){
+                    if(arr[nowR][nowC] == 'D'){
+                        root.push({nowR, nowC, temp.count+1});
+                    }
+                    else if(visit[nowR][nowC] == false && arr[nowR][nowC] =='.' &&
+                            ((steps[nowR][nowC] > temp.count+1)|| steps[nowR][nowC]==-2)){
+                        visit[nowR][nowC] = true;
+                        root.push({nowR, nowC, temp.count+1});
+                    }
+                    else{
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+    
+    if(change){
+        printf("%d", result);
+    }
+    else{
+        printf("KAKTUS");
+    }
+    return 0;
+}
