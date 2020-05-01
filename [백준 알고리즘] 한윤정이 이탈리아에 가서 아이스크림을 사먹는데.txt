@@ -1,0 +1,68 @@
+//한윤정이 이탈리아에 가서 아이스크림을 사먹는데
+
+//하나가 안되면 하나의 셀 자체를 차단 시켜야함.
+//dfs 과정에서 백트래킹 + 집합에 포함되어 있는 수가 있으면 그 수의 모든 조합은 안된다는 것을 알아야함
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+int n,m;
+bool cell[201][201];
+int result =0;
+vector <int> lockNum;
+
+bool lockCheck(int num){
+    
+    for(int i =0;i<lockNum.size(); i++){
+        if(cell[lockNum[i]][num] == false){
+            return false;
+        }
+    }
+    return true;
+}
+void dfs(int level, int start){
+    if(level == 2){
+        result +=1;
+    }
+    else{
+        for(int i = start; i<=n; i++){
+            if(i == start){continue;}
+            if(cell[start][i] && lockCheck(i)){
+                lockNum.push_back(i);
+                dfs(level+1, i);
+                lockNum.pop_back();
+            }
+        }
+    }
+}
+int main(){
+    scanf("%d %d", &n , &m);
+    
+    for(int i =0;i<=n; i++){
+        for(int j =0; j<=n; j++){
+            cell[i][j] = true;
+            if(i==j){cell[i][j] = false;}
+        }
+    }
+    
+    for(int i =0;i<m; i++){
+        int tmp1, tmp2;
+        scanf("%d %d", &tmp1, &tmp2);
+        cell[tmp1][tmp2] = false;
+        cell[tmp2][tmp1] = false;
+    }
+    
+    for(int i =1; i<=n; i++){
+        lockNum.push_back(i);
+        dfs(0, i);
+        lockNum.pop_back();
+    }
+    
+    printf("%d" , result);
+    return 0;
+}
