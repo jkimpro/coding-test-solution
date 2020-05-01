@@ -1,0 +1,98 @@
+//벽부수고 이동하기2 (14442)
+
+//1. step별로 visit 을 만들어주는 전략
+//2. 메모리 초과 될뻔함
+
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+typedef struct cell{
+    int r, c;
+    int left;
+    int count;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int arr[1001][1001];
+bool visit[11][1001][1001];
+int n,m,k;
+int result =99999999;
+bool change = false;
+
+queue <Cell> root;
+
+int main(){
+    scanf("%d %d %d", &n, &m, &k);
+    for(int i =0;i<n; i++){
+        string temp;
+        cin >> temp;
+        for(int j =0;j<m; j++){
+            arr[i][j] = temp[j] -'0';
+            
+            for(int d =0; d<=k;d++){
+                visit[d][i][j] = false;
+            }
+        }
+    }
+//    printf("\n\n");
+//    for(int i =0;i<n; i++){
+//        for(int j =0;j<m; j++){
+//            printf("%d",arr[i][j]);
+//        }
+//        printf("\n");
+//    }
+    
+    
+    root.push({0,0,k,1});
+    
+    while(!root.empty()){
+        Cell temp = root.front();
+        root.pop();
+//        cout <<"root.r: " << temp.r << " root.c: " << temp.c << " left: " << temp.left
+//        << " count: " << temp.count << endl;
+        if(temp.r == n-1 && temp.c == m-1){
+            change = true;
+            result = min(temp.count, result);
+            break;
+        }
+        else{
+            for(int dir =0;dir<4; dir++){
+                int nowR = temp.r + rdir[dir];
+                int nowC = temp.c + cdir[dir];
+                
+                if(0<=nowR && nowR<n && 0<= nowC && nowC<m){
+                    if(arr[nowR][nowC] == 1 && temp.left>0 && visit[temp.left-1][nowR][nowC] == false){
+                        
+                        //cout << "why now? " << nowR << " " << nowC << " " << temp.left <<endl;
+                        
+                        visit[temp.left-1][nowR][nowC] = true;
+                        root.push({nowR, nowC, temp.left-1, temp.count+1});
+                    }
+                    else{
+                        if(arr[nowR][nowC] == 0 && visit[temp.left][nowR][nowC] == false){
+                            visit[temp.left][nowR][nowC] = true;
+                            root.push({nowR, nowC, temp.left, temp.count+1});
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    if(change){
+        printf("%d", result);
+    }
+    else{
+        printf("-1");
+    }
+        
+    return 0;
+}
