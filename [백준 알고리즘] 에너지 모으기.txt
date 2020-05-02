@@ -1,0 +1,61 @@
+//에너지 모으기
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int num;
+    bool able;
+}Cell;
+int n;
+int result =0;
+vector <Cell> root;
+
+void dfs(int sum, int left){
+    if(left == 2){
+        result = max(result, sum);
+    }
+    else{
+        for(int i =0;i<n; i++){
+            if(i == 0 || i == n-1 || root[i].able == false){
+                continue;
+            }
+            else{
+                int tmp1, tmp2;
+
+                for(int j = i-1; j>=0; j--){
+                    if(root[j].able == true){tmp1 = root[j].num; break;}
+                }
+                for(int j = i+1; j<root.size(); j++){
+                    if(root[j].able == true){tmp2 = root[j].num; break;}
+                }
+                
+                root[i].able = false;
+                
+                dfs(sum+(tmp1*tmp2), left-1);
+
+                root[i].able = true;
+            }
+        }
+    }
+}
+int main(){
+    
+    scanf("%d", &n);
+    
+    for(int i =0; i<n; i++){
+        int tmp;
+        scanf("%d", &tmp);
+        root.push_back({tmp, true});
+    }
+    
+    dfs(0,n);
+    
+    printf("%d", result);
+    
+    return 0;
+}
