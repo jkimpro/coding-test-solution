@@ -1,0 +1,63 @@
+//isharp
+//
+//1. 공백을 포함한 string 을 입력 받을 경우 getline(cin, 변수명)과 같은 형태를 띄어야함
+//2. 변수명은 한글자가 아니라는 것을 명심할것.
+//3. 변수 출력 후에는 무조건 break; 할것
+
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <vector>
+
+using namespace std;
+
+vector <string> root;
+int start = 0;
+
+int main(){
+    string name;
+    
+    getline(cin,name);
+    
+    for(int i =0;i<name.size(); i++){
+        if(name[i] == ' '){
+            string temp = name.substr(start,i-start);
+            root.push_back(temp);
+            start = i+1;
+            continue;
+        }
+        if(i == name.size()-1){
+            string temp = name.substr(start,i-start+1);
+            root.push_back(temp);
+            continue;
+        }
+    }
+    
+    for(int i =0;i<root.size(); i++){
+        
+        if(i ==0){continue;}
+        cout << root[0];
+        for(int j = root[i].size()-1; j>=0; j--){
+            
+            if(root[i][j] == ',' || root[i][j] == ';'){
+                continue;
+            }
+            else if(root[i][j]== '&'){cout << "&";}
+            else if(root[i][j] == ']'){cout << "[";}
+            else if(root[i][j] == '['){cout << "]";}
+            else if(root[i][j] == '*'){cout << "*";}
+            else{
+                cout << " ";
+                //나머지 쭉하면 되는거임
+                for(int k =0;k<=j; k++){
+                    cout <<root[i][k];
+                }
+                cout << ";"<<endl;
+                break;
+            }
+        }
+    }
+    
+    return 0;
+}
