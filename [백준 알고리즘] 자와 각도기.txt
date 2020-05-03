@@ -1,0 +1,94 @@
+//자와 각도기
+//
+//1. 조건을 정확히 파악하기
+//2. visit 처리는 잘함
+//3. 단, sum이 360도를 넘어갈때 sum-360 처리 필요
+//4. 단, deg가 0도 밑으로 내려갈때 360+deg 처리 필요
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+int n,k;
+bool canMake = false;
+vector <int> root;
+vector <int> target;
+bool visit[361];
+
+int main(){
+    scanf("%d %d", &n, &k);
+    for(int i =0;i<n; i++){
+        int temp;
+        scanf("%d", &temp);
+        root.push_back(temp);
+    }
+    
+    for(int i =0;i<k; i++){
+        int temp;
+        scanf("%d", &temp);
+        target.push_back(temp);
+    }
+    
+    for(int t =0; t<target.size(); t++){
+        queue <int> q;
+        for(int i =0;i<=360; i++){
+            visit[i] = false;
+        }
+        for(int i =0;i<root.size(); i++){
+            q.push(root[i]);
+            visit[root[i]] = true;
+        }
+        
+        while(!q.empty()){
+            int num = q.front();
+            q.pop();
+            
+            if(num == target[t]){
+                canMake = true;
+                break;
+            }
+            else{
+                for(int i = 0;i<root.size(); i++){
+                    int sum = num + root[i];
+                    if(sum > 360){sum-=360;}
+                    
+                    int deg = num - root[i];
+                    if(deg<0){deg = 360+deg;}
+                    
+                    int deg2 = root[i] - num;
+                    if(deg2<0){deg2 = 360+deg2;}
+                    
+                    if(visit[sum] == false){
+                        visit[sum] = true;
+                        q.push(sum);
+                    }
+                    
+                    if(visit[deg] == false){
+                        visit[deg] = true;
+                        q.push(deg);
+                    }
+                    if(visit[deg2] == false){
+                        visit[deg2] = true;
+                        q.push(deg2);
+                    }
+                }
+            }
+        }
+        
+        if(canMake){
+            printf("YES ");
+        }
+        else{
+            printf("NO ");
+        }
+        while(!q.empty()){
+            q.pop();
+        }
+        canMake = false;
+    }
+    return 0;
+}
