@@ -1,0 +1,108 @@
+//월드컵
+//
+//1. 빅오를 따졌을때 3^15 가 나온다.
+//2. 즉, 어쨋든 각팀은 다른팀들과 각각 한번씩 경기를하고,
+//3. A 승 패 무무 패승 3가지케이스 분류해서 dfs를 돌리면된다.
+//4. 이전 방식은 되도 않는 for 문반복 방식이었는데, 옳지 못한 방식이다.
+
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+int arr[4][6][3];
+bool pos = false;
+void dfs(int num, int nowR, int start){
+    
+    if(nowR == 6){
+        //계산
+        bool check = false;
+        for(int i =0;i<6; i++){
+            for(int j =0;j<3; j++){
+                if(arr[num][i][j] !=0){
+                    return;
+                }
+            }
+        }
+        pos = true;
+        return;
+    }
+    else{
+        if(start>=6){
+            dfs(num, nowR+1, nowR+2);
+        }
+        else{
+            int i = start;
+            
+            if(arr[num][nowR][0]>0 && arr[num][i][2] >0){
+                arr[num][nowR][0]-=1;
+                arr[num][i][2]-=1;
+                
+             //   printf("num:%d nowR:%d i:%d plus\n", num, nowR, i);
+                
+                dfs(num,nowR,i+1);
+                
+                arr[num][nowR][0]+=1;
+                arr[num][i][2]+=1;
+                
+            //    printf("nowR:%d i:%d fuck1\n", nowR, i);
+            }
+            
+            if(arr[num][nowR][1] >0 && arr[num][i][1]>0){
+                arr[num][nowR][1] -=1;
+                arr[num][i][1]-=1;
+               
+            //    printf("num:%d nowR:%d si:%d same\n", num, nowR, i);
+                
+                dfs(num,nowR,i+1);
+                
+                arr[num][nowR][1] +=1;
+                arr[num][i][1] +=1;
+            //   printf("nowR:%d i:%d fuck2\n", nowR, i);
+            }
+            
+            if(arr[num][nowR][2] >0 && arr[num][i][0]>0){
+                
+                arr[num][nowR][2]-=1;
+                arr[num][i][0]-=1;
+                
+            //    printf("num:%d nowR:%d i:%d minor\n", num, nowR, i);
+                
+                dfs(num,nowR,i+1);
+            
+                arr[num][nowR][2]+=1;
+                arr[num][i][0]+=1;
+                
+              //  printf("nowR:%d i:%d fuck3\n", nowR, i);
+            }
+            
+          //  dfs(num, nowR+1, i+1);
+        }
+    }
+}
+int main(){
+    for(int i =0;i<4; i++){
+        for(int j =0;j<6; j++){
+            for(int k =0;k<3; k++){
+                scanf("%d", &arr[i][j][k]);
+            }
+        }
+    }
+    
+    for(int num =0; num<4; num++){
+       // printf("\n");
+        pos = false;
+        dfs(num,0,1);
+        
+        if(pos){
+            printf("1 ");
+        }
+        else{
+            printf("0 ");
+        }
+    }
+    
+    return 0;
+}
