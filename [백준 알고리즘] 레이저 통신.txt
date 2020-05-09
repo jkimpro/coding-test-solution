@@ -1,0 +1,107 @@
+//레이저 통신
+//1. 원래 처음 아이디어는 방향별로 visit을 만드는 것이었는데 이렇게 되면, 거울 개수에 포커스가 되어있는것이 아니라 먼저 도착한것에
+//포커스가 되어 있는것이라 오류가 발생한다.
+//2. 따라서, 거울 개수를 중심으로 visit을 만들어야 한다. visit을 전체 -1로 초기화한 후,
+//3. 다음 방문지 체크에서 방향전환시 visit[nowR][nowC] >= temp.count+1, 방향 비전환시 visit[nowR][nowC] >= temp.count 로 체크한다.
+
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+typedef struct cell{
+    int r,c;
+    int count;
+    int dir;
+}Cell;
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int result =99999;
+char arr[101][101];
+int visit[101][101];
+
+int n,m;
+vector <Cell> point;
+Cell start;
+Cell target;
+
+int main(){
+    scanf("%d %d", &m, &n);
+    
+    for(int i =0;i<n; i++){
+        string tmp;
+        cin >> tmp;
+        for(int j =0;j<tmp.size(); j++){
+            arr[i][j] = tmp[j];
+            if(arr[i][j] == 'C'){
+                point.push_back({i,j,0,0});
+            }
+        }
+    }
+    
+    for(int i =0;i<n; i++){
+        for(int j=0;j<m; j++){
+            visit[i][j] = -1;
+        }
+    }
+    
+    queue<Cell> root;
+    start = point[0];
+    target = point[1];
+    
+    for(int i =0;i<4; i++){
+        
+        int nowR = start.r + rdir[i];
+        int nowC = start.c + cdir[i];
+        
+        if(0<=nowR&& nowR<n && 0<=nowC && nowC<m && arr[nowR][nowC]!='*'){
+            visit[nowR][nowC] = 0;
+            root.push({nowR, nowC, 0, i});
+        }
+    }
+    
+    while(!root.empty()){
+        Cell temp = root.front();
+        root.pop();
+        
+      //  printf("tempR:%d tempC:%d\n", temp.r, temp.c);
+        
+        if(temp.r == target.r && temp.c == target.c){
+            result = min(result,temp.count);
+        }
+        else{
+            
+            for(int i =0;i<4; i++){
+                if(i ==(temp.dir+2)%4) {continue;}
+                
+                int nowR = temp.r + rdir[i];
+                int nowC = temp.c + cdir[i];
+                
+                if(0<=nowR&& nowR<n && 0<=nowC && nowC<m
+                   && arr[nowR][nowC]!='*'){
+                    
+                    if(i == temp.dir){  //같은 방향으로 갈때
+                        if(visit[nowR][nowC]==-1 || visit[nowR][nowC] >= temp.count){
+                            visit[nowR][nowC] = temp.count;
+                            root.push({nowR, nowC, temp.count, i});
+                        }
+                    }
+                    else{   //방향이 다를 경우
+                        if(visit[nowR][nowC]==-1 || visit[nowR][nowC] >= temp.count+1){
+                            visit[nowR][nowC] = temp.count+1;
+                            root.push({nowR, nowC, temp.count+1, i});
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    printf("%d", result);
+    
+    return 0;
+}
