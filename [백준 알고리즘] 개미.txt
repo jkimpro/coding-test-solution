@@ -1,0 +1,68 @@
+//개미
+
+//1. 그냥 일반적인 시뮬레이션 문제 (gruop1 반대로 정렬하고, index 값 부여후 time을 더한다.)
+//2. g2 val를 먼저 출력 -> 그다음 g1 val출력
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    char val;
+    int ind;
+}Cell;
+
+int n,m;
+string result;
+string group1;
+string group2;
+
+vector <Cell> g1;
+vector <Cell> g2;
+int now =0;
+
+bool cmp(const Cell&tmp1, const Cell&tmp2){
+    if(tmp1.ind < tmp2.ind){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+int main(){
+    int t;
+    
+    cin >> n >> m;
+    cin >> group1;
+    cin >> group2;
+    cin >> t;
+    
+    for(int i = group1.size()-1; i>=0; i--){
+        g1.push_back({group1[i], now+t});
+        now++;
+    }
+    sort(g1.begin(), g1.end(), cmp);
+    
+    for(int j = 0; j<group2.size(); j++){
+        g2.push_back({group2[j],now+j});
+    }
+  
+    for(int i =0; i<150; i++){
+        for(int j =0;j<g2.size(); j++){
+            if(g2[j].ind == i){
+                cout << g2[j].val;
+                break;
+            }
+        }
+        for(int j =0;j<g1.size(); j++){
+            if(g1[j].ind == i){
+                cout << g1[j].val;
+                break;
+            }
+        }
+    }
+    return 0;
+}
