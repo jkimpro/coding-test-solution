@@ -1,0 +1,69 @@
+//보급로  [S/W 문제해결 응용] 4일차 - 보급로
+//그냥 visit을 번호화 시킬것
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int r, c;
+    int count;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+int result = 9999999;
+int arr[101][101];
+int visit[101][101];
+
+int n;
+
+int main(){
+    int test = 0;
+    scanf("%d", &test);
+    for(int t = 1; t <=test; t++){
+        scanf("%d", &n);
+        
+        for(int i =0;i<n; i++){
+            string temp;
+            cin >> temp;
+            for(int j=0;j<n; j++){
+                arr[i][j] = temp[j] -'0';
+                visit[i][j] = -1;
+            }
+        }
+        
+        queue<Cell> root;
+        root.push({0,0, arr[0][0]});
+        visit[0][0] = arr[0][0];
+        
+        while(!root.empty()){
+            Cell temp = root.front();
+            root.pop();
+            
+            if(temp.r == n-1 && temp.c == n-1){
+                result = min(result, temp.count);
+            }
+            else{
+                for(int i =0;i<4; i++){
+                    int nowR = temp.r + rdir[i];
+                    int nowC = temp.c + cdir[i];
+                    if(0<=nowR && nowR<n && 0<=nowC && nowC<n){
+                        if(visit[nowR][nowC] == -1 ||(visit[nowR][nowC] > temp.count + arr[nowR][nowC])){
+                            visit[nowR][nowC] = temp.count + arr[nowR][nowC];
+                            root.push({nowR, nowC, temp.count + arr[nowR][nowC]});
+                        }
+                    }
+                }
+            }
+        }
+        
+        printf("#%d %d\n", t, result);
+        result = 9999999;
+    }
+    return 0;
+}
