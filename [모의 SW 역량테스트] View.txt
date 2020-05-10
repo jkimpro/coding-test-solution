@@ -1,0 +1,47 @@
+//View
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main(){
+    
+    int test = 0;
+    
+    for(int t = 1; t <=10; t++){
+        int result = 0;
+        int n = 0;
+        
+        vector <int> root;
+        
+        scanf("%d", &n);
+        
+        for(int i =0;i<n; i++){
+            int tmp;
+            scanf("%d", &tmp);
+            root.push_back(tmp);
+        }
+        
+        for(int i =2;i<root.size()-2; i++){
+            int maxL = 0;
+            for(int j = i-2; j<=i+2; j++){
+                if(i==j){continue;}
+                
+                maxL = max(maxL,root[j]);
+            }
+            
+            if(root[i]<= maxL){continue;} //조망권 확보 불가시
+            else{
+          //      printf("ind:%d maxL:%d val:%d\n",i, maxL,root[i]-maxL);
+                result += (root[i]-maxL);
+            }
+        }
+        
+        printf("#%d %d\n", t, result);
+        result = 0;
+    }
+    
+    return 0;
+}
