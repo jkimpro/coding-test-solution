@@ -1,0 +1,72 @@
+//빵집
+
+//풀이 아이디어
+// 티스토리에서 dfs룰 사용한 이유
+//한번 찍고 1만 리턴해서 종복을 방지함 나머지 row들에게 기회를 주기위함. 단, 맨위로 가는 것으로 시작한다
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int r,c;
+    int val;
+}Cell;
+
+int rdir[3] ={-1,0,1};
+int cdir[3] = {1,1,1};
+
+char arr[10001][501];
+bool visit[10001][501];
+
+int n,m;
+int result = 0;
+
+int dfs(int r, int c){
+    if(c == m-1){
+        return 1;
+    }
+    else{
+        for(int i =0;i<3; i++){
+            int nowR = r + rdir[i];
+            int nowC = c + cdir[i];
+            if(0<=nowR && nowR<n && 0<=nowC && nowC<m &&
+               visit[nowR][nowC] == false && arr[nowR][nowC] =='.'){
+                visit[nowR][nowC] = true;
+                int val = dfs(nowR, nowC);
+                if(val) return val;
+            }
+        }
+    }
+    return 0;
+}
+int main(){
+    scanf("%d %d", &n, &m);
+    
+    for(int i =0;i<n; i++){
+        for(int j =0;j<n; j++){
+            visit[i][j] = false;
+        }
+    }
+    
+    for(int i =0;i<n; i++){
+        string temp;
+        cin >> temp;
+        for(int j =0;j<m; j++){
+            arr[i][j] = temp[j];
+        }
+    }
+    
+    for(int i =0;i<n; i++){
+        result += dfs(i,0);
+    }
+    
+    printf("%d", result);
+    return 0;
+}
+
