@@ -1,0 +1,165 @@
+//차량 정비소  [모의 SW 역량테스트] 차량 정비소
+//
+//1. 대기 장소를 Cell queue 로 처리함.
+//2. 접수 창고에서 해당하는 인덱스일 경우 used = true 처리하고,
+//3. 정비 창고에서 해당하는 인덱스일 경우 used가 true 일경우 result에 더함
+//
+//4. 비어있는 배열일 경우 -1 ind와 t 값을 -1로 초기화함
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+typedef struct cell{
+    int ind;
+    int t;
+    bool used;
+}Cell;
+
+int test;
+int result = 0;
+int done = 0;
+
+int n,m,k,a,b;
+
+vector <int> aVec; //접수 창구
+vector <int> bVec; //빈창구
+
+Cell aSpend[1001];
+Cell bSpend[1001];
+
+vector <int> t;
+
+queue <Cell> waitA;
+queue <Cell> waitB;
+
+int main(){
+    
+    scanf("%d", &test);
+    
+    for(int testcase =1; testcase <=test; testcase++){
+        result = 0;
+        
+        scanf("%d %d %d %d %d", &n, &m, &k, &a, &b);
+        a-=1;
+        b-=1;
+        
+        for(int i =0;i<n; i++){
+            int tmp;
+            scanf("%d", &tmp);
+            aVec.push_back(tmp);
+            aSpend[i].ind =-1;
+            aSpend[i].t =-1;
+        }
+        for(int i =0;i<m;i++){
+            int tmp;
+            scanf("%d", &tmp);
+            bVec.push_back(tmp);
+            bSpend[i].ind =-1;
+            bSpend[i].t =-1;
+        }
+        
+        
+        for(int i =0;i<k; i++){
+            int tmp; scanf("%d", &tmp);
+            waitA.push({i+1, tmp, false}); //이미 ind 부여되서 나옴
+        }
+        
+        for(int time =0; ; time++){
+            //접수창구 완료가 waitB 이동
+            //1.정비 완료 체크 (한번에) -> a창구 ind일경우 result더하고  -> queue push함
+            //waitA가 접수창구 이동
+            for(int i =0;i<n; i++){
+                if(aSpend[i].ind == -1){
+                    if(!waitA.empty() && waitA.front().t <=time){
+                        Cell temp = waitA.front();
+                        waitA.pop();
+                        temp.t = 1;
+                        
+                        aSpend[i] = temp;
+                        if(i == a){
+                            aSpend[i].used = true;
+                        }
+                    }
+                }
+                else{
+                    if(aSpend[i].t == aVec[i]){
+                        waitB.push(aSpend[i]);
+                        if(!waitA.empty() && waitA.front().t <=time){
+                            Cell temp = waitA.front();
+                            waitA.pop();
+                            temp.t = 1;
+                            aSpend[i] = temp;
+                            if(i == a){
+                                aSpend[i].used = true;
+                            }
+                        }
+                        else{
+                            aSpend[i].ind = aSpend[i].t = -1;
+                        }
+                    }
+                    else{
+                        aSpend[i].t +=1;
+                    }
+                }
+            }
+            
+            //waitB가 정비 창구 이동
+           for(int i =0; i<m; i++){
+               if(bSpend[i].ind ==-1){
+                   if(!waitB.empty()){
+                       Cell temp = waitB.front();
+                       waitB.pop();
+                       
+                       temp.t = 1;
+                       bSpend[i] = temp;
+                       
+                       if(i == b && temp.used == true){
+                           result += temp.ind;
+                       }
+                   }
+               }
+               else{   //이미채워져 있는 경우
+                   if(bSpend[i].t == bVec[i]){
+                       done+=1;
+                       
+                       if(!waitB.empty()){
+                           Cell temp = waitB.front();
+                           waitB.pop();
+                           temp.t = 1;
+                           bSpend[i] = temp;
+                           if(i == b && temp.used == true){
+                               result += temp.ind;
+                           }
+                       }
+                       else{
+                           bSpend[i].ind = bSpend[i].t = -1;
+                       }
+                   }
+                   else{
+                       bSpend[i].t +=1;
+                   }
+               }
+           }
+            
+            if(done == k){
+                break;
+            }
+        }
+        
+        if(result == 0){
+            printf("#%d %d\n", testcase,-1);
+        }else{
+            printf("#%d %d\n", testcase,result);
+        }
+        
+        aVec.clear();
+        bVec.clear();
+        done = 0;
+    }
+    
+    return 0;
+}
