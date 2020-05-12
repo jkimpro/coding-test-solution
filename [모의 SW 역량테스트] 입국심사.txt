@@ -1,0 +1,62 @@
+//입국 심사
+//이진 탐색을 이용함
+//모든 탐색가능한 초들을 이진 탐색하여, 1회 당 result 와 mid를 비교함
+// mid 가 작을 경우 reuslt = mid; 아니면 패쓰
+
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+
+int n,m;
+
+vector<long long> cost;
+long long status[100001];
+long long maxVal =0;
+long long maxTime = 0;
+long long result = 0;
+
+int main(){
+    int test =0;
+    scanf("%d", &test);
+    
+    for(int testcase = 1; testcase<=test; testcase++){
+        scanf("%d %d", &n, &m);
+        
+        for(int i =0;i<n; i++){
+            long long tmp;
+            scanf("%lld", &tmp);
+            
+            cost.push_back(tmp);
+        }
+        long long start = 1;
+        long long end = 1e14+1;
+        long long result = end;
+        
+        while(start<=end){
+            long long mid = (start+end)/2;
+            long long sum =0;
+            for(int i =0; i<n; i++){
+                sum+=mid/cost[i];
+            }
+            if(sum >=m){
+                if(result < mid){
+                    result = result;
+                }
+                else{
+                    result = mid;
+                }
+                end = mid -1;
+            }
+            else{
+                start = mid +1;
+            }
+        }
+        
+        printf("#%d %lld\n", testcase, result);
+        cost.clear();
+    }
+}
