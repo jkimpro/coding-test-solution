@@ -1,0 +1,109 @@
+//프로세서 연결하기
+
+//1. 삼성 문제 풀때는 반드시 test 1회 돌고, 초기화할것을 잊지말것.! 반드드드ㅡ시 (안하면 삽질하게됨)
+//2. 안될 경우에는 초기화 부분 확인하기.
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int r, c;
+}Cell;
+
+int rdir[5] = {-1,0,1,0};
+int cdir[5] = {0,1,0,-1};
+int test, n;
+int core;
+int result;
+int arr[21][21];
+
+vector <Cell> root;
+
+bool check(int dir, int ind){
+    int startR = root[ind].r + rdir[dir];
+    int startC = root[ind].c + cdir[dir];
+    
+    while(0<=startR && startR<n &&
+          0<= startC && startC<n){
+        if(arr[startR][startC] !=0){
+            return false;
+        }
+        startR += rdir[dir];
+        startC += cdir[dir];
+    }
+    return true;
+}
+int lineControl(int dir, int ind, int flag){
+    int count = 0;
+    int startR = root[ind].r + rdir[dir];
+    int startC = root[ind].c + cdir[dir];
+    
+    if(flag ==0){ //지우기
+        while(0<=startR && startR<n && 0<= startC && startC<n){
+            arr[startR][startC] = 0;
+            startR += rdir[dir];
+            startC += cdir[dir];
+            count++;
+        }
+    }
+    else{
+        while(0<=startR && startR<n && 0<= startC && startC<n){
+            arr[startR][startC] = 2;
+            startR += rdir[dir];
+            startC += cdir[dir];
+            count++;
+        }
+    }
+    return count;
+}
+void dfs(int next, int sum, int coreSum){
+    
+    if(next == root.size()){
+        if(core < coreSum){
+            core = coreSum;
+            result = sum;
+        }
+        else if(core == coreSum){
+            if(sum< result)result = sum;
+        }
+    }
+    else{
+        for(int i =0;i<4; i++){
+            if(check(i,next)) {
+                dfs(next+1,sum+lineControl(i,next,1), coreSum+1);
+                lineControl(i,next,0);
+            }
+        }
+        dfs(next+1, sum, coreSum);
+    }
+}
+int main(){
+    scanf("%d", &test);
+    
+    for(int t = 1; t<=test; t++){
+        scanf("%d", &n);
+        for(int i =0;i<n; i++){
+            for(int j=0;j<n; j++){
+                scanf("%d", &arr[i][j]);
+                if(arr[i][j] == 1){
+                    if(i-1<0 || i+1>=n || j-1<0 || j+1>=n){continue;}
+                    root.push_back({i,j});
+                }
+            }
+        }
+        
+        result = 999999;
+        core =0;
+        
+        dfs(0,0,0);
+
+        printf("#%d %d\n", t, result);
+        root.clear();
+    }
+    return 0;
+}
