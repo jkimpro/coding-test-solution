@@ -1,0 +1,53 @@
+//장훈이의 높은 선반
+//1. 그냥 흔한 dfs문제
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+int test = 0;
+int result =99999;
+int n,b;
+
+vector <int> root;
+
+void dfs(int now, int sum){
+    if(sum >= b){
+        result = min(result, sum-b);
+        return;
+    }
+    
+    if(now + 1 == root.size()){
+        return;
+    }
+    else{
+        for(int i = now+1; i<root.size(); i++){
+            dfs(i, sum+ root[i]);
+        }
+    }
+}
+int main(){
+    scanf("%d", &test);
+    
+    for(int t = 1; t<=test; t++){
+        scanf("%d %d", &n, &b);
+        for(int i =0; i<n; i++){
+            int temp;
+            scanf("%d", &temp);
+            root.push_back(temp);            
+        }
+        
+        for(int i =0;i<root.size(); i++){
+            dfs(i, root[i]);
+        }
+        
+        printf("#%d %d\n", t, result);
+        
+        result = 99999;
+        root.clear();
+    }
+    
+    return 0;
+}
