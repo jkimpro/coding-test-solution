@@ -1,0 +1,111 @@
+//수영장 만들기
+//수영장을 한개가 아닌 여러개를 만들수 있다는 사실을 간과함
+//1. water[][] 배열을 만들어서 땅의 가장 높은 높이 maxVal 을 기준으로 남은 물의 양을 넣는다.
+//2. maxVal 을 기준으로 물 높이를 한층씩 줄여감으로서 만들수 있는 수영장 영역을 만든다.
+//3. 완벽하게 만들어진 수영장은 endVec이라는 곳에 좌표값을 넣고, 다시 endPoint[][]배열에 true 처리를 하여, 다음 for문 때 진입을 막는다.
+//4. result 에 더한다.
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+#include <queue>
+#include <string>
+
+using namespace std;
+typedef struct cell{
+    int r,c;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int n,m;
+
+int water[51][51];
+int arr[51][51];
+bool visit[51][51];
+bool endPoint[51][51];
+
+int maxVal;
+int result = 0;
+int main(){
+    
+    scanf("%d %d", &n, &m);
+    
+    for(int i =0;i<n; i++){
+        string tmp;
+        cin >> tmp;
+        for(int j =0;j<tmp.size();j++){
+            arr[i][j] = tmp[j]-'0';
+            maxVal = max(maxVal, arr[i][j]);
+        }
+    }
+    
+    for(int i =0;i<n; i++){
+        for(int j =0;j<m; j++){
+            water[i][j] = maxVal - arr[i][j];
+            visit[i][j] = false;
+            endPoint[i][j] = false;
+        }
+    }
+    for(int k=9;k>=0; k--){
+        int whole = 0;
+        for(int i =1;i<n-1; i++){
+            for(int j =1;j<m-1; j++){
+                if(water[i][j] ==0 || visit[i][j] == true || endPoint[i][j] == true){continue;}
+                
+                vector<Cell> endVec;
+                queue<Cell> root;
+                root.push({i,j});
+                endVec.push_back({i,j});
+                visit[i][j] = true;
+                
+                bool check = false;
+                int sum = water[i][j];
+                
+                while(!root.empty()){
+                    Cell temp = root.front();
+                    root.pop();
+
+                    if(temp.r ==0 || temp.r == n-1 || temp.c == 0 || temp.c == m-1 || arr[temp.r][temp.c] ==0){
+                        check = true;
+                    }
+                    for(int dir =0; dir<4; dir++){
+                        int nowR = temp.r + rdir[dir];
+                        int nowC = temp.c + cdir[dir];
+                        
+                        if(nowR >=0 && nowR<n && nowC>=0 && nowC<m && visit[nowR][nowC] == false
+                           && water[nowR][nowC] !=0){
+                            sum += water[nowR][nowC];
+                            visit[nowR][nowC] = true;
+                            root.push({nowR, nowC});
+                            endVec.push_back({nowR, nowC});
+                        }
+                    }
+                }
+                if(check == false){
+                    whole +=sum;
+                    for(int l = 0;l<endVec.size(); l++){
+                        endPoint[endVec[l].r][endVec[l].c] = true;
+                    }
+                }
+                endVec.clear();
+            }
+        }
+        
+        result += whole;
+        
+        for(int i =0;i<n; i++){
+            for(int j =0;j<m; j++){
+                visit[i][j] = false;
+                if(water[i][j] ==0) continue;
+                water[i][j] -=1;
+            }
+        }
+    }
+    
+    printf("%d", result);
+    
+    return 0;
+}
