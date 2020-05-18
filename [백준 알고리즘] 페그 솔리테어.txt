@@ -1,0 +1,146 @@
+//패그솔리테어
+//풀이법이 마냥 쉽지는 않았음
+//1.pin 이라는 vector 를 별도로 만들고, 'o'이 등장할때마다 순서대로 인덱스 값을 부여하고, pin vector에 push한다.
+//2.pin 개수가 최대 8이라는 점을 감안하고 모든 경우의 수를 찾는다.
+//3.dfs 한번 진입할때 마다 핀 하나 선정하고 움직인다. (백트래킹 사용)
+//4.매 dfs마다 now 값과 moveNow 변수를 비교하여 초기화한다.
+//5. (실수) now = pin.size() moveNow = 0 을 무조건 초기화 시켰어야함 (한번도 움직이지 못할때 문제가 되진 않아)
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int r, c;
+    bool able;
+}Cell;
+
+int rdir[] ={-1,0,1,0};
+int cdir[] ={0,1,0,-1};
+
+int test;
+int result;
+int arr[101][101];
+vector <Cell> pin;
+
+int now, moveNow;
+int n = 5;
+int m = 9;
+
+void dfs(int left, int move){
+    if(now > left){
+        now = left;
+        moveNow  = move;
+    }
+    if(now == left){
+        moveNow = min(moveNow, move);
+    }
+ 
+    for(int i =0;i<pin.size(); i++){
+        if(pin[i].able == false){continue;}
+        
+        for(int dir =0; dir<4; dir++){
+           int exR = pin[i].r + rdir[dir];
+           int exC = pin[i].c + cdir[dir];
+           
+           int nowR = pin[i].r + 2*rdir[dir];
+           int nowC = pin[i].c + 2*cdir[dir];
+           
+           if(0<=exR && exR<n && 0<=exC && exC<m && arr[exR][exC] != 0 && arr[exR][exC] != -1){
+               if(0<=nowR && nowR<n && 0<=nowC && nowC<m && arr[nowR][nowC] ==0){
+                
+                   int tmp = arr[exR][exC];
+                   int tmp2 =arr[pin[i].r][pin[i].c];
+                   
+                   arr[exR][exC] =0;
+                   arr[pin[i].r][pin[i].c] = 0;
+                   arr[nowR][nowC] = tmp2;
+                   
+                   
+                   pin[tmp-1].able = false;
+                   pin[i].r += 2*rdir[dir];
+                   pin[i].c += 2*cdir[dir];
+                   
+                   dfs(left-1, move+1);
+           
+                   pin[i].r -= 2*rdir[dir];
+                   pin[i].c -= 2*cdir[dir];
+                   
+                   pin[tmp-1].able = true;
+                   arr[pin[i].r][pin[i].c] = tmp2;
+                   arr[nowR][nowC] = 0;
+                   arr[exR][exC] = tmp;                                              //들어가기.
+               }
+           }
+       }
+   }
+}
+int main(){
+    scanf("%d", &test);
+    for(int t = 0; t<test; t++){
+        for(int i =0;i<5; i++){
+            string temp;
+            cin >> temp;
+            for(int j =0;j<9; j++){
+                if(temp[j] == '.'){
+                    arr[i][j] = 0;
+                }
+                if(temp[j] == '#'){
+                    arr[i][j] = -1;
+                }
+                if(temp[j] == 'o'){
+                    pin.push_back({i,j,true});
+                    arr[i][j] = pin.size();
+                }
+            }
+        }
+        
+        now = pin.size(); moveNow = 0;
+        
+        for(int i =0;i<pin.size(); i++){
+            
+            for(int dir =0; dir<4; dir++){
+                int exR = pin[i].r + rdir[dir];
+                int exC = pin[i].c + cdir[dir];
+                
+                int nowR = pin[i].r + 2*rdir[dir];
+                int nowC = pin[i].c + 2*cdir[dir];
+                
+                if(0<=exR && exR<n && 0<=exC && exC<m && arr[exR][exC] != 0){
+                    if(0<=nowR && nowR<n && 0<=nowC && nowC<m && arr[nowR][nowC] ==0){
+                        int tmp = arr[exR][exC];
+                        int tmp2 =arr[pin[i].r][pin[i].c];
+                        
+                        arr[exR][exC] =0;
+                        arr[pin[i].r][pin[i].c] = 0;
+                        arr[nowR][nowC] = tmp2;
+                        
+                        
+                        pin[tmp-1].able = false;
+                        pin[i].r += 2*rdir[dir];
+                        pin[i].c += 2*cdir[dir];
+                        
+                        dfs(pin.size()-1, 1);
+                
+                        pin[i].r -= 2*rdir[dir];
+                        pin[i].c -= 2*cdir[dir];
+                      
+                        pin[tmp-1].able = true;
+                        arr[pin[i].r][pin[i].c] = tmp2;
+                        arr[nowR][nowC] = 0;
+                        arr[exR][exC] = tmp;                                              //들어가기.
+                    }
+                }
+            }
+        }
+        
+        printf("%d %d\n", now, moveNow);
+        pin.clear();
+    }
+    
+
+    return 0;
+}
