@@ -1,0 +1,164 @@
+//연결
+//풀이 핵심
+//
+//1. a1 -> a2 최단경로 확인하고, b1 ->b2 경로 확인하기
+//2. b1 -> b2 최단경로 확인하고, a1 ->a2 경로 확인하기
+//3. 단 두 경로는 겹치면 안됌.
+//4. 또한 maxCount 같은 이상하거 만들어서 서로 제한하면 안됌.
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <cmath>
+
+using namespace std;
+typedef struct point{
+    int r,c;
+}Point;
+typedef struct cell{
+    int r,c;
+    int count;
+    std::vector<Point> p;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int n,m;
+bool visit[102][102];
+bool check = false;
+Point a1, a2;
+Point b1, b2;
+int result = 999999999;
+
+int simulation(vector<Point> p, int option){
+    if(option == 1){
+        b1 = a1;
+        b2 = a2;
+    }
+  //  printf("b1.r:%d b1.c:%d b2.r:%d b2.c:%d\n", b1.r, b1.c, b2.r, b2.c);
+    
+    bool bVisit[102][102];
+    for(int i =0;i<n;i++){
+        for(int j=0;j<m;j++){
+            bVisit[i][j] = false;
+        }
+    }
+    
+    for(int i =0;i<p.size(); i++){
+        bVisit[p[i].r][p[i].c] = true;
+    }
+    
+    queue <Cell> q;
+    q.push({b1.r, b1.c, 0});
+    bVisit[b1.r][b1.c]= true;
+    
+    while(!q.empty()){
+        Cell temp = q.front();
+        q.pop();
+        if(temp.r == b2.r && temp.c == b2.c){
+            return temp.count;
+        }
+        else{
+            for(int i =0;i<4; i++){
+                int nowR = temp.r + rdir[i];
+                int nowC = temp.c + cdir[i];
+                if(0<=nowR && nowR<n && 0<=nowC && nowC<m &&
+                    bVisit[nowR][nowC] == false){
+                    bVisit[nowR][nowC] = true;
+                    q.push({nowR, nowC, temp.count+1});
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+void mainSimul(Point start, Point target, int option){
+    Point comp1, comp2;
+    if(option == 0){
+        comp1 = b1; comp2 = b2;
+    }
+    else{
+        comp1 = a1; comp2 = a2;
+    }
+    
+    Cell t;
+   t.r = start.r; t.c = start.c; t.count =0;
+   t.p.push_back({start.r, start.c});
+   queue<Cell> root;
+   root.push(t);
+    
+   while(!root.empty()){
+       Cell temp = root.front();
+       root.pop();
+    
+       if(temp.r == target.r && temp.c == target.c){
+
+           //이부분 수정하기
+           int tmp = simulation(temp.p, option);
+           if(tmp ==0){    //불가능이라는 뜻
+               continue;
+           }
+           else{
+               check = true;
+               result = min(result, tmp+temp.count);
+           }
+       }
+       else{
+           for(int i =0;i<4; i++){
+               int nowR = temp.r + rdir[i];
+               int nowC = temp.c + cdir[i];
+               
+               if(0<=nowR && nowR<n && 0<=nowC && nowC<m
+                  && visit[nowR][nowC] == false &&
+                  !(nowR==comp1.r && nowC==comp1.c) &&
+                  !(nowR==comp2.r && nowC==comp2.c)){
+                   visit[nowR][nowC] = true;
+                   
+                   Cell input;
+                   input.p = temp.p;
+                   input.r = nowR; input.c = nowC; input.count= temp.count+1; input.p.push_back({nowR, nowC});
+                   root.push(input);
+               }
+           }
+       }
+   }
+}
+
+int main(){
+    
+    scanf("%d %d", &m, &n);
+    n+=1; m+=1;
+    
+    for(int i= 0;i<n; i++){
+        for(int j =0;j<m; j++){
+            visit[i][j] = false;
+        }
+    }
+    
+    scanf("%d %d", &a1.c, &a1.r);
+    scanf("%d %d", &a2.c, &a2.r);
+    scanf("%d %d", &b1.c, &b1.r);
+    scanf("%d %d", &b2.c, &b2.r);
+    
+    mainSimul(a1, a2,0);
+    
+    for(int i= 0;i<n; i++){
+        for(int j =0;j<m; j++){
+            visit[i][j] = false;
+        }
+    }
+    
+    mainSimul(b1, b2,1);
+    
+    if(check){
+        printf("%d", result);
+    }
+    else{
+        printf("IMPOSSIBLE");
+    }
+    
+    return 0;
+}
