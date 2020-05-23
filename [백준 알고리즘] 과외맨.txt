@@ -1,0 +1,138 @@
+//과외맨 (매우매우 ㅈ 같은 문제임)
+//1. 첫아이디어 -> 구조체에 vector를 담는 미친짓을 함 (메모리/시간 모두 초과하게 됨)
+//2. track이라는 배열을 만들어 최대값경로를 역추적하도록 만듦
+//3. 핵심은 track 배열 크기가 25만이 넘어야함
+//4. 500*1000 = 500000 50만칸에서 2를 나누면 대략 25만개의 타일이 나올수 있음
+//5. 하지만, 문제는 이코드를 로컬에서 돌리면 여전히 시간이 너무 소요됨. (int 에서 쓸수있는 메모리를 너무 많이 써서 생기는 문제일듯)
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+typedef struct cell{
+    int r,c;
+}Cell;
+
+typedef struct point{
+    int r1, c1;
+    int r2, c2;
+}Point;
+
+int rdir[4] = {0,1,0,-1};
+int cdir[4] = {1,0,-1,0};
+int arr[501][1002];
+int group[501][1002];
+int track[255001];
+
+int n;
+vector <Point> point;
+vector <int> resultSet;
+
+int result;
+int lastInd =-1;
+
+int main(){
+    int ind = 1;
+    scanf("%d", &n);
+    for(int i =0;i<n; i++){
+        if(i%2 ==0){
+            for(int j =0; j<2*n;j+=2){
+                scanf("%d %d", &arr[i][j], &arr[i][j+1]);
+                group[i][j] = ind; group[i][j+1] = ind;
+                point.push_back({i,j,i,j+1});
+                track[ind] = -1;
+                ind +=1;
+            }
+        }
+        else{
+            arr[i][0] = -1;
+            for(int j =1; j<2*n-1; j+=2){
+                scanf("%d %d", &arr[i][j], &arr[i][j+1]);
+                group[i][j] = ind; group[i][j+1] = ind;
+                point.push_back({i,j,i,j+1});
+                track[ind] = -1;
+                ind +=1;
+            }
+            arr[i][2*n-1] = -1;
+        }
+    }
+    
+    Cell start;
+    start.r = 0; start.c = 1;
+    
+    queue<Cell> root;
+    root.push(start);
+     
+    while(!root.empty()){
+        Cell temp = root.front();
+        root.pop();
+        
+        int nowInd = group[temp.r][temp.c]; //마지막 인덱스
+        int otherR, otherC;
+        if(point[nowInd-1].c1 == temp.c){
+            otherR = point[nowInd-1].r2;
+            otherC = point[nowInd-1].c2;
+        }
+        else{
+            otherR = point[nowInd-1].r1;
+            otherC = point[nowInd-1].c1;
+        }
+        
+        if(lastInd < nowInd){
+            lastInd = nowInd;
+            if(lastInd == ind-1){
+                break;
+            }
+        }
+        
+        for(int i =0;i<4; i++){
+            int nowR, nowC;
+            nowR = temp.r + rdir[i];
+            nowC = temp.c + cdir[i];
+            if(0<= nowR && nowR<n && 0<=nowC && nowC<2*n){
+                if(arr[nowR][nowC] == arr[temp.r][temp.c] && track[group[nowR][nowC]]==-1){//서로 다른 그룹이고, visit아니고, 같은 숫자면 go
+                    track[group[nowR][nowC]] = nowInd;
+                    Cell input;
+                    input.r = nowR; input.c = nowC;
+                    root.push(input);
+                }
+            }
+        }
+        temp.r = otherR;
+        temp.c = otherC;
+        
+        for(int i =0;i<4; i++){
+          int nowR, nowC;
+          nowR = temp.r + rdir[i];
+          nowC = temp.c + cdir[i];
+          if(0<= nowR && nowR<n && 0<=nowC && nowC<2*n){
+              
+              if(arr[nowR][nowC] == arr[temp.r][temp.c] && track[group[nowR][nowC]]== -1){//서로 다른 그룹이고, visit아니고, 같은 숫자면 go
+                  track[group[nowR][nowC]] = nowInd;
+                  Cell input;
+                  input.r = nowR; input.c = nowC;
+                  root.push(input);
+              }
+          }
+        }
+    }
+    point.clear();
+    //역추적 로직
+    ind = lastInd;
+    while(ind != 1){
+     //   printf("%d\n", ind);
+        resultSet.push_back(ind);
+        ind = track[ind];
+    }
+    resultSet.push_back(1);
+
+    printf("%d\n", resultSet.size());
+    for(int i =resultSet.size()-1;i>=0; i--){
+        printf("%d ",resultSet[i]);
+    }
+    
+    return 0;
+}
