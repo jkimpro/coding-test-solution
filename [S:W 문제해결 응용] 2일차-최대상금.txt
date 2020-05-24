@@ -1,0 +1,55 @@
+//최대 상금
+
+//1. 풀이 dfs를 사용하되, visit배열을 사용할것.!
+//2. memset 이랑 atoi 사용생각할것!
+
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+int limit;
+int result;
+int size;
+
+char num[6];
+bool visit[1000000][11];
+
+void dfs(int level){
+    if(level == limit){
+        int temp = atoi(num);
+        result = max(result, temp);
+        return;
+    }
+        //자리 바꾸기
+    for(int i =0;i<size; i++){
+        for(int j=i; j<size;j++){
+            if(i==j){continue;}
+            swap(num[i], num[j]);
+            if(visit[atoi(num)][level+1] == false){
+                visit[atoi(num)][level+1]= true;
+                dfs(level+1);
+            }
+            swap(num[i], num[j]);
+            
+        }
+    }
+}
+int main(){
+    int test;
+    scanf("%d", &test);
+    for(int t = 1; t<=test; t++){
+        scanf("%s %d", num, &limit);
+        size = strlen(num);
+
+        memset(visit, false, sizeof(visit));
+        
+        dfs(0);
+    
+        printf("#%d %d\n", t, result);
+        result = 0;
+    }
+    return 0;
+}
