@@ -1,0 +1,120 @@
+//불
+//1. 입력을 받으면서 fire 들만 따로 vector 에 저장해둔다.
+//2. fire 들을 bfs돌리면서 visit에 시간을 기록해둔다.
+//3. 창식이의 start지점부터 bfs 돌리면서 visit에 기록된 시간들을 참조하면서 나아간다.
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <cstring>
+
+using namespace std;
+
+typedef struct cell{
+    int r,c;
+    int count;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+int visit[1001][1001];
+char arr[1001][1001];
+bool go[1001][1001];
+
+int test;
+int n,m;
+int result;
+bool changed;
+Cell start;
+vector <Cell> fire;
+
+int main(){
+    scanf("%d", &test);
+//    '.': 빈 공간
+//    '#': 벽
+//    '@': 상근이의 시작 위치
+//    '*': 불
+    for(int t = 1; t<=test; t++){
+        changed = false;
+        result = 0;
+        
+        scanf("%d %d", &m, &n);
+        
+        for(int i =0;i<n; i++){
+            string temp;
+            cin >> temp;
+            
+            for(int j =0;j<m; j++){
+                arr[i][j] = temp[j];
+                visit[i][j] = -1;
+                go[i][j] = false;
+                
+                if(arr[i][j] == '@'){
+                    start.r = i;
+                    start.c = j;
+                    start.count = 0;
+                }
+                if(arr[i][j] == '*'){
+                    fire.push_back({i,j,0});
+                    visit[i][j] = 0;
+                }
+            }
+        }
+        
+        queue<Cell> q;
+        for(int i =0;i< fire.size();i++){
+            q.push(fire[i]);
+        }
+        
+        while(!q.empty()){
+            Cell temp = q.front();
+            q.pop();
+            
+            for(int i =0;i<4; i++){
+                int nowR = temp.r + rdir[i];
+                int nowC = temp.c + cdir[i];
+                if(0<=nowR && nowR<n && 0<=nowC && nowC<m && visit[nowR][nowC] == -1
+                   && arr[nowR][nowC]!='#'){
+                    visit[nowR][nowC] = temp.count+1;
+                    q.push({nowR, nowC, temp.count+1});
+                }
+            }
+        } //전체다돌아야함
+        
+        q.push(start);
+        go[start.r][start.c] = true;
+        
+        while(!q.empty()){
+            Cell temp = q.front();
+            q.pop();
+            
+            if(temp.r == 0 || temp.r == n-1 || temp.c ==0 || temp.c == m-1){
+                changed = true;
+                result = temp.count +1;
+                while(!q.empty()){q.pop();}
+                break;
+            }
+            else{
+                for(int i =0;i<4; i++){
+                    int nowR = temp.r + rdir[i];
+                    int nowC = temp.c + cdir[i];
+                    if(0<=nowR && nowR<n && 0<=nowC && nowC<m && (visit[nowR][nowC]>temp.count+1 || visit[nowR][nowC] ==-1)
+                       && arr[nowR][nowC]=='.' && go[nowR][nowC] == false){
+                        go[nowR][nowC] = true;
+                        q.push({nowR, nowC, temp.count+1});
+                    }
+                }
+            }
+        }
+        if(changed){
+            printf("%d\n",result);
+        }
+        else{
+            printf("IMPOSSIBLE\n");
+        }
+        fire.clear();
+    }
+    
+    return 0;
+}
