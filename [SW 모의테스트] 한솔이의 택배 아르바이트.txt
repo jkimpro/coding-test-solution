@@ -1,0 +1,73 @@
+//한솔이의 택배 아르바이트
+//
+//1. 일단 50이상은 무조건 reuslt +=1  처리
+//풀이 두가지
+//풀이.1
+//일단 50으로 딱떨어지는 수와 아닌 경우로 분리함.
+//배열에다가 같이 포함해야할 박스수를 저장하고, 순서대로 빼줌
+//
+//풀이.2
+//box.pop_back() 하면서 빼줌
+
+
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+#include <functional>
+
+using namespace std;
+vector <int> box;
+int n;
+int test;
+int result;
+int startInd, lightInd;
+
+int main(){
+    scanf("%d", &test);
+    for(int t =1; t<=test; t++) {
+        scanf("%d", &n);
+        for(int i = 0; i<n; i++) {
+            int tmp;
+            scanf("%d", &tmp);
+            if(tmp>=50) {
+                result+=1;
+            }
+            else {
+                box.push_back(tmp);
+            }
+        }
+        startInd =0;
+        
+        sort(box.begin(), box.end(), greater<int>());
+    
+        
+        for(int i = 0; i<box.size(); i++) {
+            int time = 50/box[startInd];
+            int left = 50%box[startInd];
+            //printf("startInd:%d time:%d left:%d\n", startInd, time, left);
+            if(left ==0) { //나머지가 없을때는 time-1 만 추출
+            
+                if(startInd + (time-1)>=box.size()) {break;}
+                for(int j =0;j<time-1; j++) {
+                    box.pop_back();
+                }
+            }
+            else {    //나머지가 있을때 time만큼 추출
+                if(startInd + (time)>=box.size()) {break;}
+                for(int j =0;j<time; j++) {
+                    box.pop_back();
+                }
+            }
+            startInd++;
+            result+=1;
+            if(startInd>= box.size()){break;}
+        }
+        
+        printf("#%d %d\n",t, result);
+        result = 0;
+        box.clear();
+    }
+    return 0;
+}
