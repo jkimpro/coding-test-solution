@@ -1,0 +1,61 @@
+//가능한 시험점수
+//
+//1.visit을 만들어준다
+//2. 입력을 받을때마다 총합을 visit = true 처리한다.
+//3. 그 후 sum에서 부터 0까지 true 처리 되어 있는 곳에 현재 입력 받은 값을 더한다.
+//4. 단, 처음입력 받은 값일 경우 그 visit 부분만 true 처리하며,
+//5. 다른 값의 visit일경우 현재입력 받은값 + visit 인덱스 부분을 합한 visit 을 true 처리하고 continue 한다.
+//
+//4번을 수행하는 이유는 ex) 이미 visit[5] 가 false 인데 중복으로 10부분을 true처리할 수있기 때문에 미연에 방지한다.
+#include <iostream>
+#include <cstdio>
+
+using namespace std;
+
+int test;
+int n;
+int result;
+int sum;
+bool visit[10001];
+
+int main(){
+    scanf("%d", &test);
+    for(int t = 1; t<=test; t++){
+        scanf("%d", &n);
+        
+        for(int i =0;i<10001; i++){
+            visit[i] = false;
+        }
+        visit[0] = true;
+        
+        for(int i =0; i<n; i++){
+            int tmp;
+            scanf("%d", &tmp);
+            
+            sum+=tmp;
+            visit[sum] = true;
+            
+            for(int i =sum;i>=0; i--){
+                if(i == sum) continue;
+                if(i == tmp && visit[i] == false){visit[i] = true; continue;}
+                else if(visit[i] == true){
+                 //   printf("i:%d, tmp:%d trueVal:%d \n", i, tmp,i+tmp);
+                    visit[i+tmp] = true;
+                }
+            }
+            
+        }
+        for(int i =0; i<=sum; i++){
+            if(visit[i] == true) {
+             //   printf("%d ", i);
+                result++;
+            }
+        }
+//        printf("\n");
+//
+        printf("#%d %d\n", t, result);
+        sum = 0;
+        result = 0;
+    }
+    return 0;
+}
