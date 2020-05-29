@@ -1,0 +1,118 @@
+//개리 멘더링 (삼성 기출)
+//재풀이
+#include<iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+typedef struct cell{
+    int r,c;
+    int ind;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int n;
+int sum;
+int result=99999;
+int arr[21][21];
+bool visit[21][21];
+int main(){
+
+    int n;
+    scanf("%d", &n);
+
+    for(int i =0;i<n; i++){
+        for(int j =0;j<n; j++){
+            scanf("%d", &arr[i][j]);
+            sum+=arr[i][j];
+        }
+    }
+    
+    for(int i =0; i<n; i++){ //i = x  =r
+        for(int j =0; j<n; j++){ // j = y = c
+            for(int d1 = 1; d1<n; d1++){
+                for(int d2 = 1; d2<n; d2++){
+                    if(i>=0 && i<i+d1+d2 && i+d1+d2<n && 0<=j-d1 &&
+                       j-d1<j && j<j+d2 && j+d2<n){
+                        //visit 초기화
+                        for(int l =0; l<n; l++){
+                            for(int s =0;s<n; s++){
+                                visit[l][s] = false;
+                            }
+                        }
+                      for(int k=0; k<=d1; k++){
+                            visit[i+k][j-k] = true;
+                            visit[i+d2+k][j+d2-k] = true;
+                        }
+                        for(int k =0; k<=d2; k++){
+                            visit[i+k][j+k] = true;
+                            visit[i+d1+k][j-d1+k] = true;
+                        }
+                        
+                        int areaSum = sum;
+                        int total[6] = {0,arr[0][0], arr[0][n-1], arr[n-1][0], arr[n-1][n-1],0};
+                        for(int i =0;i<6; i++){
+                            areaSum -=total[i];
+                        }
+                        visit[0][0] = true; visit[0][n-1] = true; visit[n-1][0] = true; visit[n-1][n-1] = true;
+                        queue <Cell> root;
+                        root.push({0,0,1}); root.push({0,n-1,2}); root.push({n-1,0,3}); root.push({n-1,n-1,4});
+                        
+                        while(!root.empty()){
+                            Cell temp = root.front();
+                            root.pop();
+                            
+                            for(int dir=0; dir<4; dir++){
+                                int nowR = temp.r + rdir[dir];
+                                int nowC = temp.c + cdir[dir];
+                                if(temp.ind ==1 && visit[nowR][nowC] == false && 0<= nowR && nowR < i+d1 && 0<=nowC && nowC <=j){
+                                    visit[nowR][nowC] = true;
+                                    total[temp.ind]+= arr[nowR][nowC];
+                                    areaSum -=arr[nowR][nowC];
+                                    root.push({nowR, nowC, temp.ind});
+                                }
+                                if(temp.ind ==2 && visit[nowR][nowC] == false
+                                   && 0<=nowR && nowR<=i+d2 && j<nowC && nowC<n){
+                                    visit[nowR][nowC] = true;
+                                    total[temp.ind]+= arr[nowR][nowC];
+                                    areaSum -=arr[nowR][nowC];
+                                    root.push({nowR, nowC, temp.ind});
+                                }
+                                if(temp.ind ==3 && visit[nowR][nowC] == false
+                                   && i+d1<=nowR && nowR<n && 0<=nowC && nowC<j-d1+d2){
+                                    visit[nowR][nowC] = true;
+                                    total[temp.ind]+= arr[nowR][nowC];
+                                    areaSum -=arr[nowR][nowC];
+                                    root.push({nowR, nowC, temp.ind});
+                                }
+                                if(temp.ind ==4 && visit[nowR][nowC] == false
+                                   && i+d2<nowR && nowR<n && j-d1+d2<=nowC && nowC<n){
+                                    visit[nowR][nowC] = true;
+                                    total[temp.ind]+= arr[nowR][nowC];
+                                    areaSum -=arr[nowR][nowC];
+                                    root.push({nowR, nowC, temp.ind});
+                                }
+                            }
+                        }
+                        //max 와 min 구하기
+                        total[5] = areaSum;
+                        int maxVal = total[1]; int minVal =total[1];
+                        for(int k =1; k<=5; k++){
+                            maxVal = max(total[k], maxVal);
+                            minVal = min(total[k], minVal);
+                        }
+                        result = min(result, maxVal-minVal);
+                    }
+                }
+            }
+        }
+    }
+    
+    printf("%d", result);
+    
+    return 0;
+}
