@@ -1,0 +1,149 @@
+//[삼성기출] 원판 돌리기
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+typedef struct cell{
+    int r,c;
+    int val;
+}Cell;
+typedef struct seq{
+    int x, d, k;
+}Seq;
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0 ,-1};
+
+int n,m,t;
+int sum;
+int total;
+int arr[200][200];
+vector <Seq> v;
+
+int main(){
+    scanf("%d %d %d", &n, &m, &t);
+    
+    for(int i =1;i<=n; i++){
+        for(int j =1;j<=m; j++){
+            scanf("%d", &arr[i][j]);
+            sum+=arr[i][j];
+            total+=1;
+        }
+    }
+    
+    for(int i =0;i<t; i++){
+        Seq temp;
+        scanf("%d %d %d", &temp.x, &temp.d, &temp.k);
+        v.push_back(temp);
+    }
+    
+    for(int time= 0;time<v.size(); time++){
+        bool check = false;
+        Seq now = v[time];
+        
+        //회전하기
+        for(int i =1; i<=n; i++){
+            if(i%now.x !=0){
+                continue;
+            }
+            vector <int> sample;
+            for(int j =0;j<=m; j++){
+                sample.push_back(arr[i][j]);
+            }
+            
+            if(now.d ==0){ //시계 방향
+                for(int j =0;j<sample.size(); j++){
+                    if(j+now.k>m){arr[i][j+now.k-m] = sample[j];}
+                    else{arr[i][j+now.k] = sample[j];}
+                }
+            }
+            else{ //반시계 방향
+                for(int j =0;j<sample.size(); j++){
+                    if(j-now.k<=0){arr[i][j-now.k+m] = sample[j];}
+                    else{arr[i][j-now.k] = sample[j];}
+                }
+            }
+        }
+        
+        //원판 지우기
+        for(int i =1; i<=n; i++){
+            for(int j =1; j<=m; j++){
+                if(arr[i][j] == -1){continue;}
+                bool got = false;
+                int tmpTotal = 1;
+                int tmpSum = arr[i][j];
+                queue<Cell> root;
+                root.push({i,j, arr[i][j]});
+                
+                while(!root.empty()){
+                    Cell temp = root.front();
+                    root.pop();
+                    for(int dir =0;dir<4; dir++){
+                        int nowR = temp.r + rdir[dir];
+                        int nowC = temp.c + cdir[dir];
+                        if(nowC==0){nowC = m;}
+                        if(nowC>m){nowC = 1;}
+                        if(nowR>=0 && nowR<=n &&
+                           arr[nowR][nowC] == temp.val && arr[nowR][nowC]!=-1){
+                            got = true;
+                            check = true;
+                            tmpTotal +=1; tmpSum +=arr[nowR][nowC];
+                            arr[temp.r][temp.c] = -1; arr[nowR][nowC] = -1;
+                            root.push({nowR, nowC,temp.val});
+                        }
+                    }
+                }
+                
+                if(got){ // 뭐하나라도 잡았을경우
+                    total -= tmpTotal;
+                    sum -=tmpSum;
+                }
+            }
+        }
+        if(sum ==0 || total ==0){break;}
+        if(!check){
+            int newSum =0;
+            int rest = sum%total;
+            if(rest==0){ //나머지가 없을 경우
+                int avg = sum/total;
+                for(int i =1; i<=n; i++){
+                    for(int j =1; j<=m; j++){
+                        if(arr[i][j] ==-1){continue;}
+                        if(arr[i][j] == avg){newSum+=arr[i][j]; continue;}
+                        if(arr[i][j] > avg){
+                            arr[i][j] -=1;
+                            
+                        }
+                        else{
+                            arr[i][j] +=1;
+                        }
+                        if(arr[i][j] !=-1){newSum+=arr[i][j];}
+                    }
+                }
+            }
+            else{   //나머지가 있는 경우
+                double avg = (double)sum/(double)total;
+                for(int i =1; i<=n; i++){
+                    for(int j =1; j<=m; j++){
+                        if(arr[i][j] ==-1){continue;}
+                        if(arr[i][j] > avg){
+                            arr[i][j] -=1;
+                        }
+                        else{
+                            arr[i][j] +=1;
+                        }
+                        
+                        if(arr[i][j] !=-1){newSum+=arr[i][j];}
+                    }
+                    
+                }
+            }
+            sum = newSum;
+        }
+    }
+    
+    printf("%d", sum);
+    return 0;
+}
