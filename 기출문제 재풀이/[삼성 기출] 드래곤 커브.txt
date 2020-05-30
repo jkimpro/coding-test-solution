@@ -1,0 +1,84 @@
+//드래곤 커브 (재풀이)
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int c,r;
+    int dir;
+    int level;
+}Cell;
+
+int rdir[4] = {0,-1,0,1};
+int cdir[4] = {1,0,-1,0};
+int maxR, minR;
+int maxC, minC;
+
+int n;
+int result;
+bool visit[1000][1000];
+
+int main(){
+    scanf("%d", &n);
+    
+ //   memset(visit, false, sizeof(visit));
+    
+    for(int t =0;t<n; t++){
+        Cell temp;
+        scanf("%d %d %d %d", &temp.c, &temp.r, &temp.dir, &temp.level);
+        //0세대 세팅
+        temp.r +=500;
+        temp.c +=500;
+        if(t ==0){
+            maxR = minR = temp.r;
+            maxC = minC = temp.c;
+        }
+        
+        vector <int> v;
+        int nowR, nowC;
+        for(int i =0;i<=temp.level; i++){
+            if(i ==0){
+                visit[temp.r][temp.c] = true;
+                visit[temp.r + rdir[temp.dir]][temp.c + cdir[temp.dir]] = true;
+                v.push_back(temp.dir);
+                nowR = temp.r + rdir[temp.dir]; nowC = temp.c + cdir[temp.dir];
+            }
+            else if(i==1){
+                visit[nowR][nowC] = true;
+                visit[nowR + rdir[(v[0]+1)%4]][nowC + cdir[(v[0]+1)%4]] = true;
+                v.push_back((v[0]+1)%4);
+                nowR += rdir[(v[0]+1)%4]; nowC += cdir[(v[0]+1)%4];
+            }
+            else{
+                    
+                vector <int> sample;
+                for(int j = v.size()-1; j>=0; j--){
+                    nowR += rdir[(v[j]+1)%4];
+                    nowC += cdir[(v[j]+1)%4];
+                    visit[nowR][nowC] = true;
+                    sample.push_back((v[j]+1)%4);
+                    maxR = max(maxR, nowR); minR = min(minR, nowR);
+                    maxC = max(maxC, nowC); minC = min(minC, nowC);
+                }
+                for(int j =0;j<sample.size(); j++){
+                    v.push_back(sample[j]);
+                }
+                sample.clear();
+            }
+        }
+    }
+    
+    for(int i = 0; i<1000; i++){
+        for(int j=0; j<1000; j++){
+            if(visit[i][j] && visit[i+1][j] && visit[i][j+1] && visit[i+1][j+1]){
+                result +=1;
+            }
+        }
+    }
+    
+    printf("%d", result);
+    return 0;
+}
