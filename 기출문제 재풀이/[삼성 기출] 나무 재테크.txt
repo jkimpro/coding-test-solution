@@ -1,0 +1,103 @@
+//나무 재테크 (삼성 기출)
+
+//vector 2차원 배열 만들때 (typedef struct)를 권장하지 않음
+//가급적 int 형으로 하는게 훨씬 나음
+//또한 별도의 언급이 없을 경우 x,y라도 r,c에 순서대로 매핑하는게 맞음
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int rdir[8] = {-1,-1,-1,0,1,1,1,0};
+int cdir[8] = {-1,0,1,1,1,0,-1,-1};
+
+int result;
+int n,m,l;
+int arr[11][11];
+int num[11][11];
+
+vector <int> v[11][11];
+
+int main(){
+    
+    scanf("%d %d %d", &n, &m , &l);
+    
+    for(int i =0;i< n; i++){
+        for(int j =0;j <n; j++){
+            scanf("%d",&num[i][j]);
+            arr[i][j] = 5;
+        }
+    }
+    for(int i =0;i<m; i++){
+        int r,c, age;
+        scanf("%d %d %d",&r, &c, &age);
+        r -=1; c-=1;
+        
+        v[r][c].push_back(age);
+    }
+    
+    for(int time = 0;time<l; time++){
+        //양분먹기 + 죽은 나무 양분되기 포함
+        for(int i =0;i<n; i++){
+            for(int j =0;j<n; j++){
+                if(v[i][j].size()==0){continue;}
+                bool check = false;
+                int point = 0;
+                sort(v[i][j].begin(), v[i][j].end());
+                
+                for(int k =0;k<v[i][j].size();k++){
+                    if(arr[i][j]>= v[i][j][k]){
+                        arr[i][j] -= v[i][j][k];
+                        v[i][j][k]+=1; //이런 부분 주의 하기.
+                    }
+                    else{ //부족한 경우
+                        check = true;
+                        point = k;
+                        break;
+                    }
+                }
+                
+                if(check){
+                    for(int k=v[i][j].size()-1; k>=point; k--){
+                        if(v[i][j][k] !=1){
+                            arr[i][j] += (int)(v[i][j][k]/2);
+                        }
+                        v[i][j].pop_back();
+                    }
+                }
+            }
+        }
+        
+        //씨뿌리기 + 양분뿌리기
+        for(int i =0; i<n; i++){
+            for(int j=0;j<n; j++){
+                arr[i][j] += num[i][j];
+                if(v[i][j].size()==0){continue;}
+                for(int k =0;k<v[i][j].size();k++){
+                    if(v[i][j][k]%5 ==0){
+                        //뿌리기
+                        for(int dir = 0;dir<8; dir++){
+                            int nowR = i + rdir[dir];
+                            int nowC = j +cdir[dir];
+                            if(0<= nowR && nowR<n && 0<=nowC && nowC<n){
+                                v[nowR][nowC].push_back(1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    for(int i =0;i<n; i++){
+        for(int j =0; j<n; j++){
+            result += v[i][j].size();
+        }
+    }
+    
+    printf("%d", result);
+    return 0;
+}
