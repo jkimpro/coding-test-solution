@@ -1,0 +1,130 @@
+//낚시왕 (삼성 기출)
+// 조건 확인 꼭 잘하기! (특히 각 프로세스별 초기화)
+#include <iostream>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+typedef struct shark{
+    int r,c;
+    int s;  //속도
+    int d;  //방향
+    int z;  //크기
+    bool isDead;
+}Shark;
+
+int rdir[5] = {0,-1,1,0,0};
+int cdir[5] = {0,0,0,1,-1};
+vector <Shark> root;
+vector <int> v[101][101];
+int arr[101][101];
+int result;
+
+int n,m, k;
+int rowStd, colStd;
+
+int main(){
+    scanf("%d %d %d", &n, &m, &k);
+    rowStd = n-1;
+    colStd = m-1;
+    
+    for(int i =0; i<n; i++){
+        for(int j= 0;j<m; j++){
+            arr[i][j] = -1;
+        }
+    }
+    
+    //메모리 초과면 arr 모두 -1로 초기화할것
+    for(int i =0;i<k; i++){
+        Shark temp;
+        scanf("%d %d %d %d %d",
+              &temp.r, &temp.c, &temp.s, &temp.d, &temp.z);
+        temp.r -=1; temp.c -=1; temp.isDead = false;
+        root.push_back(temp);
+        arr[temp.r][temp.c] = root.size()-1; //인덱스 집어넣기
+    }
+    
+    for(int col = 0;col<m && root.size()!=0; col++){
+        //상어 잡기
+        for(int i =0; i<n; i++){
+            if(arr[i][col]!=-1){
+                result += root[arr[i][col]].z;
+                root[arr[i][col]].isDead = true;
+                arr[i][col] =-1;
+                break;
+            }
+        }
+
+        //상어 이동
+        for(int i =0;i<root.size(); i++){
+            if(root[i].isDead){continue;}
+            if(root[i].d==1||root[i].d==2){
+                int step = root[i].s%(rowStd*2); //남는 스탭
+                int nowR = root[i].r;
+                int nowC = root[i].c;
+                while(step !=0){
+                    if(nowR + rdir[root[i].d]<0 || nowR + rdir[root[i].d]>=n){
+                        if(root[i].d==1){
+                            root[i].d =2;
+                        }
+                        else{root[i].d =1;}
+                    }
+            //        if(i==6) {printf("nowR: %d\n", nowR);}
+                    nowR += rdir[root[i].d];
+                    step-=1;
+                }
+                
+                root[i].r = nowR; root[i].c = nowC;
+                v[nowR][nowC].push_back(i);
+            }
+
+            if(root[i].d==3 || root[i].d==4){
+                int step = root[i].s%(colStd*2);
+                int nowR = root[i].r;
+                int nowC = root[i].c;
+                while(step !=0){
+                    if(nowC + cdir[root[i].d]<0 || nowC + cdir[root[i].d]>=m){
+                        if(root[i].d==3){root[i].d =4;}
+                        else{root[i].d =3;}
+                    }
+                    nowC += cdir[root[i].d];
+                    step-=1;
+                }
+                root[i].r = nowR; root[i].c = nowC;
+                v[nowR][nowC].push_back(i);
+            }
+        }
+
+        for(int i =0; i<n; i++){
+            for(int j =0; j<m; j++){
+                arr[i][j] = -1;
+                
+                if(v[i][j].empty()){continue;}
+                else if(v[i][j].size()==1){ arr[i][j] = v[i][j][0]; }
+                else{
+                    int sum = 0;
+                    int maxInd =0; int maxVal = 0;
+                    
+                    for(int l =0; l<v[i][j].size(); l++){
+                        sum+= v[i][j][l];
+                        if(maxVal < root[v[i][j][l]].z){
+                            maxInd = v[i][j][l];
+                            maxVal = root[v[i][j][l]].z;
+                        }
+                    }
+                    
+                    for(int l = 0; l<v[i][j].size(); l++){
+                        if(v[i][j][l] == maxInd){continue;}
+                        root[v[i][j][l]].isDead = true;
+                    }
+                    root[maxInd].z = maxVal;
+                    arr[i][j] = maxInd;
+                }
+                v[i][j].clear();
+            }
+        }
+
+    }
+    printf("%d", result);
+    return 0;
+}
