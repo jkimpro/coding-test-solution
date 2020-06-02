@@ -1,0 +1,247 @@
+//주사위 윷놀이 (삼성 기출)
+
+//  if 문을 왜 중첩해야하는지 반드시 확인하기!!!!!
+//중첩해서 다른 조건식에 못들어가도록 만듦
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct mal{
+    int r, c;
+    bool active;
+}Mal;
+vector <int> step;
+
+bool visit[4][31];
+int result =0;
+int arr[4][31] = {
+    {0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,0,0,0,0,0},
+    {10,13,16,19,25,30,35,40,0,0,0,0,0,0,0},
+    {20,22,24,25,30,35,40,0,0,0,0,0,0,0},
+    {30,28,27,26,25,30,35,40,0,0,0,0,0}
+};
+// r이 1일때 4
+// r이 1일때 3
+// r이 1일때 4
+
+Mal mal[4];
+
+bool check(int val){
+    if(val == 40){
+        if(!visit[0][20] && !visit[1][7] && !visit[2][6] && !visit[3][7]){
+            return true;
+        }
+        return false;
+    }
+    else if(val == 25){
+        if(!visit[1][4] && !visit[2][3] && !visit[3][4]){
+            return true;
+        }
+        return false;
+    }
+    else if(val ==30){
+        if(!visit[1][5] && !visit[2][4] && !visit[3][5]){
+            return true;
+        }
+        return false;
+    }
+    else{
+        if(!visit[1][6] && !visit[2][5] && !visit[3][6]){
+            return true;
+        }
+        return false;
+    }
+}
+void dfs(int level, int sum, int canAdd){
+//    if(visit[0][5] == true){
+//        printf("fuck\n");
+//    }
+//    printf("level:%d sum:%d canAdd:%d\n", level, sum, canAdd);
+//
+//    for(int i =0;i<4; i++){
+//        printf("ind:%d r:%d c:%d val:%d on:%d\n", i, mal[i].r, mal[i].c, arr[mal[i].r][mal[i].c], mal[i].active);
+//    }
+//    printf("\n");
+    
+    result = max(result, sum);
+        
+    if(level == 10){
+        return;
+    }
+    else{
+        if(level == 0){
+            mal[0].c+= step[level];
+            mal[0].active = true;
+           
+            if(arr[mal[0].r][mal[0].c] ==10){
+                mal[0].r = 1; mal[0].c = 0;
+                visit[1][0] = true;
+                
+                dfs(level+1, sum+10, 1);
+                
+                visit[1][0] = false;
+                mal[0].r = 0; mal[0].c = 0;
+            }
+            else{
+                visit[0][mal[0].c] = true;
+                dfs(level+1, sum+arr[mal[0].r][mal[0].c], 1);
+                visit[0][mal[0].c] = false;
+            }
+//            mal[0].c -= step[level];
+//            mal[0].active = false;
+        }
+        else{
+            for(int i =0; i<canAdd; i++){
+                if(mal[i].active == false){continue;}
+                
+                visit[mal[i].r][mal[i].c] = false;
+
+                int tmpR = mal[i].r;
+                int tmpC = mal[i].c;
+              //  printf("r:%d c:%d val:%d\n", mal[i].r, mal[i].c, arr[mal[i].r][mal[i].c]);
+                mal[i].c += step[level];
+                
+                if(arr[mal[i].r][mal[i].c] ==0){ //범위를 벗어났을경우 (fail)
+                    mal[i].active = false;
+                    dfs(level+1, sum, canAdd);
+                    mal[i].active = true;
+                }
+                else{
+                    if(mal[i].r ==0 && arr[0][mal[i].c] ==10){
+                        if(!visit[1][0]){
+                            mal[i].r = 1; mal[i].c = 0;
+                            visit[1][0] = true;
+                        
+                            dfs(level+1,sum+10,canAdd);
+                            visit[1][0] = false;
+                            mal[i].r = tmpR; mal[i].c = tmpC;
+                        }
+                    } //방향 전환
+                    else if(mal[i].r ==0 && arr[0][mal[i].c] == 20){
+                        if(!visit[2][0]){
+                            mal[i].r = 2; mal[i].c = 0;
+                            visit[2][0] = true;
+        
+                            dfs(level+1,sum+20,canAdd);
+                            visit[2][0] = false;
+                            mal[i].r = tmpR; mal[i].c = tmpC;
+                        }
+                    }
+                    else if(mal[i].r ==0 && arr[0][mal[i].c] == 30){
+                        if(!visit[3][0]){
+                            mal[i].r = 3; mal[i].c = 0;
+                            visit[3][0] = true;
+                            
+                            dfs(level+1,sum+30,canAdd);
+                            
+                            visit[3][0] = false;
+                            mal[i].r = tmpR; mal[i].c = tmpC;
+                        }
+                    }
+                    else{
+                        //여기서부터 세부체크 들어가기.
+                        if(arr[mal[i].r][mal[i].c] == 40){
+                            if(check(40)){
+                                visit[mal[i].r][mal[i].c] = true;
+                                dfs(level+1,sum+40,canAdd);
+                                visit[mal[i].r][mal[i].c] = false;
+                            }
+                        }
+                        else if(mal[i].r!=0 && mal[i].c!=0 && arr[mal[i].r][mal[i].c]==25){
+                            if(check(25)){
+                                visit[mal[i].r][mal[i].c] = true;
+                                dfs(level+1,sum+25,canAdd);
+                                visit[mal[i].r][mal[i].c] = false;
+                            }
+                        }
+                        else if(mal[i].r!=0 && mal[i].c!=0 && arr[mal[i].r][mal[i].c]==30){
+                            if(check(30)){
+                                visit[mal[i].r][mal[i].c] = true;
+                                dfs(level+1,sum+30,canAdd);
+                                visit[mal[i].r][mal[i].c] = false;
+                            }
+                        }
+                        else if(mal[i].r!=0 && mal[i].c!=0 && arr[mal[i].r][mal[i].c]==35){
+                            if(check(35)){
+                                visit[mal[i].r][mal[i].c] = true;
+                                dfs(level+1,sum+35,canAdd);
+                                visit[mal[i].r][mal[i].c] = false;
+                            }
+                        }
+                        else{
+                            if(!visit[mal[i].r][mal[i].c]){
+                              //  printf("arr[][]:%d r:%d c:%d\n", arr[mal[i].r][mal[i].c], mal[i].r, mal[i].c);
+                                visit[mal[i].r][mal[i].c] = true;
+                                dfs(level+1,sum+arr[mal[i].r][mal[i].c],canAdd);
+                                visit[mal[i].r][mal[i].c] = false;
+                            }
+                        }
+                    }
+                }
+                
+                visit[tmpR][tmpC] = true;
+                mal[i].r = tmpR;
+                mal[i].c = tmpC;
+            }
+            //신규 투입
+            if(canAdd <4){
+                int nowR = mal[canAdd].r;
+                int nowC = mal[canAdd].c + step[level];
+                
+                if(arr[nowR][nowC] ==10 && visit[1][0] == false){
+                    visit[1][0] = true;
+                    mal[canAdd].r = 1; mal[canAdd].c = 0;
+                    mal[canAdd].active = true;
+                    
+                    dfs(level+1, sum+10, canAdd+1);
+                    
+                    mal[canAdd].active = false;
+                    mal[canAdd].r = 0; mal[canAdd].c = 0;
+                    visit[1][0] = false;
+                }
+                else{
+                    
+                    if(!visit[nowR][nowC] && arr[nowR][nowC] !=10){
+                        
+                        visit[nowR][nowC] = true;
+                        mal[canAdd].r = nowR; mal[canAdd].c = nowC;
+                        mal[canAdd].active = true;
+                        
+                        dfs(level+1, sum+arr[nowR][nowC], canAdd+1);
+                       
+                        mal[canAdd].active = false;
+                        mal[canAdd].r = 0; mal[canAdd].c = 0;
+                        visit[nowR][nowC] = false;
+                    }
+                }
+            }
+            
+        }
+    }
+}
+int main(){
+    for(int i=0;i<4; i++){
+        for(int j =0;j<31;j++){
+            visit[i][j] = false;
+        }
+    }
+    
+    for(int i =0;i<4; i++){
+        mal[i].r = 0;
+        mal[i].c = 0;
+        mal[i].active = false;
+    }
+    
+    for(int i =0;i<10;i++){
+        int temp;
+        scanf("%d", &temp);
+        step.push_back(temp);
+    }
+    
+    dfs(0,0,0);
+    printf("%d", result);
+    return 0;
+}
