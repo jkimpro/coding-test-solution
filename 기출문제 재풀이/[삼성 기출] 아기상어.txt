@@ -1,0 +1,133 @@
+//아기상어
+//풀어가는 방식은 여러개지만, 주어진 조건을 정리하는 습관 들이기!
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+typedef struct cell{
+    int r,c;
+    int size;
+    int nut;
+    int step;
+}Cell;
+
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,-1,0,1};
+
+int n,m;
+int arr[20][20];
+bool visit[20][20];
+
+int result;
+int sum;
+vector <Cell> fish;
+Cell start;
+
+int main(){
+    scanf("%d", &n);
+    
+    for(int i =0;i<n; i++){
+        for(int j =0;j<n; j++){
+            
+            visit[i][j] = false;
+            scanf("%d", &arr[i][j]);
+            if(arr[i][j] ==0){
+                arr[i][j] = -1;
+            }
+            if(arr[i][j] !=0 && arr[i][j] !=9){
+                sum++;
+            }
+            if(arr[i][j] ==9){
+                arr[i][j] = -1;
+                start.r = i; start.c = j;
+                start.step = 0;
+                start.size = 2;
+                start.nut = 0;
+            }
+        }
+    }
+    
+    while(sum!=0){
+        bool eat = false;
+        int minR =-1, minC =-1;
+        int minDis=-1;
+        
+        queue <Cell> root;
+        root.push(start);
+        
+        visit[start.r][start.c] = true;
+        
+        while(!root.empty()){
+            Cell temp = root.front();
+            root.pop();
+            
+            if(arr[temp.r][temp.c] !=-1 && arr[temp.r][temp.c] < temp.size){
+                eat = true;
+                if(minDis ==-1){
+                    minR = temp.r; minC = temp.c;
+                    minDis = temp.step;
+                }
+                else{
+                    if(minDis > temp.step){
+                        minR = temp.r; minC = temp.c;
+                        minDis = temp.step;
+                    }
+                    else if(minDis == temp.step){
+                        if(minR > temp.r){
+                            minR = temp.r; minC = temp.c;
+                            minDis = temp.step;
+                        }
+                        else if(minR == temp.r){
+                            if(minC > temp.c){
+                                minR = temp.r; minC = temp.c;
+                                minDis = temp.step;
+                            }
+                        }
+                    }
+                }
+            }
+            else{
+                for(int i =0;i<4; i++){
+                    int nowR = temp.r + rdir[i];
+                    int nowC = temp.c + cdir[i];
+                    
+                    if(nowR >=0 && nowR<n &&nowC>=0 && nowC<n && visit[nowR][nowC] == false
+                       && arr[nowR][nowC] <= temp.size){
+                        Cell next;
+                        next.r = nowR; next.c = nowC; next.size = temp.size; next.step = temp.step+1;
+                        visit[nowR][nowC] = true;
+                        root.push(next);
+                    }
+                }
+            }
+        }
+        
+        if(eat== false){
+            break;
+        }
+        else{ //minDis 및 이외것 초기화
+            result +=minDis;
+            start.r = minR; start.c = minC;
+            start.nut+=1;
+            arr[minR][minC] = -1;
+            
+            if(start.nut == start.size){
+                start.size+=1;
+                start.nut =0;
+            }
+            
+            for(int i =0;i<n; i++){
+                for(int j =0;j<n; j++){
+                    visit[i][j] = false;
+                }
+            }
+        }
+    }
+
+    printf("%d", result);
+    return 0;
+}
