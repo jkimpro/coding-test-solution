@@ -1,0 +1,104 @@
+//인구이동 재풀이
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <cstdlib>
+#include <cmath>
+
+using namespace std;
+
+typedef struct cell{
+    int r, c;
+}Cell;
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+
+int n,l,r;
+int arr[101][101];
+bool visit[101][101];
+int total[101][101];
+int result;
+
+int main(){
+    scanf("%d %d %d", &n, &l, &r);
+    for(int i =0;i<n; i++){
+        for(int j =0;j<n; j++){
+            scanf("%d", &arr[i][j]);
+            visit[i][j] = false;
+            total[i][j] = 0;
+        }
+    }
+    
+    for(int time =1; ; time++){
+        bool check = false;
+        
+        for(int i =0;i<n; i++){
+            for(int j=0;j<n; j++){
+                if(visit[i][j] == true){continue;}
+                bool isAdded = false;
+                
+                int sum =arr[i][j];
+                int count = 1;
+                vector <Cell> comp;
+                queue <Cell> root;
+                comp.push_back({i,j});
+                root.push({i,j});
+                
+                while(!root.empty()){
+                    Cell temp = root.front();
+                    root.pop();
+                    
+                    for(int dir =0;dir<4; dir++){
+                        int nowR = temp.r + rdir[dir];
+                        int nowC = temp.c + cdir[dir];
+                        
+                        if(nowR>=0 && nowR<n && nowC>=0 && nowC<n && visit[nowR][nowC] == false
+                           && abs(arr[temp.r][temp.c] - arr[nowR][nowC])>=l && abs(arr[temp.r][temp.c] - arr[nowR][nowC])<=r){
+                            visit[temp.r][temp.c] = true;
+                            visit[nowR][nowC] = true;
+                            sum+=arr[nowR][nowC];
+                            count+=1;
+                            check = true;
+                            isAdded = true;
+                            root.push({nowR, nowC});
+                            comp.push_back({nowR, nowC});
+                        }
+                    }
+                }
+                
+                if(isAdded){
+                    int avg = sum/count;
+                    for(int k =0;k<comp.size(); k++){
+                        total[comp[k].r][comp[k].c] = avg;
+                    }
+                    comp.clear();
+                }
+                else{
+                    comp.clear();
+                }
+                
+            }
+        }
+        
+        if(!check){
+            result = time;
+            break;
+        }
+        else{
+            //visit 초기화
+            for(int i =0;i<n; i++){
+                for(int j =0;j<n; j++){
+                    if(total[i][j] !=0){
+                        arr[i][j] = total[i][j];
+                    }
+                    total[i][j] = 0;
+                    visit[i][j] = false;
+                }
+            }
+        }
+    }
+    printf("%d" , result-1);
+    return 0;
+}
