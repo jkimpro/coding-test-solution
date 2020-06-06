@@ -1,0 +1,120 @@
+//연구소 3 겨우품
+
+//똑같이 bfs는 맞는데 마지막에 바이러스가 퍼진곳이 연구소라면 그곳은 초에서 제외해야하는 것이 핵심이었음!
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <queue>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct cell{
+    int r, c;
+    int time;
+}Cell;
+int rdir[4] = {-1,0,1,0};
+int cdir[4] = {0,1,0,-1};
+int n,m;
+int arr[51][51];
+bool check = false;
+
+int result = 99999999;
+vector <Cell> v;
+vector <Cell> active;
+
+void dfs(int level, int start){
+    if(active.size() ==m){
+        int maxTime =0;
+        int visit[51][51];
+        memset(visit, -1, sizeof(visit));
+        
+        queue <Cell> root;
+        for(int i =0;i<active.size(); i++){
+            active[i].time = 0;
+            root.push(active[i]);
+            visit[active[i].r][active[i].c] = 0;
+        }
+        while(!root.empty()){
+            Cell temp = root.front();
+            root.pop();
+            
+            for(int i =0;i<4; i++){
+                int nowR = temp.r +rdir[i];
+                int nowC = temp.c +cdir[i];
+                if(0<= nowR && nowR<n && nowC>=0 && nowC<n && arr[nowR][nowC] !=1){
+                    if(visit[nowR][nowC] ==-1){
+                        visit[nowR][nowC] = temp.time+1;
+                        root.push({nowR, nowC, temp.time+1});
+                    }
+                    else{
+                        if(temp.time+1 < visit[nowR][nowC]){
+                            visit[nowR][nowC] = temp.time+1;
+                            root.push({nowR, nowC, temp.time+1});
+                        }
+                    }
+                }
+            }
+        }
+        
+        bool isFail = false;
+        for(int i =0;i<n; i++){
+            for(int j= 0; j<n; j++){
+                if(visit[i][j] == -1 && (arr[i][j]==0||arr[i][j] ==2)){isFail = true;}
+                if(visit[i][j] ==-1){continue;}
+                if(arr[i][j]!=2){
+                    maxTime = max(maxTime, visit[i][j]);
+                }
+            }
+            if(isFail){break;}
+        }
+        
+        
+        if(!isFail){
+        
+            check = true;
+            result =min(result, maxTime);
+//            printf("result:%d\n", result);
+//            printf("\n");
+        }
+    }
+    else{
+        for(int i = start; i<v.size(); i++){
+            active.push_back(v[i]);
+            dfs(level+1, i+1);
+            active.pop_back();
+        }
+    }
+}
+
+int main(){
+    scanf("%d %d",&n, &m);
+    
+    for(int i =0; i<n; i++){
+        for(int j =0;j<n; j++){
+            scanf("%d", &arr[i][j]);
+            
+            if(arr[i][j] ==2){
+                v.push_back({i,j});
+            }
+        }
+    }
+    
+    for(int i =0;i<v.size(); i++){
+        active.push_back(v[i]);
+        dfs(1, i+1);
+        active.pop_back();
+    }
+    
+    
+    if(check){
+        printf("%d", result);
+    }
+    else{
+        printf("-1");
+    }
+    return 0;
+}
+
