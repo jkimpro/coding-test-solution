@@ -1,0 +1,260 @@
+#define MAX_ORDER   20010
+#define MAX_SHAPE   1002
+#define MAX_ARCH    102
+
+extern void makeCookies(int mID);
+
+template <typename T>
+void _swap(T& val1, T& val2) {
+    T tmp = val1; val1 = val2; val2 = tmp;
+}
+
+typedef struct order {
+    int seq;
+    int shape;
+    int date;
+    bool isActive;
+}Order;
+
+typedef struct pq {
+    int size;
+    Order heap[15001];
+
+    bool comp(Order t1, Order t2) {
+        if (t1.date < t2.date) {
+            return 1;
+        }
+        else if (t1.date == t2.date) {
+            if (t1.seq < t2.seq) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        }
+        else {
+            return 0;
+        }
+    }
+    void init() {
+        size = 0;
+    }
+    Order front() {
+        return heap[1];
+    }
+    void push(Order val) {
+        heap[++size] = val;
+        for (int cur = size; cur > 1; cur /= 2) {
+            if (comp(heap[cur], heap[cur / 2])) {
+
+                _swap(heap[cur], heap[cur / 2]);
+            }
+            else {
+                break;
+            }
+        }
+    }
+    void pop() {
+        heap[1] = heap[size--];
+        for (int cur = 2; cur <= size; cur *= 2) {
+            if (cur < size && comp(heap[cur + 1], heap[cur])) {
+                cur += 1;
+            }
+            if (comp(heap[cur], heap[cur / 2])) {
+                _swap(heap[cur], heap[cur / 2]);
+            }
+            else {
+                break;
+            }
+        }
+    }
+    int getSize() {
+        return size;
+    }
+    bool empty() {
+        return size == 0;
+    }
+
+}PQ;
+
+PQ shapesOrd[MAX_SHAPE]; // 쿠키의 모양 (주문 적재)
+PQ todayOrd;
+Order order[MAX_ORDER];
+
+int totalOrderCount[MAX_SHAPE];
+int todayShapeCount[MAX_SHAPE];
+int arch[MAX_ARCH][12];
+int archMakeCount[MAX_ARCH];
+
+int nowDate;
+int sequence;
+int madeCutterCount;
+
+void init(void) {
+    nowDate = 0;
+    sequence = 0;
+    madeCutterCount = 1;
+
+    for (int i = 0; i < MAX_SHAPE; i++) {
+        shapesOrd[i].init();
+        todayShapeCount[i] = 0;
+        totalOrderCount[i] = 0;
+    }
+}
+void addCookieCutter(int mID, int N, int mShapeList[]) { //order 2
+    archMakeCount[mID] = N;
+    for (int i = 0; i < N; i++) {
+        arch[mID][i] = mShapeList[i];
+    }
+    madeCutterCount++;
+
+}
+
+void orderCookie(int mShape, int daysLeft) { //order 3
+    Order ord = { sequence, mShape, nowDate + daysLeft, true };
+    order[sequence] = ord; // order 동기화
+    totalOrderCount[mShape] += 1;
+
+    shapesOrd[mShape].push(ord);
+    sequence++;
+}
+
+int checkRemain(int mShape) { //order 4
+//    printf("mShape:%d count: %d\n", mShape, totalOrderCount[mShape]);
+    return totalOrderCount[mShape];
+}
+
+void newDay(void) { //order 5
+    nowDate += 1;
+    int total = 0;
+    Order nowOrder;
+    todayOrd.init();
+
+    //1.주문 목록에서 수령일이 오늘인 주문을 선택한다 (가장 먼저 들어온 주문 부터 처리)
+    for (int i = 1; i < MAX_SHAPE; i++) {
+        while (!shapesOrd[i].empty() && shapesOrd[i].front().date == nowDate) {
+            //printf("shapesOrd[i].front().date:%d \n", shapesOrd[i].front().date);
+
+            if (order[shapesOrd[i].front().seq].isActive == false) {
+                shapesOrd[i].pop();
+                continue;
+            }
+            todayOrd.push(shapesOrd[i].front());
+            todayShapeCount[shapesOrd[i].front().shape] += 1;
+            shapesOrd[i].pop();
+
+            total++;
+            //   printf("%d input success! total:%d \n", shapesOrd[i].front().date, total);
+
+        }
+    }
+    if (total == 0) { return; }
+
+
+    while (!todayOrd.empty()) {
+        bool check = false;
+        while (true) {
+            if (order[todayOrd.front().seq].isActive == true) {
+                nowOrder = todayOrd.front();
+                //   printf("nowOrder input success! nowOrder seq:%d date:%d shape:%d\n", nowOrder.seq, nowOrder.date, nowOrder.shape);
+                check = true;
+                todayOrd.pop();
+                break;
+            }
+            else {
+                todayOrd.pop();
+            }
+
+            if (todayOrd.empty()) { break; }
+        }
+        if (!check && todayOrd.empty()) { return; }
+
+
+        int maxOrder = 0;
+        int selectedArchInd;
+
+        //현재 주문 선택된 상태 (nowOrder에 업뎃된 상태)
+        for (int i = 1; i < madeCutterCount; i++) {
+            int delOrderMaxCount = 0;
+            bool applyCheck = false;
+            for (int j = 0; j < archMakeCount[i]; j++) {
+                if (totalOrderCount[arch[i][j]] > 0) { delOrderMaxCount++; }
+                if (nowOrder.shape == arch[i][j]) { applyCheck = true; }
+            }
+
+            //여기서 체크
+            if (!applyCheck) { continue; }
+
+            if (maxOrder < delOrderMaxCount) {
+
+                //   printf("nowInd:%d maxorder: %d delOrderMaxCount:%d \n", i, maxOrder, delOrderMaxCount);
+                maxOrder = delOrderMaxCount;
+
+                selectedArchInd = i;
+            }
+        }
+
+        makeCookies(selectedArchInd);
+
+        for (int i = 0; i < archMakeCount[selectedArchInd]; i++) {
+
+            if (nowOrder.shape == arch[selectedArchInd][i]) { //지우려고 하는 주문의 shape ㄱㄱ
+                //따로 처리
+             //   printf("delivery done\n");
+                order[nowOrder.seq].isActive = false;
+                totalOrderCount[nowOrder.shape] -= 1;
+                continue;
+            }
+
+
+            if (totalOrderCount[arch[selectedArchInd][i]] > 0) {
+                //     printf("other delivery success!\n");
+                bool outCheck = false;
+                Order backup;
+
+                PQ tmpPQ;
+                tmpPQ.init();
+
+                while (!todayOrd.empty()) {
+                    if (order[todayOrd.front().seq].isActive == true &&
+                        todayOrd.front().shape == arch[selectedArchInd][i]) {
+
+                        backup = todayOrd.front();
+                        todayOrd.pop();
+                        outCheck = true;
+                        break;
+                    }
+                    tmpPQ.push(todayOrd.front());
+                    todayOrd.pop();
+                }
+
+                while (!tmpPQ.empty()) {
+                    todayOrd.push(tmpPQ.front());
+                    tmpPQ.pop();
+                }
+
+
+                if (outCheck) { //today order에 있는 놈 일 경우
+                    order[backup.seq].isActive = false;
+                }
+                else {
+                    while (!shapesOrd[arch[selectedArchInd][i]].empty()) {
+
+                        if (order[shapesOrd[arch[selectedArchInd][i]].front().seq].isActive == true) {
+
+                            order[shapesOrd[arch[selectedArchInd][i]].front().seq].isActive = false;
+                            shapesOrd[arch[selectedArchInd][i]].pop();
+                            break;
+                        }
+                        else {
+                            shapesOrd[arch[selectedArchInd][i]].pop();
+                        }
+                    }
+                }
+
+                totalOrderCount[arch[selectedArchInd][i]] -= 1;
+            }
+        }
+    }
+
+}

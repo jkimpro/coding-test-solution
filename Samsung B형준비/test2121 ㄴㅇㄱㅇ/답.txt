@@ -1,0 +1,258 @@
+
+#include <stdio.h>
+
+#define MAX_TOOL	401
+#define MAX_CALL	10001
+
+using namespace std;
+
+struct Tnode {
+	int ind;
+	int val;
+	Tnode* next;
+	Tnode() :ind(-1), val(-1), next(0) {};
+};
+
+struct Tool {
+	int id;
+	int orgVal;
+	int duration;
+	int capacity;
+
+	int startT;
+	int endT;
+};
+
+struct People {
+	int stamp;
+	int priority;
+	int num;
+
+	// 제일 끝노드를 위한것.
+	int orgVal;
+	int leftPeople;
+};
+
+template <typename T>
+void _swap(T& t1, T& t2) {
+	T tmp = t1; t1 = t2; t2 = tmp;
+}
+
+typedef struct pq {
+	People heap[MAX_CALL];
+	int size;
+	int total;
+
+	bool comp(People p1, People p2) {
+		if (p1.leftPeople > p2.leftPeople) {
+			return true;
+		}
+		else if (p1.leftPeople == p2.leftPeople) {
+			if (p1.orgVal > p2.orgVal) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void init() {
+		total = size = 0;
+		heap[0].num = 0; heap[0].priority = 0;
+	}
+	People front() {
+		return heap[1];
+	}
+	void push(People p) {
+		total += p.num;
+		heap[++size] = p;
+		for (int cur = size; cur > 1; cur /= 2) {
+			if (heap[cur].priority > heap[cur / 2].priority) {
+				_swap(heap[cur], heap[cur / 2]);
+			}
+			else {
+				break;
+			}
+		}
+	}
+	void pop() {
+		total -= heap[1].num;
+		heap[1] = heap[size--];
+
+		for (int cur = 2; cur <= size; cur *= 2) {
+			if (cur < size && heap[cur + 1].priority > heap[cur].priority) {
+				cur = cur + 1;
+			}
+			if (heap[cur].priority > heap[cur / 2].priority) {
+				_swap(heap[cur], heap[cur / 2]);
+			}
+			else {
+				break;
+			}
+		}
+	}
+	void push_tool(People p) {
+		heap[++size] = p;
+		for (int cur = size; cur > 1; cur /= 2) {
+			if (comp(heap[cur], heap[cur / 2])) {
+				_swap(heap[cur], heap[cur / 2]);
+			}
+			else {
+				break;
+			}
+		}
+	}
+	void pop_tool() {
+		heap[1] = heap[size--];
+		for (int cur = 2; cur <= size; cur *= 2) {
+			if (cur < size && comp(heap[cur + 1], heap[cur])) {
+				cur = cur + 1;
+			}
+			if (comp(heap[cur], heap[cur / 2])) {
+				_swap(heap[cur], heap[cur / 2]);
+			}
+			else {
+				break;
+			}
+		}
+	}
+
+
+	//void printSection() {
+	//	for (int i = 1; i <= size; i++) {
+	//		printf("%d	", heap[i].num);
+	//	}
+
+	//	printf("\n");
+	//}
+}PQ;
+
+Tnode table[MAX_TOOL];
+Tool tool[MAX_TOOL];
+PQ toolLog[102];
+int toolCount;
+int getHash(int val) {
+	int hash = val % MAX_TOOL;
+
+	Tnode* dum = &table[hash];
+	while (dum->ind != -1) {
+		if (dum->val == val) {
+			return dum->ind;
+		}
+		dum = dum->next;
+	}
+	dum->ind = toolCount++;
+	dum->val = val;
+	dum->next = new Tnode();
+	return dum->ind;
+}
+void init(int N, int mId[], int mDuration[], int mCapacity[]) {
+	toolCount = 0;
+
+	for (int i = 0; i < MAX_TOOL; i++) {
+		table[i].ind = -1; table[i].next = 0; table[i].val = -1;
+		tool[i].startT = tool[i].endT = 0;
+	}
+
+	for (int i = 0; i < N; i++) {
+		int ind = getHash(mId[i]); //어차피 순서대로 접근하게 되어 있음
+		toolLog[ind].init();
+
+		tool[ind].id = ind;
+		tool[ind].orgVal = mId[i];
+		tool[ind].duration = mDuration[i];
+		tool[ind].capacity = mCapacity[i];
+		//	printf("ind;%d org:%d duration:%d capacity:%d\n", ind, mId[i], tool[ind].duration, tool[ind].capacity);
+
+	}
+	toolLog[toolCount].init();
+
+	return;
+}
+void toolUpdate(int stamp, int ind) {
+	/*if (toolLog[ind].size == 0) {
+		tool[ind].endT = 0;
+		return;
+
+		여기 위에다 선언해두면 문제가 되는이유
+		tool[ind].endT <= stamp 조건을 안거치게 된다.
+		즉, endT이 stamp를 초과할수도 있는데 이걸 무시하고 무작정 0으로 초기화하게 된다는점이다.
+
+	}*/
+	while (tool[ind].endT <= stamp) {
+		if (toolLog[ind].size == 0) { 
+			
+			tool[ind].endT = 0;
+			break;
+		}
+
+		if (tool[ind].endT == 0) {
+			tool[ind].startT = stamp;
+			tool[ind].endT = tool[ind].startT + tool[ind].duration;
+		} //제일 첫 경우일때
+		else {
+			tool[ind].startT = tool[ind].endT;
+			tool[ind].endT = tool[ind].startT + tool[ind].duration;
+		}
+
+		int vacancy = tool[ind].capacity;
+		while (vacancy > 0) {
+
+			if (vacancy - toolLog[ind].front().num >= 0) {
+				int num = toolLog[ind].front().num;
+				toolLog[ind].pop();
+				vacancy -= num;
+			}
+			else {
+				toolLog[ind].total -= vacancy;
+				toolLog[ind].heap[1].num -= vacancy;
+				vacancy = 0;
+			}
+
+			if (toolLog[ind].size == 0) { //더 나올게 없으면 vacancy가 있어도 그대로 진행
+				break;
+			}
+		}
+	}
+}
+int add(int tStamp, int mId, int mNum, int mPriority) {
+
+	int ind = getHash(mId);
+	toolUpdate(tStamp - 1, ind);
+	toolLog[ind].push({ tStamp,mPriority, mNum });
+	toolUpdate(tStamp, ind);
+
+	int result;
+	if (toolLog[ind].size == 0) { result = 0; }
+	else { result = toolLog[ind].front().priority; }
+
+	//	printf("printSection: %d ->   ", tool[ind].orgVal);
+	//	toolLog[ind].printSection();
+
+	return result;
+}
+
+void search(int tStamp, int mCount, int mId[], int mWait[]) {
+	//각 stamp 별로 시뮬레이션돌리면 됨
+//	toolUpdate(tStamp);
+//	toolLog[toolCount].push_tool({ 0,0,0, tool[i].orgVal, toolLog[i].total });
+
+	for (int i = 0; i < toolCount; i++) {
+		toolUpdate(tStamp, i);
+		toolLog[toolCount].push_tool({ 0,0,0,tool[i].orgVal, toolLog[i].total });
+		//	printf("printSection: %d ->   ", tool[i].orgVal);
+			//toolLog[i].printSection();
+
+	}
+
+	for (int i = 0; i < mCount; i++) {
+		People tmp = toolLog[toolCount].front();
+		toolLog[toolCount].pop_tool();
+
+		mId[i] = tmp.orgVal; mWait[i] = tmp.leftPeople;
+		//printf("val:%d num:%d\n", tmp.orgVal, tmp.leftPeople);
+	}
+
+	toolLog[toolCount].init();
+	return;
+}
+

@@ -1,0 +1,255 @@
+#define MAX_NAME_LEN        (4+1)
+#define MAX_HEAP            30001
+#define MAX_AC_NUM          100001
+#define MAX_GROUP           21
+#define MAX_NUM             600000
+typedef unsigned long long  ull;
+typedef unsigned long       ul;
+
+//정리
+
+//고객의 최대갯수는 30000개 이말은 즉슨 생성할 수 있는 계좌는 30000개 이하 (openAccount)호출 횟수는 30000개 이하이기 때문
+//1. 계좌번호로 ACCOUNT에 직접 접근하는 구조체 생성
+//2. 해당 포인터로 30000개가 한도인 ACCOUNT에 접속
+//3. 30000개가 한도인 ACCOUNT는 USER구조체의 연결리스트에 포인터로 접근되어 있음
+
+//4. GROUP은 해당인원들의 별도 저장하는 연결리스트를 가지고 있음
+//5.
+
+ull str2ull(const char* str) {
+    ull h = 0;
+    while (*str != '\0') {
+        h = (h * 27) + (*str++ - 'a' + 1);
+    }
+    return h;
+}
+
+struct Account {
+    int number;
+    int uid;
+    int gid;
+    int asset;
+    int time;
+    int state;
+    Account* prev;
+    Account* next;
+};
+struct User {
+    unsigned long long name;
+    Account* account;
+    int group[MAX_GROUP];
+    int gCount;
+};
+struct Group {
+    unsigned long long name;
+    User* user[MAX_HEAP]; // user 객체에는 별도로 next 가 없기 때문에 배열로 만들고 uCount index순서대로 접근하여서 갱신할 예정
+    int uCount;
+};
+
+Account* aNum[MAX_AC_NUM];
+Account accounts[MAX_HEAP];
+User users[MAX_HEAP];
+Group groups[MAX_GROUP];
+int aInd, gInd, uInd;
+int userHash[MAX_NUM];
+int groupHash[MAX_NUM];
+
+void init() {
+    for (int i = 0; i < MAX_HEAP; i++) {
+        users[i].gCount = 0;
+        users[i].account = 0;
+    }
+    for (int i = 0; i < MAX_GROUP; i++) {
+        groups[i].uCount = 0;
+    }
+    for (int i = 0; i < MAX_NUM; i++) {
+        userHash[i] = groupHash[i] = 0;
+    }
+
+    //    for(int i = 0;i<=gInd; i++){
+    //        groups[i].uCount =0;
+    //    }
+    //    for(int i =0;i<=uInd; i++){
+    //        users[i].gCount =0;
+    //        users[i].account = 0;
+    //    }
+    //
+    for (int i = 0; i < MAX_AC_NUM; i++) {
+        aNum[i] = 0;
+    }
+    aInd = 0; uInd = 0; gInd = 0;
+}
+
+void openAccount(int mTime, char mName[MAX_NAME_LEN], char mGroup[MAX_NAME_LEN], int mNumber, int mAsset) {
+
+    ull gh = str2ull(mGroup);
+    if (groupHash[gh] == 0) { //만약 새로운 그룹일 경우
+        groupHash[gh] = ++gInd;
+        groups[gInd].name = gh;
+    }
+    int gid = groupHash[gh];
+    Group* group = &groups[gid];
+
+    ull uh = str2ull(mName);
+    if (userHash[uh] == 0) {
+        userHash[uh] = ++uInd;
+        users[uInd].name = uh; //users의 name으로 hash값에 접근
+    }
+    int uid = userHash[uh];
+    User* user = &users[uid];
+
+    int aid = aInd++;
+    Account* newAcc = &accounts[aid];
+    newAcc->uid = uid;
+    newAcc->gid = gid;
+    newAcc->number = mNumber;
+    newAcc->asset = mAsset;
+    newAcc->time = mTime;
+    newAcc->state = 2;
+
+    newAcc->prev = 0;
+    newAcc->next = user->account; // 위에 User * user = &users[uid]; 로 해당 주소값에 연결되어진 상태
+
+    if (user->account) {
+        user->account->prev = newAcc;
+    }
+    user->account = newAcc;
+    //또한 위 세개의 문장으로 user에 가장 최신화 된 계좌를 갱신 시키는 것임
+
+    aNum[mNumber] = newAcc;
+
+    bool check = false;
+    for (int i = 0; i < user->gCount; i++) {
+        if (user->group[i] == gid) {
+            check = true;
+            break;
+        }
+    }
+    if (!check) {
+        group->user[group->uCount] = user;
+        group->uCount += 1;
+        user->group[user->gCount] = gid;
+        user->gCount += 1;
+    }
+}
+
+int closeAccount(int mTime, int mNumber) {
+    aNum[mNumber]->time = -1; //time을 -1로 갱신하기
+    User* user = &users[aNum[mNumber]->uid];
+    if (user->account->number == mNumber) { // 지우려는 놈이 젤 앞에 와있다면
+        Account* account = user->account->next;
+        while (account) {
+
+            if (account->time != -1) {
+                account->prev = 0;
+                user->account = account;
+                break;
+            }
+            account = account->next;
+        }
+    }
+    return aNum[mNumber]->asset;
+}
+
+int sendByNumber(int mTime, int mNumber, int mReceiveNumber, int mValue) {
+    Account* sender = aNum[mNumber];
+    Account* receiver = aNum[mReceiveNumber];
+
+    if (sender == 0 || receiver == 0 || sender->time == -1 || receiver->time == -1
+        || sender->asset < mValue) {
+        return -1;
+    }
+
+    sender->asset -= mValue;
+    receiver->asset += mValue;
+    sender->time = receiver->time = mTime;
+    sender->state = 1;
+    receiver->state = 2;
+
+    if (sender != users[sender->uid].account) { //최신화 되어 있지 않다면
+        if (sender->prev) { sender->prev->next = sender->next; } //연결 끊어버리기
+        if (sender->next) { sender->next->prev = sender->prev; } //연결 끊어버리기
+        users[sender->uid].account->prev = sender; //sender랑 연결짓기
+        sender->next = users[sender->uid].account; //sender랑 연결짓기
+        users[sender->uid].account = sender;
+    }
+    if (receiver != users[receiver->uid].account) {    //최신화 되어 있지 않다면
+        if (receiver->prev) { receiver->prev->next = receiver->next; }
+        if (receiver->next) { receiver->next->prev = receiver->prev; }
+        users[receiver->uid].account->prev = receiver;
+        receiver->next = users[receiver->uid].account;
+        users[receiver->uid].account = receiver;
+    }
+
+    return receiver->asset;
+}
+
+int sendByName(int mTime, int mNumber, char mReceiveName[MAX_NAME_LEN], int mValue) {
+
+    Account* sender = aNum[mNumber];
+    Account* receiver;
+    ull name = str2ull(mReceiveName);
+
+    if (sender == 0 || sender->time == -1 || userHash[name] == 0 || sender->asset < mValue) {
+        return -1;
+    }
+
+
+    receiver = users[userHash[name]].account;
+
+    sender->asset -= mValue;
+    sender->state = 1;
+    sender->time = receiver->time = mTime;
+
+    receiver->asset += mValue;
+    receiver->state = 2;
+
+    if (users[sender->uid].account != sender) {
+        if (sender->prev) { sender->prev->next = sender->next; }
+        if (sender->next) { sender->next->prev = sender->prev; }
+        users[sender->uid].account->prev = sender;
+        sender->next = users[sender->uid].account;
+        users[sender->uid].account = sender;
+
+    }
+    if (users[receiver->uid].account != receiver) {
+        if (receiver->prev) { receiver->prev->next = receiver->next; }
+        if (receiver->next) { receiver->next->prev = receiver->prev; }
+        users[receiver->uid].account->prev = receiver;
+        receiver->next = users[receiver->uid].account;
+        users[receiver->uid].account = receiver;
+    }
+    return receiver->asset;
+}
+
+void sendBonus(int mTime, char mGroup[MAX_NAME_LEN], int mValue) {
+    ull gh = str2ull(mGroup);
+    Group* group = &groups[groupHash[gh]];
+
+
+    for (int i = 0; i < group->uCount; i++) {
+        User* user = group->user[i];
+        Account* account = user->account;
+
+        while (account) {
+            if (account->gid == groupHash[gh] && account->time != -1) {
+                break;
+            }
+            account = account->next;
+        }
+
+        account->state = 2;
+        account->time = mTime;
+        account->asset += mValue;
+
+        if (account != user->account) {
+            if (account->prev) { account->prev->next = account->next; }
+            if (account->next) { account->next->prev = account->prev; }
+            user->account->prev = account;
+            account->next = user->account;
+            user->account = account;
+        }
+    }
+
+
+}

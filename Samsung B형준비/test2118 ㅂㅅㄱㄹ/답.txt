@@ -1,0 +1,149 @@
+//각 끝자리  tail 과 head의 연결을 통해
+// 함수호출 최소화가 핵심
+
+
+// double linked list 다음 답을 꼭 암기할것!
+
+#include <iostream>
+
+#define MAX_TEAM        6
+#define MAX_SOLIDER     100001
+#define NULL            0
+using namespace std;
+
+struct Solider {
+    int id;
+    int team;
+    bool isActive;
+    Solider* prev;
+    Solider* next;
+    Solider() :id(-1), team(-1), isActive(false),
+        prev(0), next(0) {};
+
+};
+
+bool comp(Solider* input, Solider* compVal) {
+    if (input->id > compVal->id) {
+        return true;
+    }
+    return false;
+}
+typedef struct team {
+    Solider* head;
+    Solider* tail;
+    void link(Solider* left, Solider* right) {
+        left->next = right;
+        right->prev = left;
+    }
+    void init() {
+        head = new Solider();
+        tail = new Solider();
+        link(head, tail);
+    }
+
+    void push(Solider* val) {
+        link(tail->prev, val);
+        link(val, tail);
+    }
+
+    void pop(Solider* val) {
+        link(val->prev, val->next);
+    }
+
+    int getMaxSolider() {
+        Solider* result = head->next;
+        Solider* dum = head->next;
+
+        while (dum != tail) {
+            if (comp(dum, result)) {
+                result = dum;
+            }
+            dum = dum->next;
+        }
+        return result->id;
+    }
+}Team;
+
+Solider solider[MAX_SOLIDER];
+Team team[MAX_TEAM][MAX_TEAM];
+
+Team temp[6];
+
+void init() {
+    for (int i = 0; i < MAX_SOLIDER; i++) {
+        solider[i].id = -1; solider[i].isActive = false;
+        solider[i].prev = solider[i].next = 0;
+    }
+    for (int i = 0; i < MAX_TEAM; i++) {
+        for (int j = 0; j < MAX_TEAM; j++) {
+            team[i][j].init();
+        }
+    }
+}
+
+void hire(int mID, int mTeam, int mScore) {
+    solider[mID].id = mID;
+    solider[mID].isActive = true;
+    solider[mID].team = mTeam;
+
+    team[mTeam][mScore].push(&solider[mID]);
+}
+
+void fire(int mID) {
+    solider[mID].isActive = false;
+    
+    Solider* left = solider[mID].prev;
+    Solider* right = solider[mID].next;
+    left->next = right;
+    right->prev = left;
+}
+
+void updateSoldier(int mID, int mScore) {
+
+    Solider* left = solider[mID].prev;
+    Solider* right = solider[mID].next;
+    left->next = right;
+    right->prev = left;
+
+    team[solider[mID].team][mScore].push(&solider[mID]);
+}
+
+void updateTeam(int mTeam, int mChangeScore) {
+
+    int newInd[6] = { 0,1,2,3,4,5 };
+    
+    for (int i = 1; i < 6; i++) {
+        temp[i].init();
+        int newScore = newInd[i] + mChangeScore;
+        if (newScore > 5) { newScore = 5; }
+        if (newScore < 1) { newScore = 1; }
+        newInd[i] = newScore;
+    }
+
+    for (int i = 5; i >= 1; i--) {
+        if (temp[newInd[i]].head->next == temp[newInd[i]].tail) { //한번도 input 안한 상황
+            
+            temp[newInd[i]].link(temp[newInd[i]].head, team[mTeam][i].head->next);
+            temp[newInd[i]].link(team[mTeam][i].tail->prev, temp[newInd[i]].tail);
+            
+        }
+        else {            
+            temp[newInd[i]].link(temp[newInd[i]].tail->prev, team[mTeam][i].head->next);
+            temp[newInd[i]].link(team[mTeam][i].tail->prev, temp[newInd[i]].tail);
+        }
+        
+        team[mTeam][i].link(team[mTeam][i].head, team[mTeam][i].tail);
+ 
+    }
+    for (int i = 5; i >= 1; i--) {
+        team[mTeam][i].link(team[mTeam][i].head, temp[i].head->next);
+        team[mTeam][i].link(temp[i].tail->prev, team[mTeam][i].tail);
+    }
+}
+int bestSoldier(int mTeam) {
+    for (int i = 5; i >= 1; i--) {
+        if (team[mTeam][i].head->next->id !=-1) {
+            return team[mTeam][i].getMaxSolider();
+        }
+    }
+}

@@ -1,0 +1,343 @@
+#define MAX_NAME_LEN    (4+1)
+#define MAX_HEAP        30001
+#define MAX_AC_NUMBER   100001
+
+void mstrcpy(char dst[], const char src[]) {
+    int c = 0;
+    while ((dst[c] = src[c]) != '\0') ++c;
+}
+
+template <typename T>
+void swap(T& t1, T& t2) {
+    T tmp = t1; t1 = t2; t2 = tmp;
+}
+
+typedef struct account {
+    char name[MAX_NAME_LEN];
+    char group[MAX_NAME_LEN];
+    int time;
+    int asset;
+    bool isActive;
+    int status; //0 open 1 send 2 rec
+    bool updated;
+}Account;
+
+Account account[MAX_AC_NUMBER]; //계좌번호 접근법
+
+typedef struct group {
+    int person[MAX_HEAP];
+    int count;
+}Group;
+
+template <class T>
+class stack {
+public:
+    int size;
+    struct Log {
+        Log * next;
+        Account ac;
+
+        Log() {};
+        Log(Account ac) :ac(ac){};
+    };
+    int size;
+
+    Log* head;
+    Log* tail;
+
+    stack() {
+        head = tail = 0;
+        size = 0;
+    }
+
+
+    Log front() const{
+        return head->ac;
+    }
+    void push(Account ac) {
+        Log* temp = new Log(ac);
+        if (head == 0) {
+            head = temp;
+        }
+        else {
+            temp->next = head;
+            head = temp;
+        }
+        size++;
+    }
+    void pop() {
+        Log* temp = head;
+        head = head->next;
+        delete(temp);
+        size--;
+    }
+};
+
+// 우선 순위 큐가 아닌 stack을 사용해야함
+
+typedef struct pq {
+    int accountSum;
+    int size;
+    int heap[1000]; 
+    int startInd;
+    int endInd;
+
+    int front() {
+        return heap[1];
+    }
+    void init() {
+        size = 0;
+        accountSum = 0;
+        startInd = 1;
+        endInd = 1;
+    }
+    void push(int val) { //같은 그룹에 속한놈이 있거나, isActive == false 처리될 경우 pop
+        size+=1;
+        heap[size] = val;
+
+        for (int cur = size; cur > 1; cur /= 2) {
+            if (heap[cur] == heap[cur/2]) {
+                continue;
+            }
+            else if (account[heap[cur]].time > account[heap[cur / 2]].time) {
+                
+                swap(heap[cur], heap[cur / 2]);
+            }
+            else if (account[heap[cur]].time == account[heap[cur / 2]].time) {
+                if (account[heap[cur]].status > account[heap[cur / 2]].status) {
+                    swap(heap[cur], heap[cur / 2]);
+                }
+                else {
+                    break;
+                }
+            }
+            else {
+                break;
+            }
+        }
+
+    }
+    void pop() {
+        heap[1] = heap[size];
+        size--;
+
+        for (int cur = 2; cur <= size; cur *= 2) {
+            if (cur < size && account[heap[cur]].time <= account[heap[cur + 1]].time) {
+                cur += 1;
+            }
+
+            if (heap[cur] == heap[cur / 2]) {
+                continue;
+            }
+            else if (account[heap[cur]].time > account[heap[cur / 2]].time) {
+                swap(heap[cur], heap[cur / 2]);
+            }
+            else if (account[heap[cur]].time == account[heap[cur / 2]].time) {
+                if (account[heap[cur]].status > account[heap[cur / 2]].status) {
+                    swap(account[heap[cur]], account[heap[cur / 2]]);
+                }
+                else {
+                    break;
+                }
+            }
+            else {
+                break;
+            }
+        }
+    }
+
+}PQ;
+
+//user총 우선순위
+
+//stack <Account> user[MAX_HEAP]; // 개인 우선순위
+//stack <Account> group[21][MAX_HEAP] //그룹 우선순위
+
+PQ user[MAX_HEAP];
+Group group[22];
+
+//group -> user -> 총우선순위
+unsigned long groupHash(const char* str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+    {
+        hash = (((hash << 5) + hash) + c) % 22;
+    }
+
+    return hash % 22;
+}
+
+unsigned long userHash(const char* str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+    {
+        hash = (((hash << 5) + hash) + c) % MAX_HEAP;
+    }
+
+    return hash % MAX_HEAP;
+}
+
+void init() {
+    for (int i = 0; i < MAX_AC_NUMBER; i++) {
+        account[i].isActive = false;
+        account[i].status = 0;
+        account[i].asset = 0;
+    }
+    for (int i = 0; i < MAX_HEAP; i++) {
+        user[i].init();
+    }
+    for (int i = 0; i < 22; i++) {
+        group[i].count = 0;
+    }
+}
+
+void openAccount(int mTime, char mName[MAX_NAME_LEN], char mGroup[MAX_NAME_LEN], int mNumber, int mAsset) {
+
+    mstrcpy(account[mNumber].name, mName);
+    mstrcpy(account[mNumber].group, mGroup);
+    account[mNumber].time = mTime;
+    account[mNumber].status = 2;
+    account[mNumber].isActive = true;
+    account[mNumber].asset = mAsset;
+    account[mNumber].updated = false;
+
+    int groupInd = groupHash(mGroup);
+    int userInd = userHash(mName);
+    bool check = true;
+
+    for (int i = 0; i < group[groupInd].count;i++) {
+        if (group[groupInd].person[i] == userInd) {
+            check = false;
+            break;
+        }
+    }
+
+    if (check) {
+        group[groupInd].person[group[groupInd].count] = userInd;
+        group[groupInd].count += 1;
+    }
+
+    // 총 몇개의 계좌가 있는지 미리세둠 (나중에 총정리할때 활용할 예정
+    user[userInd].push(mNumber);
+    user[userInd].accountSum++;
+}
+
+int closeAccount(int mTime, int mNumber) {
+    account[mNumber].isActive = false;
+    int userInd = userHash(account[mNumber].name);
+    user[userInd].accountSum -= 1;
+
+    return account[mNumber].asset;
+}
+
+int sendByNumber(int mTime, int mNumber, int mReceiveNumber, int mValue) {
+    //검사
+    if (account[mNumber].isActive == false || account[mReceiveNumber].isActive == false ||
+        account[mNumber].asset < mValue) {
+        return -1;
+    }
+
+    // 최신화
+    account[mNumber].time = mTime;
+    account[mNumber].status = 1;
+    account[mNumber].asset -= mValue;
+
+    account[mReceiveNumber].time = mTime;
+    account[mReceiveNumber].status = 2;
+    account[mReceiveNumber].asset += mValue;
+
+    int userSInd = userHash(account[mNumber].name);
+    int userRInd = userHash(account[mReceiveNumber].name);
+
+    user[userSInd].push(mNumber);
+    user[userRInd].push(mReceiveNumber);
+
+    return  account[mReceiveNumber].asset;
+}
+
+int sendByName(int mTime, int mNumber, char mReceiveName[MAX_NAME_LEN], int mValue) { // 우선순위가 같으면 안댐
+
+    int rInd = userHash(mReceiveName);
+
+    if (account[mNumber].isActive == false || user[rInd].size == 0 || user[rInd].accountSum == 0 ||
+        account[mNumber].asset < mValue) {
+        return -1;
+    }
+
+    account[mNumber].time = mTime;
+    account[mNumber].status = 1;
+    account[mNumber].asset -= mValue;
+
+    int mReceiveNumber;
+
+    while (true) {
+        mReceiveNumber = user[rInd].front();
+
+        if (account[mReceiveNumber].isActive && mReceiveNumber != mNumber) {
+            break;
+        }
+        else {
+            user[rInd].pop();
+        }
+    }
+    account[mReceiveNumber].time = mTime;
+    account[mReceiveNumber].status = 2;
+    account[mReceiveNumber].asset += mValue;
+
+    int userSInd = userHash(account[mNumber].name);
+
+    int userRInd = userHash(account[mReceiveNumber].name);
+
+    user[userSInd].push(mNumber);
+    user[userRInd].push(mReceiveNumber);
+    return account[mReceiveNumber].asset;
+}
+
+void sendBonus(int mTime, char mGroup[MAX_NAME_LEN], int mValue) {
+
+    int ind = groupHash(mGroup);
+    for (int i = 0; i < group[ind].count; i++) {
+        int userInd = group[ind].person[i];    
+        int mReceiveNumber;
+        int list[10000];
+        int listCount = 0;
+
+        while (true) {
+            mReceiveNumber = user[userInd].front();
+
+            if (account[mReceiveNumber].isActive) {
+                if (groupHash(account[mReceiveNumber].group) == ind) { //같은 그룹인가에 대한것
+
+                    account[mReceiveNumber].time = mTime;
+                    account[mReceiveNumber].asset += mValue;
+                    account[mReceiveNumber].status = 2;
+
+                    list[listCount] = mReceiveNumber;
+                    listCount++;
+
+                    break;
+                }
+                else {
+                    list[listCount] = mReceiveNumber;
+                    listCount++;
+                    user[userInd].pop();
+                }
+            }
+            else {
+                user[userInd].pop();
+            }
+        }
+
+        for (int j = 0; j < listCount; j++) {
+            user[userInd].push(list[j]);
+        }
+    }
+}
+
+

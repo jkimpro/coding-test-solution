@@ -1,0 +1,587 @@
+10 100
+25
+100 6
+200 A 2 Ro Fa 1
+200 B 1 Po 1
+200 Aa 2 Cr Fa 1
+200 C 1 Yo 2
+200 D 2 Co Cr 1
+200 E 4 Co Fa Yo Ro 1
+200 Abc 2 Ad Co 1
+200 Ab 3 Ro Ad Fa 1
+300 Ro 1 2 3
+400 E 3
+200 Ff 2 Fa Yo 3
+200 G 2 Ad Cr 3
+300 Cr 1 4 2
+300 Ad 2 5 1
+400 Abc 2
+400 A 3
+200 Cba 4 Cr Ad Ro Fa 5
+200 Ccc 2 Ho Dr 4
+200 F 2 Te Dr 6
+400 Cba 3
+300 Fa 4 3 1
+500 Ccc
+600 2 Fa Yo 3 5
+600 2 Ro Fa 3 5
+600 1 Cr 3 3
+
+
+50
+100 5
+200 rT 3 lZ bJp oN 3
+600 1 IJ 3 0
+200 yfnIO 1 IJ 5
+400 yfnIO 4
+300 oN 3 5 1
+600 2 lZ bJp 3 0
+200 oDg 5 EQ gOJ YV kq Eg 1
+200 FC 4 uzD dU IJ Vj 5
+200 dtBBv 4 XFa BAl kl bJp 2
+200 l 4 IJ BMC MHQ PIg 2
+200 OGe 4 dwn kl gOJ uf 1
+200 lV 3 kl WO bf 1
+200 hkFX 5 ds bJp gOJ WuM Qj 3
+500 yfnIO
+500 l
+400 hkFX 4
+300 EQ 1 5 1
+200 HVpNC 4 PXR uzD XFa TOk 3
+300 uzD 5 2 1
+200 N 5 ll ds dwn dZ IJ 2
+200 rQrr 5 yVh oN uf kq zv 4
+500 dtBBv
+500 oDg
+200 KAtfY 2 uf kq 5
+200 uvqS 1 bf 3
+200 mfy 1 dsZ 4
+400 HVpNC 5
+300 dwn 1 3 1
+200 sVjR 3 kD Vj bf 5
+200 bzEDC 1 PIg 4
+400 hkFX 3
+200 UOo 1 tq 4
+600 5 PIg EHe dsZ YV uf 4 3
+200 YfzwTR 4 ky bJp XFa rW 5
+200 b 5 EjL zv BMC ky Wr 3
+200 d 2 cAe EHe 5
+200 QL 2 MHQ QZ 3
+200 sD 1 PIg 3
+500 uvqS
+200 U 4 bf BMC yVh XFa 4
+200 m 3 wb bf cAe 1
+200 jUoE 1 PIg 4
+300 ky 5 4 1
+400 KAtfY 3
+200 u 4 ds wb BMC WO 4
+200 O 2 uzD gOJ 2
+200 osoIro 3 ARv yVh uf 2
+600 3 oN EHe kq 5 2
+200 BMlM 4 Ea XFa rW kD 3
+600 1 dZ 4 0
+
+
+
+500
+100 5
+200 g 3 rq nJ HTl 1
+400 g 5
+200 pBHUPN 5 eC SRf BP JOW AnA 5
+200 VnD 3 oC uHc GEl 3
+300 SRf 5 2 1
+200 Cr 2 jL rq 3
+200 Zm 2 Ji Ssw 4
+300 SRf 2 1 1
+200 A 5 ucr KaW jSc rq NoJ 5
+200 BKCFU 5 BTF uhG woH eV QC 5
+400 pBHUPN 2
+300 woH 5 3 1
+200 i 1 Jo 5
+200 DjK 4 Pl ysj RPb jL 3
+200 BWtHBZ 1 Tv 2
+500 A
+200 kmkBR 4 Ji gb KtP woH 2
+200 wqXEru 3 Pl Kio Aq 2
+600 1 Aq 2 1
+200 m 1 eDs 2
+200 UQVj 1 aS 1
+200 XwMRYR 3 TDz AnA lK 4
+200 lNC 4 eS NXG uzs ct 3
+500 BWtHBZ
+500 g
+200 j 5 af ct jL gi pxB 2
+200 GLEJJ 1 AnA 1
+200 w 4 Ns BZN Ji RRE 3
+600 4 qi Ji wt ucr 4 1
+200 JNPYv 3 NoJ eV Bt 3
+300 lK 4 3 1
+300 RRE 3 1 1
+600 2 ucr Jo 5 1
+300 aS 1 4 1
+200 SNwGFX 1 KtP 5
+500 Cr
+500 i
+200 oxiUZ 5 ct SRf NAk NXG Kio 5
+500 m
+500 UQVj
+200 HHV 1 Bu 3
+200 PZKbr 4 vCA EJl mSr mte 3
+200 Ti 1 ATb 4
+200 Yuhurs 1 ZD 3
+600 1 AnA 1 1
+200 YPb 3 qi Mp PV 1
+200 HlyEXx 3 sKN af IAA 5
+200 G 4 PYP NA lK Jo 3
+200 NsdHZ 5 Qqa eGD rJ Mp kk 3
+200 BqGV 4 AnA pxB PV IvE 5
+500 lNC
+200 hU 1 ysj 4
+200 SdT 4 af uHc Ji pxB 2
+300 ysj 4 1 1
+200 ovVop 3 BZN apK ysj 3
+200 R 2 Ssw wy 3
+500 kmkBR
+200 QO 3 mte wt Jo 3
+500 GLEJJ
+500 BqGV
+200 DsnbZ 2 mSr DHL 4
+200 VK 2 gxM woH 2
+200 sIUXF 1 PV 1
+400 VnD 2
+200 ewxXln 2 af ZD 4
+200 oc 2 RTY ATb 3
+200 zOVvw 3 WkC SRf eDs 4
+300 uHc 2 4 2
+200 UZRrw 2 TDz Tpi 4
+200 sMoMgx 4 eDs oC uzs vCA 1
+400 wqXEru 1
+200 Sech 5 vCA ct RtA DHL SRf 2
+600 3 eV SRf oC 1 1
+200 x 1 uhG 2
+200 UUP 5 BTF Kg qi RPb NA 5
+200 MqbNM 3 Nfb kkE RtA 1
+200 tuehw 5 eS NoJ gb uzs uhG 3
+200 e 4 GEl jx af ATb 4
+200 RU 2 ZD KtP 2
+400 SdT 3
+500 Yuhurs
+200 ts 2 eS Nfb 3
+500 oxiUZ
+200 YMYT 4 BTF lcU NAk uzs 4
+200 h 2 SSi lK 1
+200 F 2 uhG WkC 2
+600 2 Ji Kio 2 0
+200 RAvBC 1 Tv 2
+200 cdnF 3 Tpi TDz SRf 3
+300 lK 1 3 1
+200 qW 1 gb 5
+200 AJRC 5 pxB mSr wV jSc rq 4
+300 ATb 3 2 1
+200 ySAzI 5 Ssw Mp Kg Ji WkC 2
+400 Ti 3
+200 cVRK 3 Tpi ct Bt 1
+300 ysj 3 1 2
+300 GEl 4 1 2
+200 wrYFvR 4 JOW Tpi gi eGD 2
+200 pGYmmo 2 HTl zNh 5
+200 AOL 4 jSc gb RTY DHL 5
+300 Bt 1 2 1
+500 G
+200 WzBUft 5 BTF ysj jSc rq Qrm 3
+200 VAb 3 RPb gAj KlE 1
+200 pBqTd 3 rJ NoJ woH 4
+200 jh 1 mSr 5
+400 e 4
+600 5 jL KtP lcU ct JOW 2 6
+200 yB 1 KlE 2
+300 PV 1 2 2
+200 dKXUYy 3 af DHL HTl 5
+400 wrYFvR 3
+200 Nrgu 4 ucr RTY oC RPb 1
+500 j
+500 WzBUft
+200 fAYvLL 4 TDz uHc rq Pl 2
+200 hUkDoY 1 Kg 3
+200 cUAW 2 rq GEl 1
+300 JOW 2 5 1
+300 Ji 2 3 1
+500 DjK
+200 TA 2 lK BP 3
+200 u 5 Ssw ATb jx ysj uzs 2
+400 Sech 1
+200 MRFZ 3 Kg eS qi 3
+300 NAk 4 3 1
+200 Ak 1 uzs 1
+200 dl 1 ATb 3
+200 exp 5 lK byV sKN zNh mte 2
+200 pzC 1 qi 4
+200 euTDG 5 JOW Nfb SSi vq RPb 3
+200 WUj 3 Tpi kkE rJ 1
+300 ysj 2 1 1
+200 SmA 4 jx gi Kg mte 4
+300 GEl 1 4 2
+600 1 TDz 2 1
+300 gxM 2 3 1
+200 FY 1 uHc 3
+200 NfX 3 PYP wy KaW 3
+600 2 jSc RPb 5 2
+200 qiOZXB 5 gi NoJ DHL nJ RRE 4
+500 NfX
+400 h 1
+200 GbZNW 4 vCA SSi ysj eDs 3
+600 1 PYP 3 0
+500 cdnF
+200 yms 3 Tv NA Ji 2
+300 kkE 1 2 2
+200 I 1 eV 1
+500 Zm
+200 a 2 NAk Kg 5
+300 KlE 1 4 1
+500 PZKbr
+200 hNRL 5 RPb kkE wy ysj ucr 5
+600 4 SRf qi lcU ATb 4 3
+400 pzC 5
+400 HHV 4
+300 ATb 4 3 1
+200 d 3 Mp af vCA 3
+200 H 1 af 4
+200 bXwqMu 3 PV qi uhG 3
+500 WUj
+200 AoP 3 PV RTY eV 1
+600 3 kkE WkC oC 3 1
+200 nOAwO 2 rJ IAA 2
+200 ia 2 vCA eV 2
+400 HlyEXx 3
+200 Vx 4 Mp ZD Nfb nJ 4
+500 ovVop
+600 2 HTl WkC 2 1
+600 5 jSc lcU Ns SRf IvE 4 2
+200 X 2 qi wy 5
+200 VZOLlw 2 af Ji 5
+200 ykLv 2 RPb Pl 5
+400 hUkDoY 4
+200 YAy 1 Tv 4
+200 NVszlC 1 NT 3
+500 QO
+200 W 3 eGD WkC RRE 2
+300 ysj 5 1 1
+200 XlkMh 3 uk BP nN 1
+300 ysj 1 2 3
+200 fpzBL 1 TNa 1
+200 MfifK 5 jL Mp ATb RRE TNa 5
+200 ANzKS 4 ct wV qi JOW 4
+200 EyH 4 QC WkC KlE EJl 5
+200 qjmSlE 2 uHc SxD 3
+500 qiOZXB
+200 V 2 Kl aS 5
+200 Amz 4 EJl PYP Ssw KaW 1
+200 dsWHLD 5 iWk JOW EJl Jo jL 1
+200 dgf 5 Ji aS RTY IAA BTF 5
+200 OJjYIN 1 Qqa 1
+400 oc 4
+200 z 3 Qqa Kg pxB 1
+200 JDWa 1 HTl 3
+200 lmcgya 5 uHc zNh Nfb lcU jL 4
+200 uPCSZz 5 gAj ucr eDs iWk eC 1
+200 YLprkW 3 Ji rJ jx 2
+200 xWgJ 5 uhG gAj Aq rq eV 3
+200 li 3 BTF SRf wy 2
+200 ASWAH 1 ATb 1
+200 tVWMuw 3 Qqa Bt RRE 3
+200 MiZseG 2 gAj Jo 3
+200 oNYh 4 ysj Kg Bu Qqa 2
+200 Jsq 4 BTF PYP IAA SSi 5
+300 kk 3 1 1
+400 d 5
+200 oWLkaR 1 byV 5
+300 zNh 4 3 1
+400 ts 2
+300 TNa 5 4 1
+200 gEfle 4 EjJ RRE Qqa gxM 2
+200 osPyjI 1 eDs 5
+200 YDnau 2 Tv rq 3
+600 1 Kg 2 1
+500 NsdHZ
+500 AJRC
+200 fYm 5 aS ct Qrm lcU SSi 1
+200 WN 3 KtP TDz NT 4
+400 yms 3
+200 EW 1 gb 4
+200 St 3 BZN Aq tLj 3
+200 LfydxG 1 RTY 3
+200 EQlKmR 2 Qqa Tv 1
+500 w
+200 iycfoZ 2 TNa JOW 4
+400 H 1
+200 LTyfUJ 2 QC DHL 4
+500 fYm
+200 nT 5 HTl NA wt TDz AnA 3
+200 M 5 Pl hI SSi aS af 3
+200 fk 4 nN ucr QC Tpi 3
+200 qDI 1 af 1
+400 ia 1
+300 qi 4 5 1
+400 yB 1
+600 5 wy IvE TNa Kg eC 5 4
+200 qZ 2 eC mSr 5
+400 ts 1
+600 1 gb 5 2
+200 QS 2 SRf HTl 3
+200 ub 5 HTl gb ysj BZN WkC 4
+600 4 aS IvE jL byV 5 3
+200 MgOFwy 5 RPb sKN qC Tpi mSr 2
+200 DEUO 1 ct 5
+300 ATb 2 3 1
+200 zLIkU 5 Jo oC wy wt QC 1
+200 T 5 sKN uhG wy wt wV 3
+500 VK
+600 4 iWk Tpi aS RtA 5 2
+600 4 tLj RtA AnA gxM 2 2
+200 SV 5 zNh QC SRf NA Jo 5
+400 euTDG 5
+300 NT 4 3 1
+200 VDt 1 ct 2
+200 uAjq 5 wy nJ RTY RtA KaW 1
+200 RbDSBr 3 RPb lcU uk 3
+200 RYtet 3 JOW woH eGD 2
+600 4 Kg PV pxB ATb 5 2
+200 plya 1 Jo 5
+500 euTDG
+200 PaXw 4 eS gAj TNa nN 1
+200 pAJzn 4 eC mSr Ssw sKN 3
+200 Yd 5 jSc Pl RRE NA qi 4
+600 1 af 1 2
+300 uHc 3 1 4
+400 Ti 1
+200 q 4 sKN QC Ji Kio 5
+200 fAH 2 SRf uk 3
+200 mVqPx 5 uk jL EjJ eV KlE 5
+200 eaoqLs 1 vq 2
+200 fvoR 2 kkE eV 3
+300 Aq 3 1 2
+600 5 nN HTl eC ysj AnA 5 4
+200 nameZ 4 NA eDs NXG rq 3
+400 jh 3
+400 exp 4
+200 ttaf 1 nJ 2
+200 yXOd 5 TDz wy eC qi uzs 3
+200 nNwcgt 1 PYP 1
+600 1 Qqa 5 0
+300 SSi 3 5 2
+500 H
+300 WkC 4 2 2
+200 ezivQ 4 nJ gb mte KtP 5
+400 RU 1
+200 rL 3 IAA oC Ssw 2
+200 PNJKsg 1 Tv 1
+200 oyIvZl 3 kkE gi af 1
+200 me 4 uhG EjJ KtP Bu 5
+200 zMlaP 3 GEl PV PYP 5
+400 UUP 4
+200 CO 4 lK af Bt Aq 5
+400 oyIvZl 5
+200 QRVirN 3 jL NXG Tv 2
+400 cVRK 5
+200 PpOVlC 5 TNa apK Jo uhG rq 2
+600 2 RTY PYP 3 1
+300 rq 4 1 1
+400 tVWMuw 4
+200 DbVj 3 EJl IvE Qqa 3
+200 okcB 5 eS rq PV EJl NT 3
+200 xMlzg 2 oC wt 2
+600 2 eC tLj 3 2
+200 fKCbG 3 nN Bt GEl 3
+200 qQwRnB 1 gAj 1
+300 wy 5 2 1
+300 uk 1 4 1
+200 kAXmn 3 ATb af zNh 5
+200 FR 4 Nfb EJl eV eDs 3
+200 k 2 NT af 1
+200 v 4 ucr jx qi Pl 3
+200 CsQzVV 3 ZD lK RTY 5
+200 nOC 2 wV jSc 4
+200 HjvPNf 3 Mp ysj rJ 1
+200 AdtPd 3 gb Kio aS 3
+400 UZRrw 3
+400 Sech 5
+400 Ti 3
+200 cO 4 PYP SRf Ssw NAk 3
+200 MqfyN 2 TDz ATb 3
+200 ADwIFw 4 eS Tpi pxB iWk 1
+200 Bmc 2 Tpi mSr 4
+200 jlspQQ 3 EJl TNa RTY 1
+200 OY 1 Mp 4
+200 mKsJs 1 SSi 4
+200 QXzJ 1 AnA 3
+200 PSHBm 5 qi PV Bu ZD EjJ 3
+400 M 2
+200 L 5 BTF Pl IvE nN byV 2
+400 CsQzVV 4
+200 hLCzX 5 rq nJ wt BZN NXG 4
+200 qrxS 5 TDz eV qi eS Qqa 5
+200 EFl 3 eDs Ssw uhG 3
+600 2 NT JOW 4 1
+200 ftUkN 4 Kio AnA jSc vq 5
+200 SLFR 2 Pl uk 1
+600 3 ZD TNa aS 1 4
+400 HHV 3
+400 xWgJ 3
+300 mte 5 1 1
+200 Km 2 Bu lK 2
+500 AdtPd
+400 Bmc 3
+200 wjZU 2 KlE uhG 3
+600 4 eV jx JOW Nfb 1 6
+300 Jo 1 5 2
+600 1 uk 2 0
+500 xWgJ
+200 iBebF 5 kkE iWk uHc uhG ysj 4
+200 AYsY 4 uHc AnA TDz KtP 5
+200 da 3 JOW EjJ QC 2
+200 hjmTH 5 ucr ZD gAj Kl byV 2
+200 IE 3 lcU KlE ct 5
+200 VYove 3 wy IvE nN 1
+500 V
+200 wua 4 jx wV BP HTl 4
+200 EJecxy 4 NXG lcU NAk ucr 2
+300 HTl 4 3 1
+400 yms 5
+200 uYU 1 jSc 2
+200 wmXEo 2 JOW rJ 4
+200 FCIMD 4 wt Bt hI Mp 2
+200 qndmud 4 BZN zNh oC pxB 2
+200 Itei 1 IvE 1
+500 pBHUPN
+200 CvNRU 5 Kg eV Bu uHc Nfb 2
+200 GOh 5 eS ct eDs uHc vCA 5
+200 rWUCwG 5 qi tLj BTF uk pxB 4
+200 HxA 4 Qrm JOW RTY uHc 1
+400 gEfle 5
+500 ub
+200 cQkS 3 TNa RRE ZD 2
+500 PNJKsg
+500 hLCzX
+200 KiHW 4 NoJ Tpi qi RtA 1
+500 MRFZ
+200 LKhl 3 ZD byV RRE 1
+200 Qhxr 5 IAA sKN Pl ucr af 1
+200 QLS 5 kk ATb Nfb eC jSc 2
+400 SdT 4
+600 4 NXG apK Tpi WkC 3 6
+200 YJLbPM 5 uzs ATb uHc sKN qi 2
+300 vCA 1 5 2
+200 EQF 4 Tpi mte TNa rq 1
+600 2 ATb IAA 5 3
+200 uUMgCB 5 kkE ATb tLj byV Nfb 4
+400 sIUXF 3
+400 dgf 2
+500 FY
+500 hU
+500 lmcgya
+300 DHL 5 2 3
+200 dNkJs 3 Bu ucr Ssw 1
+200 wif 2 Kg Ns 1
+600 1 NXG 2 2
+200 SxFfxY 4 eS HTl SxD mSr 5
+200 dS 2 kk vq 5
+300 Tpi 3 2 4
+600 3 WkC zNh Bu 5 5
+500 X
+200 rvRMg 1 SxD 3
+300 BTF 5 2 1
+400 ySAzI 1
+200 gXF 4 jSc JOW Pl RPb 1
+200 CzDYhs 4 NT rq tLj wV 4
+200 ZM 5 DHL aS PYP lK uhG 5
+200 ILD 2 wy zNh 1
+200 NO 3 woH nN mte 2
+600 1 gAj 3 1
+400 QRVirN 5
+200 gPbtvY 5 kk NA TDz Kio Ns 3
+600 1 vCA 4 0
+600 4 Kg af qi NAk 4 7
+200 deknsD 1 RPb 2
+200 VdZfao 3 NA iWk jL 2
+200 HV 3 PV nN Pl 4
+500 hUkDoY
+200 XbZxLj 1 lK 4
+300 Ns 3 1 1
+200 QEYk 5 Qrm NoJ apK Kg Bu 5
+200 Dg 1 Kio 5
+200 tga 3 kkE qC tLj 5
+200 wMhrB 2 eDs NXG 5
+200 D 2 af Bu 2
+200 S 3 DHL rq uzs 3
+600 4 Jo Ji IvE gb 2 5
+600 2 RRE lK 1 2
+400 OY 5
+200 wFlwbG 2 GEl IAA 4
+200 FE 1 ct 1
+200 ye 1 eV 1
+600 5 Jo IvE oC ct Bt 3 4
+200 ExX 4 GEl DHL vq sKN 4
+600 3 eS gAj NoJ 3 4
+500 F
+300 uHc 1 4 2
+200 TH 5 RtA RTY KaW NAk GEl 4
+200 KTm 2 jL QC 2
+600 1 kk 3 0
+200 vK 5 nJ jx PYP EjJ TDz 3
+500 PaXw
+500 jh
+200 gAxix 1 kk 3
+600 2 tLj BTF 2 4
+200 EI 1 KtP 1
+200 qwREm 3 Nfb IvE Tpi 5
+400 wua 2
+400 qDI 2
+200 zaH 4 QC TNa lK wy 2
+200 hkz 3 eS Ns Bu 1
+200 aNqN 3 uHc BP Tpi 2
+200 Uehx 5 eV QC JOW NXG ATb 3
+200 ze 3 gAj AnA eS 5
+200 YFs 4 BTF TDz Ji ysj 1
+200 ThuJZv 4 JOW WkC eV wt 4
+600 4 kk Kio eGD KlE 3 2
+600 2 rJ BP 2 4
+200 Qq 2 JOW nN 4
+200 UQe 3 TNa BZN KlE 3
+200 iwgzf 1 TNa 4
+200 NnFJb 4 uHc BP Aq KaW 5
+600 5 DHL GEl woH vq Nfb 5 5
+200 jlwbO 3 Bt NoJ BP 4
+200 Uqb 1 af 4
+200 wfT 2 EJl RPb 4
+200 CWiM 1 Qrm 4
+300 mSr 3 2 1
+600 4 mSr RTY iWk NA 2 6
+200 Baksh 5 BZN ysj EjJ QC PYP 5
+200 hzlZ 4 HTl eGD ucr gxM 2
+200 LBg 3 Ssw eS eV 1
+500 SNwGFX
+500 qQwRnB
+400 ExX 2
+200 NMa 5 vq kkE IAA EJl apK 5
+200 eRsy 2 RTY zNh 2
+200 CssQFH 2 uzs woH 5
+600 2 HTl AnA 4 0
+300 RRE 2 5 2
+200 zKXlG 5 rq eV KlE IAA Kio 1
+200 Wvz 2 ucr mte 4
+200 QfP 1 nJ 5
+200 Hjqd 4 BZN ct Kg eS 2
+200 XsRcc 1 gi 2
+200 l 3 RPb mte NA 1
+200 opw 3 BP SSi NXG 4
+200 gI 3 Nfb NA Kl 4
+200 wkl 3 NoJ NA sKN 3
+600 5 JOW BTF nJ SxD jL 1 4
+200 GS 2 Bu KtP 4
+200 uoudN 5 eC apK ZD Pl uhG 3
+200 QiTlSz 2 NoJ eC 1
+200 NAI 1 KlE 1
+300 byV 2 4 2
+200 yaX 2 JOW NA 2
+200 RHE 3 Jo jL uhG 3
+600 5 wy gb BP qC HTl 4 4

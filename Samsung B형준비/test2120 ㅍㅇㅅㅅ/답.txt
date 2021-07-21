@@ -1,0 +1,291 @@
+#include <iostream>
+#define NULL		0
+#define MAX_FILE	20001
+#define MAX_VAL		1000000000
+using namespace std;
+
+struct Addr {
+	int ind;
+	int val;
+	Addr* next;
+	Addr() :ind(-1), next(NULL) {};
+};
+
+struct Node {
+	int id;
+	int size;
+	int nowSize;
+	int pDir;
+
+	bool isActive;
+	Node* prev;
+	Node* next;
+	Node() :id(-1), size(-1), pDir(-2), prev(NULL), next(NULL) {};
+};
+struct LinkedList {
+	Node* head;
+	Node* tail;
+
+	void link(Node* left, Node* right) {
+		left->next = right;
+		right->prev = left;
+	}
+	void init() {
+		head = new Node();
+		tail = new Node();
+		link(head, tail);
+	}
+	void push(Node* val) {
+		if (head->next->id == -1) {
+			link(head, val);
+			link(val, tail);
+		}
+		else {
+			link(tail->prev, val);
+			link(val, tail);
+		}
+	}
+	void pop(Node* val) {
+		link(val->prev, val->next);
+		val->next = NULL;
+		val->prev = NULL;
+	}
+};
+struct Dir {
+	int size;
+	int fileSum = 0;
+	LinkedList subFile;
+	LinkedList subDir;
+	void init() {
+		subFile.init(); subDir.init();
+		size = 0;
+		fileSum = 0;
+	}
+};
+
+Node node[MAX_FILE];
+Dir dir[MAX_FILE];
+Addr table[MAX_FILE];
+
+int totalCount;
+int fileCount;
+int totalSize;
+
+int subFileCount;
+
+int getHash(int val) {
+	int hash = val % MAX_FILE;
+
+	Addr* dum = &table[hash];
+	while (dum->ind != -1) {
+		if (dum->val == val) {
+			return dum->ind;
+		}
+		dum = dum->next;
+	}
+	dum->ind = totalCount++;
+	dum->val = val;
+	dum->next = new Addr();
+	return dum->ind;
+}
+void init() {
+	totalCount = 0;
+	totalSize = 0;
+	fileCount = 0;
+	subFileCount = 0;
+
+	for (int i = 0; i < MAX_FILE; i++) {
+		node[i].id = -1; node[i].isActive = false; node[i].prev = node[i].next = NULL; node[i].size = -1;
+		table[i].ind = -1; table[i].next = NULL;
+
+		dir[i].init();
+	}
+
+	//root에 관련된거
+	int ind = getHash(10000);
+	node[ind].id = ind;
+	node[ind].size = node[ind].nowSize = 0;
+	node[ind].isActive = true;
+	node[ind].pDir = -1; // root만 예외적으로 적용
+}
+
+int recoverSub(int id) {
+	//하위 Linked List
+	int sum = 0;
+	Node* dum = dir[id].subFile.head->next;
+	while (dum->id != -1) {
+		if (dum->nowSize != dum->size) {
+			int recover = dum->nowSize - dum->size;
+			dum->nowSize = dum->size;
+			totalSize -= recover;
+			sum += recover;
+		}
+		dum = dum->next;
+	}
+	dir[id].size -= sum;
+
+	int size = dir[id].size;
+	dum = dir[id].subDir.head->next;
+	while (dum->id != -1) {
+		size += recoverSub(dum->id);
+		dum = dum->next;
+	}
+	return size;
+}
+int infectSub(int id, int addSize) {
+	int size = 0;
+	Node* dum = dir[id].subFile.head->next;
+
+	while (dum->id != -1) {
+		dum->nowSize += addSize;
+		dir[id].size += addSize;
+		totalSize += addSize;
+		dum = dum->next;
+	}
+	size = dir[id].size;
+	
+	dum = dir[id].subDir.head->next;
+	while (dum->id != -1) {
+		size += infectSub(dum->id, addSize);
+		dum = dum->next;
+	}
+	return size;
+}
+
+int getSubSize(int id) {
+	int size = dir[id].size;
+	subFileCount += dir[id].fileSum;
+	//printf("size:%d \n", size);
+
+	Node* dum = dir[id].subDir.head->next;
+	while (dum->id != -1) {
+		size += getSubSize(dum->id);
+		dum = dum->next;
+	}
+	return size;
+}
+
+int cmdAdd(int newID, int pID, int fileSize) {
+	subFileCount = 0;
+
+	int ind = getHash(newID);
+	totalSize += fileSize;
+	node[ind].id = ind;
+	node[ind].size = node[ind].nowSize = fileSize;
+	node[ind].pDir = getHash(pID);
+	node[ind].isActive = true;
+
+	dir[node[ind].pDir].size += fileSize;
+
+	if (fileSize == 0) { //dir 인경우
+		dir[node[ind].pDir].subDir.push(&node[ind]);
+	}
+	else { //file인경우
+		dir[node[ind].pDir].subFile.push(&node[ind]);
+		dir[node[ind].pDir].fileSum += 1;
+		fileCount++;
+	}
+
+	return getSubSize(node[ind].pDir);
+}
+int cmdMove(int tID, int pID) {
+	subFileCount = 0;
+
+	int ind = getHash(tID);
+
+	if (node[ind].size == 0) { //dir인경우
+		dir[node[ind].pDir].subDir.pop(&node[ind]);
+		node[ind].pDir = getHash(pID);
+		dir[node[ind].pDir].subDir.push(&node[ind]);
+	}
+	else {
+		dir[node[ind].pDir].subFile.pop(&node[ind]);
+		dir[node[ind].pDir].size -= node[ind].nowSize;
+		dir[node[ind].pDir].fileSum -= 1;
+
+		node[ind].pDir = getHash(pID);
+
+		dir[node[ind].pDir].subFile.push(&node[ind]);
+		dir[node[ind].pDir].size += node[ind].nowSize;
+		dir[node[ind].pDir].fileSum += 1;
+	}
+	//새로이어버리기
+	return getSubSize(node[ind].pDir);
+}
+
+int cmdInfect(int tID) {
+	subFileCount = 0;
+
+	int ind = getHash(tID);
+	int result = 0;
+	if (totalSize == 0) { return 0; }
+	int addSize = totalSize / fileCount;
+
+	if (node[ind].size == 0) { //dir인경우
+		result = infectSub(ind, addSize);
+	}
+	else { //file이 감염되었을 경우 상위로 점수를 올리면되는데
+		node[ind].nowSize += addSize;
+		dir[node[ind].pDir].size += addSize;
+
+		totalSize += addSize;
+		return node[ind].nowSize;
+	}
+	return result;
+}
+
+int cmdRecover(int tID) {
+	subFileCount = 0;
+
+	int ind = getHash(tID);
+	int result = 0;
+
+	if (node[ind].size == 0) { // dir인 경우
+		result = recoverSub(ind);
+	}
+	else {
+		int recover = node[ind].nowSize - node[ind].size;
+		node[ind].nowSize = node[ind].size;
+		dir[node[ind].pDir].size -= recover;
+
+		totalSize -= recover;
+		return node[ind].nowSize;
+	}
+	return result;
+}
+
+int cmdRemove(int tID) {
+	subFileCount = 0;
+
+	int ind = getHash(tID);
+	int result = 0;
+	if (ind == 0) { //root인경우 
+		result = totalSize;
+		init();
+		return result;
+	}
+
+	if (node[ind].size == 0) { //dir 인 경우
+		result = getSubSize(ind);
+
+		//dir[node[ind].pDir].size -= result;
+		dir[node[ind].pDir].subDir.pop(&node[ind]);
+
+		//파일 카운드 down
+		fileCount -= subFileCount;
+		totalSize -= result; //전체를 통째로 뺴야하기 때문에 이게 맞음
+		node[ind].isActive = false;
+	}
+	else {
+		dir[node[ind].pDir].subFile.pop(&node[ind]);
+		dir[node[ind].pDir].size -= node[ind].nowSize;
+		dir[node[ind].pDir].fileSum -= 1;
+
+		fileCount -= 1;
+		totalSize -= node[ind].nowSize;
+		node[ind].isActive = false;
+		return node[ind].nowSize;
+	}
+
+	return result;
+}

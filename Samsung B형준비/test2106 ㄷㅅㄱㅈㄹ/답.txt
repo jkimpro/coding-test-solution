@@ -1,0 +1,247 @@
+#define NULL			0
+#define MAX_N			5
+#define MAX_SECTION		101
+#define MAX_NAME_LEN	7
+#define MAX_TAG_LEN		4
+#define MAX_RANGE		60001
+
+
+struct Tnode {
+	int id;
+	char type[MAX_TAG_LEN];
+	Tnode* next;
+	Tnode() :id(-1), next(0) {};
+};
+
+struct Node {
+	int ind;
+	char name[MAX_NAME_LEN];
+	Node* next;
+	Node() :ind(-1), next(0) { };
+};
+struct Type {
+	int id;
+	Type* next;
+	Type() :id(-1), next(0) {};
+	Type(int val) :id(val), next(0) {};
+};
+struct Book {
+	int id;
+	int section;
+	int typeNum;
+	char name[MAX_NAME_LEN];
+	char type[MAX_N][MAX_TAG_LEN];
+	bool isActive;
+	Book* prev;
+	Book* next;
+	Book() :id(-1), prev(0), next(0) {};
+};
+
+typedef struct TypeList {
+	Type* head;
+	Type* tail;
+	void init() {
+		head = tail = NULL;
+	}
+	void push(int id) {
+		Type* tmp = new Type(id);
+		if (head == NULL) {
+			head = tail = tmp;
+		}
+		else {
+			tail->next = tmp;
+			tail = tmp;
+		}
+	}
+};
+typedef struct section {
+	Book* head;
+	Book* tail;
+
+	void link(Book* left, Book* right) {
+		left->next = right;
+		right->prev = left;
+	}
+	void init() {
+		head = new Book();
+		tail = new Book();
+		link(head, tail);
+	}
+	void push(Book* val) {
+		if (head->next->id == -1) {
+			link(head, val);
+			link(val, tail);
+		}
+		else {
+			link(tail->prev, val);
+			link(val, tail);
+		}
+	}
+	void pop(Book* val) {
+		link(val->prev, val->next);
+		val->prev = val->next = NULL;
+	}
+
+}Section;
+
+Node table[MAX_RANGE];
+Tnode typeTable[MAX_RANGE];
+
+TypeList typeList[MAX_RANGE];
+Book book[MAX_RANGE];
+Section section[MAX_SECTION];
+int bookCount;
+int typeCount;
+
+void mstrcpy(char dst[], const char src[]) {
+	int c = 0;
+	while ((dst[c] = src[c]) != '\0') ++c;
+}
+int mstrcmp(const char str1[], const char str2[]) {
+	int c = 0;
+	while (str1[c] != '\0' && str1[c] == str2[c]) ++c;
+	return str1[c] - str2[c];
+}
+
+unsigned long getType(const char* str) {
+	char realStr[MAX_TAG_LEN];
+	mstrcpy(realStr, str);
+
+
+	unsigned long hashval = 5381;
+	int c;
+	while (c = *str++)
+	{
+		hashval = (((hashval << 5) + hashval) + c) % MAX_RANGE;
+	}
+
+	hashval = hashval % MAX_RANGE;
+
+	int hash = (int)hashval;
+
+	Tnode* dum = &typeTable[hash];
+	while (dum->id != -1) {
+		if (!mstrcmp(dum->type, realStr)) {
+			return dum->id;
+		}
+		dum = dum->next;
+	}
+	dum->id = typeCount++;
+	mstrcpy(dum->type, realStr);
+	dum->next = new Tnode();
+
+	return dum->id;
+}
+unsigned long getHash(const char* str)
+{
+	char realStr[MAX_NAME_LEN];
+	mstrcpy(realStr, str);
+	
+	unsigned long hashval = 5381;
+	int c;
+	while (c = *str++)
+	{
+		hashval = (((hashval << 5) + hashval) + c) % MAX_RANGE;
+	}
+
+	hashval = hashval % MAX_RANGE;
+	int hash = (int)hashval;
+	
+	Node* dum = &table[hash];
+	
+	while (dum->ind != -1) {
+		if (!mstrcmp(dum->name, realStr)) {
+			return dum->ind;
+		}
+		dum = dum->next;
+	}
+	dum->ind = bookCount++;
+	mstrcpy(dum->name, realStr);
+	dum->next = new Node();	
+	return dum->ind;
+}
+
+void init(int M) {
+	bookCount = 0;
+	typeCount = 0;
+
+	for (int i = 0; i < MAX_RANGE; i++) {
+		book[i].id = -1;
+		book[i].prev = book[i].next = NULL;
+		book[i].isActive = false;
+
+		table[i].ind = -1; table[i].next = 0;
+		typeTable[i].id = -1; typeTable[i].next = 0;
+		
+		typeList[i].init();
+	}
+	for (int i = 0; i < MAX_SECTION; i++) {
+		section[i].init();
+	}
+
+}
+
+void add(char mName[MAX_NAME_LEN], int mTypeNum, char mTypes[MAX_N][MAX_TAG_LEN], int mSection) {
+	int ind = getHash(mName);
+	book[ind].id = ind;
+	book[ind].section = mSection;
+	book[ind].typeNum = mTypeNum;
+	book[ind].isActive = true;
+	mstrcpy(book[ind].name, mName);
+
+	for (int i = 0; i < mTypeNum; i++) {
+		int typeInd = getType(mTypes[i]);
+		mstrcpy(book[ind].type[i], mTypes[i]);
+		typeList[typeInd].push(ind);
+	}
+	section[mSection].push(&book[ind]);
+}
+
+int moveType(char mType[MAX_TAG_LEN], int mFrom, int mTo) {
+	int count = 0;
+	int typeInd = getType(mType);
+	Type* dum = typeList[typeInd].head;
+	while (dum != NULL) {
+		if (book[dum->id].isActive == true && book[dum->id].section == mFrom) {
+			section[mFrom].pop(&book[dum->id]);
+			book[dum->id].section = mTo;
+			section[mTo].push(&book[dum->id]);
+			count++;
+		}
+		dum = dum->next;
+	}
+	return count;
+}
+
+void moveName(char mName[MAX_NAME_LEN], int mSection) {
+	int ind = getHash(mName);
+	section[book[ind].section].pop(&book[ind]);
+	book[ind].section = mSection;
+	section[mSection].push(&book[ind]);
+}
+
+void deleteName(char mName[MAX_NAME_LEN]) {
+	int ind = getHash(mName);
+	book[ind].isActive= false;
+	section[book[ind].section].pop(&book[ind]);
+}
+
+int countBook(int mTypeNum, char mTypes[MAX_N][MAX_TAG_LEN], int mSection){
+	int count = 0;
+	Book * dum = section[mSection].head->next;
+	while (dum->id!=-1) {
+		bool check = false;
+		for (int i = 0; i < mTypeNum; i++) {
+			for (int j = 0; j < dum->typeNum; j++) {
+				if (!mstrcmp(mTypes[i], dum->type[j])) {
+					count++;
+					check = true;
+					break;
+				}
+			}
+			if (check) { break; }
+		}
+		dum = dum->next;
+	}
+	return count;
+}

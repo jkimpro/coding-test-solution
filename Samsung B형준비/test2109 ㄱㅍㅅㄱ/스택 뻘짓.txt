@@ -1,0 +1,265 @@
+#define MAX_NAME_LEN    (4+1)
+#define MAX_GROUP       21
+#define MAX_HEAP        30001
+#define MAX_AC_NUMBER   100001
+
+void mstrcpy(char dst[], const char src[]) {
+    int c = 0;
+    while ((dst[c] = src[c]) != '\0') ++c;
+}
+
+typedef struct account {
+    char name[MAX_NAME_LEN];
+    char group[MAX_NAME_LEN];
+    int time;
+    int asset;
+    bool isActive;
+    int status; //0 open 1 send 2 rec
+}Account;
+
+typedef struct groupUser {
+    int indArr[MAX_HEAP];
+    int count;
+}GroupUser;
+
+template <class T>
+class _stack {
+public:
+    struct Log {
+        Log * next;
+        
+        int accountNo;
+
+        Log() {};
+        Log(int accountNo) :accountNo(accountNo){};
+    };
+    
+    Log* head;
+    Log* tail;
+    int _size;
+
+    _stack() {
+        head = tail = 0;
+        _size = 0;
+    }
+    void push(int accountNo) {
+        Log* temp = new Log(accountNo);
+        if (head == 0) {
+            head = temp;
+        }
+        else {
+            temp->next = head;
+            head = temp;
+        }
+        _size++;
+    }
+    void pop() {
+        Log* temp = head;
+        head = head->next;
+        delete(temp);
+        _size--;
+    }
+    bool empty()  {
+        return _size == 0;
+    }
+    T front() {
+        return head->accountNo;
+    }
+};
+
+// 우선 순위 큐가 아닌 stack을 사용해야함
+
+Account account[MAX_AC_NUMBER]; //계좌번호 총괄 접근
+_stack <int> user[MAX_HEAP+1]; // 개인 우선순위
+_stack <int> group[MAX_GROUP + 1][MAX_HEAP + 1]; //그룹 우선순위
+GroupUser groupUser[MAX_GROUP + 1];
+
+//group -> user -> 총우선순위
+unsigned long groupHash(const char* str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+    {
+        hash = (((hash << 5) + hash) + c) % MAX_GROUP;
+    }
+
+    return hash % MAX_GROUP;
+}
+
+unsigned long userHash(const char* str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+    {
+        hash = (((hash << 5) + hash) + c) % MAX_HEAP;
+    }
+
+    return hash % MAX_HEAP;
+}
+
+void init() {
+    for (int i = 0; i < MAX_AC_NUMBER; i++) {
+        account[i].isActive = false;
+        account[i].status = 0;
+        account[i].asset = 0;
+    }
+    for (int i = 0; i < MAX_GROUP; i++) {
+        for (int j = 0; j < MAX_HEAP; j++) {
+            while (!group[i][j].empty()) {
+                group[i][j].pop();
+            }
+        }
+        groupUser[i].count = 0;
+    }
+}
+
+void openAccount(int mTime, char mName[MAX_NAME_LEN], char mGroup[MAX_NAME_LEN], int mNumber, int mAsset) {
+
+    mstrcpy(account[mNumber].name, mName);
+    mstrcpy(account[mNumber].group, mGroup);
+    account[mNumber].time = mTime;
+    account[mNumber].status = 2;
+    account[mNumber].isActive = true;
+    account[mNumber].asset = mAsset;
+
+    int groupInd = groupHash(mGroup);
+    int userInd = userHash(mName);
+    bool check = true;
+    
+ //   printf("groupHash:%d userHash:%d\n", groupInd, userInd);
+    //구현
+    user[userInd].push(mNumber);
+    group[groupInd][userInd].push(mNumber);
+
+    //원래 있는 놈인지 체크
+    for (int i = 0; i < groupUser[groupInd].count; i++) {
+        if (groupUser[groupInd].indArr[i] == userInd) {
+            check = false;
+            break;
+        }
+    }
+    if (check) {
+        groupUser[groupInd].indArr[groupUser[groupInd].count] = userInd;
+        groupUser[groupInd].count+=1;
+    }
+}
+
+int closeAccount(int mTime, int mNumber) {
+    account[mNumber].isActive = false;
+    
+    return account[mNumber].asset;
+}
+
+
+int sendByNumber(int mTime, int mNumber, int mReceiveNumber, int mValue) {
+    //검사
+    if (account[mNumber].isActive == false || account[mReceiveNumber].isActive == false ||
+        account[mNumber].asset < mValue) {
+        return -1;
+    }
+
+    // 최신화
+    account[mNumber].time = mTime;
+    account[mNumber].status = 1;
+    account[mNumber].asset -= mValue;
+
+    account[mReceiveNumber].time = mTime;
+    account[mReceiveNumber].status = 2;
+    account[mReceiveNumber].asset += mValue;
+
+    int userSInd = userHash(account[mNumber].name);
+    int userRInd = userHash(account[mReceiveNumber].name);
+    int groupSInd = groupHash(account[mNumber].group);
+    int groupRInd = groupHash(account[mReceiveNumber].group);
+
+    user[userSInd].push(mNumber);
+    user[userRInd].push(mReceiveNumber);
+    
+    group[groupSInd][userSInd].push(mNumber);
+    group[groupRInd][userRInd].push(mReceiveNumber);
+
+    //구현
+    return  account[mReceiveNumber].asset;
+}
+
+int sendByName(int mTime, int mNumber, char mReceiveName[MAX_NAME_LEN], int mValue) { // 우선순위가 같으면 안댐
+
+    int rInd = userHash(mReceiveName);
+    int mReceiveNumber;
+    //검사
+    if (account[mNumber].isActive == false || user[rInd].empty() ||
+        account[mNumber].asset < mValue) {
+        return -1;
+    }
+
+    //user[rInd] stack 안 중 isActive 한걸로 pop
+    while (true) {
+        mReceiveNumber = user[rInd].front();
+        if (account[mReceiveNumber].isActive) {
+            break;
+        }
+        else {
+            user[rInd].pop();
+        }
+    }
+   
+    // 최신화
+    account[mNumber].time = mTime;
+    account[mNumber].status = 1;
+    account[mNumber].asset -= mValue;
+
+    account[mReceiveNumber].time = mTime;
+    account[mReceiveNumber].status = 2;
+    account[mReceiveNumber].asset += mValue;
+
+    int userSInd = userHash(account[mNumber].name);
+    int userRInd = userHash(account[mReceiveNumber].name);
+    int groupSInd = groupHash(account[mNumber].group);
+    int groupRInd = groupHash(account[mReceiveNumber].group);
+
+    user[userSInd].push(mNumber);
+    user[userRInd].push(mReceiveNumber);
+
+    group[groupSInd][userSInd].push(mNumber);
+    group[groupRInd][userRInd].push(mReceiveNumber);
+
+    //구현
+    return  account[mReceiveNumber].asset;
+}
+
+void sendBonus(int mTime, char mGroup[MAX_NAME_LEN], int mValue) {
+
+    int groupInd = groupHash(mGroup);
+  //  printf("groupHash:%d \n", groupInd);
+
+  //  printf("val:%d\n", groupUser[groupInd].count);
+    for (int i = 0; i < groupUser[groupInd].count; i++) {
+        int userInd = groupUser[groupInd].indArr[i];
+        int mReceiveNumber;
+        while (true) {
+            mReceiveNumber = group[groupInd][userInd].front();
+
+            if (account[mReceiveNumber].isActive) {
+                break;
+            }
+            else {
+                group[groupInd][userInd].pop();
+            }
+        }
+
+        account[mReceiveNumber].time = mTime;
+        account[mReceiveNumber].status = 2;
+        account[mReceiveNumber].asset += mValue;
+
+    //    printf("receive:%d, valstatus:%d\n", mReceiveNumber, account[mReceiveNumber].asset);
+
+        user[userInd].push(mReceiveNumber);
+        group[groupInd][userInd].push(mReceiveNumber);
+    }
+}
+
+

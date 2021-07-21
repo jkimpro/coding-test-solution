@@ -1,0 +1,248 @@
+
+//접근법
+//1. d일 동안 생존하기 위해 얼마가 필요한가
+//2. d일 동안각각의 물건을 몇개씩 사야하는가
+//      ex. D=19 , d = 7 -> 3 necessities
+//      ceil(D/d) -> 올림 함수
+
+// 1일 부터 쭉쭉 늘려가면서 내가 불가능할때까지 해보고 그전 값을 return 하면 됨.
+
+// 발전된 방향 내림차순 정리 d일을 기준으로
+// 생존할 수 있는 경우 , 생존할수없는 경우
+// 생존 가능한 날중 가장 큰날
+
+// 정답구간을 찾는 것 -> parametric search
+
+//문제점 -> trie나 헤싱을 이용할 것 name 관리
+// 값이 너무 큰 경우 -> Bigint 사용하기
+// int나 long long을 사용하기에는 너무 큼
+
+//Big int 를 처리하는 방법 -> 뒤집어서 저장하기
+// 1."1123456788" 입력
+// 2. ADD예시  88765432110000
+// 3.       + 431756998900000
+// 4.         12 11 8 13 10 10 10 12 11 9 10 00000
+// 5.         229311320110000
+
+//연산시 느릴수 있음 (Lazy Carry) -> 나눗셈/나머지 연산 등은 최소한으로 줄여주는 것이 좋음
+// 한꺼번에 연산할때 -> 여러개의 더하기를 한번에 해준다음에 자리올림을 젤 마지막에 한번만 해줌
+
+
+//BigInt 10진법을 사용하는 방법
+
+// money의 최대길이는 100까지 될수있음.
+
+#define MAX_NAME        20
+#define MAX_PRODUCT     51
+#define MAX_PRICE       100
+#define MAX_DAY         3001
+#define NULL            0
+typedef unsigned long ul;
+
+struct Node {
+    int val;
+    char name[20];
+    Node* next;
+    Node() :val(-1), next(0) {};
+    Node(int val) :val(val), next(0) {};
+};
+
+typedef struct product {
+    int id;
+    int price[MAX_PRICE];
+    int duration;
+}Product;
+
+Product product[MAX_PRODUCT];
+Node hashtable[MAX_PRODUCT];
+int totalDuration[MAX_PRODUCT][MAX_DAY];
+int accDay[MAX_DAY][MAX_PRICE];
+int proSum;
+
+unsigned long getHash(const char* str) {
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++) {
+        hash = (((hash << 5) + hash) + c) % MAX_PRODUCT;
+    }
+    return hash % MAX_PRODUCT;
+}
+int carry(int* dst) {       //return 0 일경우 더이상 플러스가 안되는 경우
+    int size = 0;
+
+    for (int i = 0; i < MAX_PRICE; i++) {
+        int nextVal = dst[i] / 10;
+        dst[i] = dst[i] % 10;
+
+        if (nextVal > 0 && i + 1 == MAX_PRICE) {
+            return 0; //더 이상 더하기 불가.
+        }
+
+        if (i + 1 < MAX_PRICE) dst[i + 1] += nextVal;
+    }
+
+    //printf("nowMoney: ");
+    //for (int i = 0; i < MAX_PRICE; i++) {
+    //    printf("%d", dst[i]);
+    //}
+    //printf("\n");
+    return 1;
+}
+
+void add(int dst[], const int src[]) {
+    for (int i = 0; i < MAX_PRICE; i++) {
+        dst[i] = src[i] + dst[i];
+    }
+}
+void intcpy(int dst[], const int src[]) {
+    for (int i = 0; i < MAX_PRICE; i++) {
+        dst[i] = src[i];
+    }
+}
+void _strcpy(char dst[], const char src[]) {
+    int c = 0;
+    while ((dst[c] = src[c]) != 0) ++c;
+}
+void str2int(int dst[], const char src[]) {
+    int c = 0;
+    int dc = 0;
+    while (src[c] != '\0') {
+        c++;
+    }
+    c -= 1;
+    while (c >= 0) {
+        dst[dc] = (src[c] - '0');
+        c--;
+        dc++;
+    }
+
+    for (int i = dc; i < 100; i++) {
+        dst[i] = 0;
+    }
+
+}
+int mstrcmp(const char str1[], const char str2[]) {
+    int c = 0;
+    while (str1[c] != 0 && str1[c] == str2[c]) ++c;
+    return str1[c] - str2[c];
+}
+
+void init(int N, char mName[50][20], char mPrice[50][100], int mDuration[50]) {
+
+    for (int i = 0; i < MAX_PRODUCT; i++) {
+        hashtable[i].val = -1;
+        hashtable[i].next = 0;
+    }
+
+    proSum = N;
+    for (int i = 0; i < N; i++) {
+        ul hashVal = getHash(mName[i]);
+        Node* dum = &hashtable[hashVal];
+
+        while (dum != NULL) {
+            if (dum->val == -1) {
+                dum->val = i;
+                _strcpy(dum->name, mName[i]);
+                dum->next = new Node();
+                break;
+            }
+            dum = dum->next;
+        }
+
+        product[i].id = dum->val;
+
+        str2int(product[i].price, mPrice[i]);
+        product[i].duration = mDuration[i];
+
+        int dayCount = 1;
+        for (int j = 1; j < MAX_DAY; j++) {
+            totalDuration[i][j] = dayCount;
+            accDay[j][0] = -1;
+            if (j % mDuration[i] == 0) {
+                dayCount++;
+            }
+        }
+    }
+}
+
+void priceChange(char mName[20], char mPrice[100]) {
+    ul hashVal = getHash(mName);
+    Node* dum = &hashtable[hashVal];
+    int ind;
+    while (dum != NULL) {
+        if (!mstrcmp(dum->name, mName)) {
+            ind = dum->val;
+            break;
+        }
+        dum = dum->next;
+    }
+    str2int(product[ind].price, mPrice);
+
+    int dayCount = 1;
+    totalDuration[ind][0] = 0;
+    for (int j = 1; j < MAX_DAY; j++) {
+        totalDuration[ind][j] = dayCount;
+        if ((j % product[ind].duration) == 0) dayCount++;
+        accDay[j][0] = -1;
+        
+    }
+}
+
+bool moneyCheck(int* money, int* cmpMoney) {
+    for (int i = MAX_PRICE - 1; i >= 0; i--) {
+        if (money[i] == cmpMoney[i]) { continue; }
+        if (money[i] < cmpMoney[i]) { return 0; }
+        if (money[i] > cmpMoney[i]) { return 1; }
+    }
+    return 1;
+}
+int daySurvivable(char mMoney[100]) {
+    int money[MAX_PRICE];
+    int cmpMoney[MAX_PRICE];
+    int status[MAX_PRODUCT];
+    int result = 0;
+    int sDate = 1;
+
+    for (int i = 0; i < proSum; i++) { status[i] = 0;}
+    for (int i = 0; i < MAX_PRICE; i++) { cmpMoney[i] = 0; }
+    str2int(money, mMoney); //완료
+
+    for (int day = 1; day < MAX_DAY; day++) {
+
+        if (accDay[day][0] == -1) {
+            for (int p = 0; p < proSum; p++) {
+                status[p] = totalDuration[p][day-1];
+            }
+            sDate = day;
+
+            if (day != 1) {
+                add(cmpMoney, accDay[day - 1]);
+            }
+            break;
+        }
+        if (!moneyCheck(money,accDay[day])) {
+            return result;
+        }
+        result = day;
+    }
+
+    //이미 저장되어 있는 것과 대소 비교
+    for (int day = sDate; day < MAX_DAY; day++) {
+        for (int p = 0; p < proSum; p++) {
+            if (status[p] == totalDuration[p][day]) {
+                continue;
+            }
+            status[p] = totalDuration[p][day];
+            add(cmpMoney, product[p].price); 
+        }
+        
+        int cmp = carry(cmpMoney);
+        if (cmp == 0 || !moneyCheck(money, cmpMoney)) {
+            break;
+        }
+        intcpy(accDay[day], cmpMoney);
+        result = day;
+    }
+    return result;
+}

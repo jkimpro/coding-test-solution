@@ -1,0 +1,211 @@
+//#include <stdio.h>
+#define HEAP_MAX 100001
+#define USER_MAX 100001
+
+typedef struct news {
+    int newsId;
+    int count;
+    int section;
+    bool isActive;
+}News;
+
+template <typename T>
+void swap(T& t1, T& t2) {
+    T tmp = t1; t1 = t2; t2 = tmp;
+}
+
+typedef struct PQ {
+    News heap[HEAP_MAX];
+    int size;
+
+    void init() {
+        size = 0;
+    }
+    News front() {
+        return heap[1];
+    }
+
+    int getSize() {
+        return size;
+    }
+    void push(News t) {
+        size++;
+        heap[size] = t;
+        for (int current = size; current > 1; current /= 2) {
+            if (heap[current].count > heap[current / 2].count) {
+                //바꾸기
+                swap(heap[current], heap[current / 2]);
+            }
+            else if (heap[current].count == heap[current / 2].count) {
+                if (heap[current].newsId > heap[current / 2].newsId) {
+                    swap(heap[current], heap[current / 2]);
+                }
+            }
+            else {
+                break;
+            }
+        }
+    }
+    void pop() {
+        if (size == 0) {
+            return;
+        }
+
+        swap(heap[size], heap[1]);
+        size--;
+
+        for (int current = 2; current <= size; current *= 2) {
+            if (current < size && heap[current].count < heap[current + 1].count) {
+                current += 1;
+            }
+            else if (current < size && heap[current].count == heap[current + 1].count) {
+                if (heap[current].newsId < heap[current + 1].newsId) {
+                    current += 1;
+                }
+            }
+
+            if (heap[current].count > heap[current / 2].count) {
+                swap(heap[current], heap[current / 2]);
+            }
+            else if (heap[current].count == heap[current / 2].count) {
+                if (heap[current].newsId > heap[current / 2].newsId) {
+                    swap(heap[current], heap[current / 2]);
+                }
+            }
+            else {
+                break;
+            }
+        }
+    }
+}PQ;
+
+News news[HEAP_MAX];
+PQ pq[11];
+int userSection[USER_MAX];
+int newsSize = 0;
+
+void init() {
+    newsSize = 0;
+    for (int i = 0; i < HEAP_MAX; i++) {
+       
+        news[i].count = 0;
+        news[i].section = 10;
+        news[i].isActive = false;
+    }
+    
+    for (int i = 0; i < USER_MAX; i++) {
+        userSection[i] = 10;
+    }
+
+    for (int i = 0; i < 11; i++) {
+        pq[i].init();
+    }
+}
+
+///option 1
+void addNews(int mSection, int mNewsId) {
+    newsSize++;
+    news[newsSize].newsId = newsSize;
+    news[newsSize].section = mSection;
+    news[newsSize].isActive = true;
+
+    for (int i = 0; i < 11; i++) {
+        if (mSection == i) {
+            pq[i].push({ newsSize,10,mSection,true });
+        }
+        else {
+            pq[i].push(news[newsSize]);
+        }
+    }
+}
+
+///option 2
+void eraseNews(int mNewsId) {
+    news[mNewsId].isActive = false;
+}
+
+
+///option 3
+void readNews(int mUserId, int mNewsId) {
+    userSection[mUserId] = news[mNewsId].section;
+    news[mNewsId].count += 1;
+
+    for (int i = 0; i < 11; i++) {
+        if (news[mNewsId].section == i) {
+            News tmp = news[mNewsId];
+            tmp.count += 10;
+            pq[i].push(tmp);
+        }
+        else {
+            pq[i].push(news[mNewsId]);
+        }
+    }
+}
+
+///option 4
+void changeSection(int mNewsId, int mSection) {
+    int org = news[mNewsId].section;
+    news[mNewsId].section = mSection;
+
+
+    for (int i = 0; i < 11; i++) {
+        if (mSection == i) {
+            pq[i].push({ mNewsId, news[mNewsId].count + 10, mSection,true });
+        }
+        else {
+            pq[i].push(news[mNewsId]); //원래 값 넣기
+        }
+    }
+
+}
+
+///option 5
+int getList(int mUserId, int mList[]) {
+    int count = 0;
+    int pSection = userSection[mUserId];
+
+    //기본적으로 section 하나로 정렬되어 있는 상황임 
+    while (count < 10) {
+        if (pq[pSection].getSize() != 0) {
+            News t = pq[pSection].front();
+            pq[pSection].pop();
+
+            // 1.check active
+            if (news[t.newsId].isActive == false) {
+                continue;
+            }
+
+            // 2.section check
+            if (t.section != news[t.newsId].section) {
+                continue;
+            }
+            // 3.duplication check
+            bool isExist = false;
+            for (int i = 0; i < count; i++) {
+                if (mList[i] == t.newsId) {
+                    isExist = true;
+                    break;
+                }
+            }
+            if (isExist) { continue; }
+
+            // 4. input
+            mList[count] = t.newsId;
+            count++;
+        }
+        else {
+            break;
+        }
+    }
+    
+    for (int i = 0; i < count; i++) {
+        if (news[mList[i]].section == pSection) {
+            pq[pSection].push({ mList[i],news[mList[i]].count + 10,news[mList[i]].section, true });
+        }
+        else {
+            pq[pSection].push(news[mList[i]]);
+        }
+    }
+
+    return count;
+}
