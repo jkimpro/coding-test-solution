@@ -1,0 +1,233 @@
+#//include <stdio.h>
+#define MAX_CALL 100001
+
+using namespace std;
+// hash 로 해결하는 방법과 아닌 방법
+struct Tnode {
+	int ind;
+	char str[20];
+	Tnode* next;
+	Tnode() :ind(-1), next(0) {};
+};
+struct Word {
+	int ind;
+	char str[20];
+	int count;
+	int updateTime;
+	bool isActive;
+	Word* prev;
+	Word* next;
+	Word() :prev(0), next(0), ind(-1) {};
+};
+
+void link(Word* left, Word* right) {
+	left->next = right;
+	right->prev = left;
+}
+void pop(Word* w) {
+	link(w->prev, w->next);
+}
+struct LinkedList {
+	Word* head;
+	Word* tail;
+
+	void init() {
+		head = new Word();
+		tail = new Word();
+		link(head, tail);
+	}
+	void push(Word* w) {
+		if (head->next->ind == -1) {
+			link(head, w);
+			link(w, tail);
+		}
+		else {
+			link(tail->prev, w);
+			link(w, tail);
+		}
+	}
+};
+struct Tree {
+	char c;
+	Tree* nextAlpha[26];
+	LinkedList list;
+
+	void init(char input) {
+		c = input;
+		for (int i = 0; i < 26; i++) {
+			nextAlpha[i] = 0;
+		}
+		list.init();
+	}
+	Tree() {};
+};
+
+Tnode table[MAX_CALL];
+Word word[MAX_CALL];
+Tree tree[26];
+
+Word* bestWord;
+int wordCount;
+int time;
+
+void mstrcpy(char dst[], const char src[])
+{
+	int c = 0;
+	while ((dst[c] = src[c]) != 0)
+		++c;
+}
+int mstrlen(const char str[])
+{
+	int ret = 0;
+	while (str[ret])
+		++ret;
+	return ret;
+}
+int mstrcmp(const char str1[], const char str2[])
+{
+	int c = 0;
+	while (str1[c] != 0 && str1[c] == str2[c])
+		++c;
+	return str1[c] - str2[c];
+}
+
+unsigned long getHash(const char* str)
+{
+	char real[20];
+	mstrcpy(real, str);
+	unsigned long hash = 5381;
+	int c;
+
+	while (c = *str++) {
+		hash = (((hash << 5) + hash) + c) % MAX_CALL;
+	}
+
+	hash = hash % MAX_CALL;
+	Tnode* dum = &table[hash];
+
+	//hash update
+	while (dum->ind != -1) {
+		if (!mstrcmp(dum->str, real)) {
+			return dum->ind;
+		}
+		dum = dum->next;
+	}
+	dum->ind = wordCount++;
+	mstrcpy(dum->str, real);
+	dum->next = new Tnode();
+
+	//basic word update
+	word[dum->ind].ind = dum->ind;
+	mstrcpy(word[dum->ind].str, dum->str);
+	word[dum->ind].isActive = true;
+
+	//tree update
+	int len = mstrlen(real);
+	int start = real[0] - 'a';
+	Tree* tDum = &tree[start];
+	for (int i = 1; i < len; i++) {
+		int now = real[i] - 'a';
+		if (tDum->nextAlpha[now] == 0) {
+			(tDum->nextAlpha[now]) = new Tree();
+			tDum->nextAlpha[now]->init(now);
+		}
+		tDum = tDum->nextAlpha[now];
+	}
+	//input
+	tDum->list.push(&word[dum->ind]);
+
+	return dum->ind;
+}
+
+void init() {
+	wordCount = 0;
+	time = 0;
+	bestWord = 0;
+	for (int i = 0; i < MAX_CALL; i++) {
+		table[i].ind = -1; table[i].next = 0;
+		word[i].ind = -1; word[i].count = 0;
+		word[i].prev = word[i].next = 0; word[i].isActive = false;
+		word[i].updateTime = 0;
+	}
+	for (int i = 0; i < 26; i++) {
+		char c = 'a' + i;
+		tree[i].init(c);
+	}
+}
+
+void inputWord(char mWord[20]) {
+	int ind = getHash(mWord);
+	word[ind].count++;
+	word[ind].updateTime = time++;
+
+	//printf("word:%s count:%d time:%d\n", word[ind].str, word[ind].count, word[ind].updateTime);
+}
+
+bool comp(Word* src, Word* compWord) {
+	if (src->count > compWord->count) {
+		return true;
+	}
+	else if (src->count == compWord->count) {
+		if (src->updateTime > compWord->updateTime) {
+			return true;
+		}
+	}
+	return false;
+}
+void findWord(Tree* nowTree) {
+	Word* dum = nowTree->list.head->next;
+	while (dum->ind != -1) {
+		if (bestWord == 0) {
+			bestWord = dum;
+			dum = dum->next;
+			continue;
+		}
+		if (comp(dum, bestWord)) {
+			
+		//	printf("dum:%s dum->count:%d   <--- bestWord:%s bestWord->count:%d\n",dum->str, dum->count, bestWord->str, bestWord->count);
+			bestWord = dum;
+			
+		}
+		dum = dum->next;
+	}
+	// 다음트리 탐색
+	for (int i = 0; i < 26; i++) {
+		if (nowTree->nextAlpha[i] != 0) {
+			findWord(nowTree->nextAlpha[i]);
+		}
+	}
+}
+int recommend(char mUser[20], char mAnswer[20]) {
+	int len = mstrlen(mUser);
+	int start = mUser[0] - 'a';
+	Tree* tDum = &tree[start];
+	for (int i = 1; i < len; i++) {
+		int now = mUser[i] - 'a';
+		if (tDum->nextAlpha[now] == 0) {
+		//	(tDum->nextAlpha[now]) = new Tree();
+		//	tDum->nextAlpha[now]->init(now);
+		
+			mstrcpy(mAnswer, mUser);
+			bestWord = 0;
+			return mstrlen(mUser);
+		}
+		tDum = tDum->nextAlpha[now];
+	}
+
+	findWord(tDum);
+	if (bestWord == 0) {
+		mstrcpy(mAnswer, mUser);
+		bestWord = 0;
+		return mstrlen(mUser);
+	}
+	mstrcpy(mAnswer, bestWord->str);
+	int result = mstrlen(mAnswer);
+	bestWord = 0;
+	return result;
+}
+
+void banWord(char mWord[20]) {
+	int ind = getHash(mWord);
+	word[ind].isActive = false;
+	pop(&word[ind]);
+}
