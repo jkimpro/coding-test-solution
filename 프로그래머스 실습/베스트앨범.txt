@@ -1,0 +1,84 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct song{
+    int orgNum;
+    int play;
+}Song;
+
+int totalPlay[100];
+vector <Song> songTable[100];
+vector <string> genTable;
+
+int getGenNum(string gen){
+    for(int i =0; i<genTable.size(); i++){
+        if(genTable[i] == gen){
+            return i;
+        }
+    }
+    return -1;   
+}
+
+bool comp (const Song& tmp1, const Song& tmp2){
+    if(tmp1.play  > tmp2.play){return true;}
+    else if(tmp1.play==tmp2.play) {
+        if(tmp1.orgNum < tmp2.orgNum){return true;}
+        return false;
+    }
+    return false;
+}
+
+void init(){
+    genTable.clear();
+    for(int i =0;i<100; i++){totalPlay[i]=0;songTable[i].clear();}
+}
+vector<int> solution(vector<string> genres, vector<int> plays) {
+    init();
+    int maxPlay =-1;
+    int maxGen =-1;
+    vector<int> answer;
+    for(int i =0;i<genres.size(); i++){
+        int num= getGenNum(genres[i]);
+        if(num==-1){
+            genTable.push_back(genres[i]); 
+            totalPlay[genTable.size()-1]+= plays[i];
+            songTable[genTable.size()-1].push_back({i, plays[i]});
+        }
+        else{
+            totalPlay[num]+=plays[i];
+            songTable[num].push_back({i, plays[i]});
+        }
+    }    
+    //songTable sort
+    for(int i =0; i<genTable.size(); i++){
+        sort(songTable[i].begin(), songTable[i].end(), comp);
+    }
+    
+    while(true){
+        for(int i=0; i<genTable.size(); i++){
+            if(totalPlay[i] !=-1 && maxPlay < totalPlay[i]){
+                maxPlay = totalPlay[i];
+                maxGen = i;
+            }
+        }
+        if(maxPlay == -1 || maxGen ==-1){break;}
+        answer.push_back(songTable[maxGen][0].orgNum);
+        
+        if(songTable[maxGen].size()>1){
+            answer.push_back(songTable[maxGen][1].orgNum);
+        }
+        totalPlay[maxGen] =-1;
+        
+        maxPlay =-1;
+        maxGen =-1;
+    }
+    
+    return answer;
+}
+
+
+
+
