@@ -1,0 +1,153 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+typedef struct log{
+    int startTime;
+    int endTime;
+}Log;
+
+vector <Log> startlogs;
+vector <Log> endlogs;
+int changeTime(int time){
+    int result; 
+    int milsec = time%1000;
+    int tmp = time/1000;
+    
+    //205957    071
+    int hour = (tmp/10000)*60*60*1000;
+    tmp -= (tmp/10000)*10000;
+    //5957
+    int minute = (tmp/100)*60*1000;
+    tmp -= (tmp/100)*100;
+    int sec = (tmp)*1000;
+    
+    result = hour+minute+sec+milsec;
+    
+    return result;
+}
+
+bool startComp(const Log& tmp1, const Log& tmp2){
+    if(tmp1.startTime < tmp2.startTime){
+        return true;
+    }
+    else if(tmp1.startTime == tmp2.startTime){
+        if(tmp1.endTime < tmp2.endTime){
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+bool endComp(const Log& tmp1, const Log& tmp2){
+    if(tmp1.endTime < tmp2.endTime){
+        return true;
+    }
+    else if(tmp1.endTime == tmp2.endTime){
+        if(tmp1.startTime < tmp2.startTime){
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+
+
+int solution(vector<string> lines) {
+    int answer = 0;
+    startlogs.clear();
+    endlogs.clear();
+    for(int i =0;i<lines.size(); i++){
+        string tmpL = lines[i];
+        tmpL = tmpL.substr(11);
+        tmpL.erase(remove(tmpL.begin(), tmpL.end(), ':'), tmpL.end());
+        tmpL.erase(remove(tmpL.begin(), tmpL.end(), 's'), tmpL.end());
+       
+        string time = tmpL.substr(0,10);
+        string tSpent = tmpL.substr(11);
+        
+        time.erase(remove(time.begin(), time.end(), '.'),time.end());
+        tSpent.erase(remove(tSpent.begin(), tSpent.end(), '.'),tSpent.end());
+        
+        string spent = tSpent;
+        
+        for(int i = spent.size(); i<4; i++){ spent += '0'; }
+        
+        int spentTime = stoi(spent); 
+        int endTime = changeTime(stoi(time));
+        int startTime = endTime - spentTime +1;
+        startlogs.push_back({startTime, endTime});   
+    }
+    
+    sort(startlogs.begin(), startlogs.end(),startComp);
+    sort(endlogs.begin(), endlogs.end(), endComp);
+    
+    for(int i =0; i<startlogs.size(); i++){
+        // startTime 앞뒤
+        int maxVal = -1;
+        int tmp = 0;
+        int point[2] = {startlogs[i].startTime-999,startlogs[i].startTime+999};
+        
+        for(int j = i; j>=0 && j<startlogs.size(); j--){
+            if((point[0]<= startlogs[j].startTime && startlogs[j].startTime <= point[0]+999) ||
+               (point[0]<= startlogs[j].endTime && startlogs[j].endTime <= point[0]+999) ||
+               (startlogs[j].startTime < point[0] && point[0] < startlogs[j].endTime)
+              ){
+                tmp++;
+            }
+        }
+        maxVal = max(tmp, maxVal); tmp = 0;
+        
+        for(int j = i; j>=0 &&  j<startlogs.size(); j++){
+            if((point[1]-999<= startlogs[j].startTime && startlogs[j].startTime <= point[1]) ||
+               (point[1]-999<= startlogs[j].endTime && startlogs[j].endTime <= point[1]) ||
+               (startlogs[j].startTime < point[1] && point[1] < startlogs[j].endTime)
+              ){
+                tmp++;
+            }
+            
+        }
+        maxVal = max(tmp, maxVal); tmp = 0;
+        answer = max(answer, maxVal);
+    }
+    
+    
+    
+    
+    
+    for(int i =0; i<endlogs.size(); i++){
+        // endTime 앞뒤
+        int maxVal = -1;
+        int tmp = 0;
+        int point[2] = {endlogs[i].endTime-999,endlogs[i].endTime+999};
+        
+        for(int j = i; j>=0 && j<endlogs.size(); j--){
+            if((point[0]<= endlogs[j].startTime && endlogs[j].startTime <= point[0]+999) ||
+               (point[0]<= endlogs[j].endTime && endlogs[j].endTime <= point[0]+999) ||
+                (endlogs[j].startTime < point[0] && point[0] < endlogs[j].endTime)
+             ){
+                tmp++;
+            }
+            
+        }
+        maxVal = max(tmp, maxVal); tmp = 0;
+        
+        for(int j = i; j>=0 &&  j<endlogs.size(); j++){
+            if((point[1]-999<= endlogs[j].startTime && endlogs[j].startTime <= point[1]) ||
+               (point[1]-999<= endlogs[j].endTime && endlogs[j].endTime <= point[1]) ||
+                (endlogs[j].startTime < point[1] && point[1] < endlogs[j].endTime)
+             ){
+                tmp++;
+            }
+        }
+        maxVal = max(tmp, maxVal); tmp = 0;
+        answer = max(answer, maxVal);
+    }
+    
+    
+    return answer;
+}
