@@ -1,0 +1,64 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+int dist[20001];
+bool visit[20001];
+int maxDis = -1;
+
+typedef struct cell{
+    int from;
+    int now;
+}Cell;
+
+queue <Cell> root;
+vector <int> arr[20001];
+vector <Cell> result;
+
+int solution(int n, vector<vector<int>> edge) {
+    int answer = 0;
+    maxDis = -1;
+    
+    for(int i =0; i<=n; i++) { visit[i] = false;arr[i].clear(); dist[i] = -1;}
+   
+    visit[1] = true;
+    dist[1] = 1;
+    
+    for(int i =0;i<edge.size(); i++){
+        int maxNum = max(edge[i][0],edge[i][1]);
+        int minNum = min(edge[i][0],edge[i][1]);
+        edge[i][0] = minNum; 
+        edge[i][1] = maxNum; 
+        
+        arr[minNum].push_back(maxNum);
+        arr[maxNum].push_back(minNum);
+        if(minNum ==1){root.push({minNum, 1});}     
+    }
+    
+    visit[1] = true;
+    
+    while(!root.empty()){
+        Cell tmp = root.front();
+        root.pop();
+        
+        maxDis = max(maxDis, tmp.now);
+        
+        for(int i =0;i<arr[tmp.from].size(); i++){
+            if(!visit[arr[tmp.from][i]]){
+                visit[arr[tmp.from][i]] = true;
+                dist[arr[tmp.from][i]] = tmp.now+1;
+                root.push({arr[tmp.from][i], tmp.now+1});
+            }
+        }
+    }
+    
+    for(int i =1; i<=n; i++){
+        if(dist[i] == maxDis){answer++;}
+    }
+    
+    return answer;
+}
